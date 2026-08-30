@@ -1,0 +1,2846 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kana Duel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yuji+Mai&family=Yuji+Syuku&family=Klee+One:wght@400;600&family=Shippori+Mincho:wght@500;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* ==========================================================
+   KANA DUEL
+   One committed visual world: washi day (dojo) / sumi night (duel).
+   Every color painted explicitly; no theme inversion.
+   ========================================================== */
+:root{
+  --ink:#0A0C10;
+  --ink-2:#141922;
+  --ink-3:#1E2733;
+  --washi:#E4D9BE;
+  --washi-2:#D3C4A2;
+  --washi-3:#BFAD86;
+  --sumi:#221E19;
+  --sumi-2:#4A423A;
+  --vermilion:#C0392B;
+  --vermilion-hot:#E4573F;
+  --moon:#9FB6D0;
+  --slate:#5D7A99;
+  --gold:#C9A227;
+  --jade:#6E8F7D;
+
+  /* --brush is decorative only (titles, 受/斬, 勝/敗). Yuji Mai is gyosho:
+     beautiful, but it collapses る/ろ and turns い into ソ, so it must never
+     carry a character the student is being asked to identify. --kana does
+     that job and is switchable from the dojo. */
+  --brush:"Yuji Mai","Hiragino Mincho ProN","Yu Mincho","MS Mincho",serif;
+  --kana:"Yuji Syuku","Hiragino Mincho ProN","Yu Mincho",serif;
+  --body:"Shippori Mincho","Hiragino Mincho ProN",Georgia,serif;
+  --mono:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--ink);
+  color:var(--washi);
+  font-family:var(--body);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+#app{position:fixed;inset:0;overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column}
+.screen.on{display:flex}
+
+/* ---------- shared controls ---------- */
+.btn{
+  font-family:var(--body);font-weight:700;font-size:15px;letter-spacing:.04em;
+  padding:12px 22px;border:1px solid currentColor;background:transparent;
+  color:var(--washi);cursor:pointer;border-radius:2px;
+  transition:background .18s ease,color .18s ease,transform .12s ease;
+}
+.btn:hover{background:var(--washi);color:var(--ink)}
+.btn:active{transform:translateY(1px)}
+.btn.solid{background:var(--vermilion);border-color:var(--vermilion);color:#F6EEDD}
+.btn.solid:hover{background:var(--vermilion-hot);border-color:var(--vermilion-hot);color:#fff}
+.btn.big{font-size:19px;padding:16px 34px}
+.btn.dark{color:var(--sumi);border-color:var(--sumi-2)}
+.btn.dark:hover{background:var(--sumi);color:var(--washi)}
+.btn.tiny{font-size:12px;padding:7px 12px}
+
+/* ==========================================================
+   TITLE
+   ========================================================== */
+#s-title{
+  align-items:center;justify-content:center;
+  background:
+    radial-gradient(58% 46% at 50% 40%, rgba(90,120,160,.18), transparent 72%),
+    linear-gradient(#05070B 0%, #0C1119 55%, #06080D 100%);
+}
+#s-title .disc{
+  position:absolute;top:14%;left:50%;width:min(46vmin,420px);aspect-ratio:1;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:radial-gradient(circle at 42% 38%, var(--vermilion-hot), var(--vermilion) 58%, #7E2318 100%);
+  box-shadow:0 0 120px 30px rgba(192,57,43,.22);
+  opacity:.92;
+}
+#s-title .disc::after{
+  content:"";position:absolute;inset:-2px;border-radius:50%;
+  background:repeating-linear-gradient(102deg, rgba(10,12,16,.5) 0 2px, transparent 2px 9px);
+  mix-blend-mode:multiply;opacity:.35;
+}
+.title-stack{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:26px;padding:24px}
+.vtitle{
+  writing-mode:vertical-rl;font-family:var(--brush);
+  font-size:clamp(56px,11vmin,116px);line-height:1.04;letter-spacing:.1em;
+  margin:0;color:#F4ECD9;
+  text-shadow:0 0 26px rgba(0,0,0,.85), 0 2px 0 rgba(0,0,0,.6);
+}
+.romline{
+  font-family:var(--mono);font-size:13px;letter-spacing:.55em;text-indent:.55em;
+  color:var(--moon);margin:0;text-transform:uppercase;
+}
+.tag{
+  font-size:16px;color:var(--washi-3);margin:0;text-align:center;max-width:34ch;
+  line-height:1.7;text-wrap:balance;
+}
+.fine{font-family:var(--mono);font-size:11px;color:var(--slate);margin:0;letter-spacing:.08em}
+
+/* ==========================================================
+   DOJO — washi sheet
+   ========================================================== */
+.paper{
+  color:var(--sumi);
+  background:
+    radial-gradient(90% 60% at 18% 0%, rgba(255,255,255,.55), transparent 60%),
+    repeating-linear-gradient(94deg, rgba(120,96,60,.045) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(2deg, rgba(120,96,60,.035) 0 1px, transparent 1px 7px),
+    linear-gradient(155deg, #EFE6CE 0%, #E2D6B6 48%, #D2C39F 100%);
+}
+#s-dojo{flex-direction:row}
+/* vertical brush rail on the right edge */
+.rail{
+  flex:0 0 clamp(74px,9vw,112px);order:2;
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  padding:22px 0 20px;border-left:1px solid var(--washi-3);
+  background:linear-gradient(180deg, rgba(34,30,25,.05), rgba(34,30,25,.14));
+}
+.rail h2{
+  writing-mode:vertical-rl;font-family:var(--brush);font-weight:400;
+  font-size:clamp(30px,4.4vw,46px);letter-spacing:.18em;margin:0;color:var(--sumi);
+}
+.rail .rail-en{
+  writing-mode:vertical-rl;font-family:var(--mono);font-size:11px;letter-spacing:.42em;
+  color:var(--sumi-2);text-transform:uppercase;
+}
+.rail .seal{
+  width:44px;height:44px;display:grid;place-items:center;border-radius:3px;
+  background:var(--vermilion);color:#F6EEDD;font-family:var(--brush);font-size:22px;
+  box-shadow:0 2px 0 rgba(0,0,0,.18);
+}
+.dojo-main{order:1;flex:1 1 auto;display:flex;flex-direction:column;min-width:0}
+
+.dojo-bar{
+  display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;
+  padding:20px clamp(16px,3vw,34px) 14px;border-bottom:1px solid var(--washi-3);
+}
+.dojo-bar .lede{flex:1 1 260px;min-width:0}
+.dojo-bar .lede p{margin:0;font-size:14px;line-height:1.65;color:var(--sumi-2);max-width:62ch}
+.dojo-bar .acts{display:flex;gap:10px;flex-wrap:wrap}
+
+.chipset{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:14px clamp(16px,3vw,34px) 0}
+#chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chipset .lbl{
+  font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--sumi-2);margin-right:6px;
+}
+.chip{
+  border:1px solid var(--washi-3);background:rgba(255,255,255,.34);color:var(--sumi);
+  padding:7px 13px;border-radius:2px;cursor:pointer;font-size:14px;
+  display:inline-flex;align-items:center;gap:7px;
+  transition:background .16s ease,border-color .16s ease,color .16s ease;
+}
+.chip .jp{font-family:var(--kana);font-size:17px;line-height:1}
+.chip .ct{font-family:var(--mono);font-size:10px;color:var(--sumi-2)}
+.chip:hover{border-color:var(--sumi-2)}
+.chip[aria-pressed="true"]{background:var(--sumi);border-color:var(--sumi);color:var(--washi)}
+.chip[aria-pressed="true"] .ct{color:var(--washi-3)}
+.seg{display:inline-flex;border:1px solid var(--washi-3);border-radius:2px;overflow:hidden}
+.seg button{
+  border:0;background:rgba(255,255,255,.34);color:var(--sumi-2);
+  padding:7px 14px;cursor:pointer;font-size:13px;
+}
+.seg button[aria-pressed="true"]{background:var(--sumi);color:var(--washi)}
+.switch{display:inline-flex;align-items:center;gap:9px;font-size:13px;color:var(--sumi-2);cursor:pointer}
+.switch input{accent-color:var(--vermilion);width:16px;height:16px}
+.pick{
+  font-family:var(--body);font-size:13px;padding:6px 9px;max-width:230px;
+  border:1px solid var(--washi-3);background:rgba(255,255,255,.45);
+  color:var(--sumi);border-radius:2px;
+}
+.pick:disabled{opacity:.5}
+.rate{accent-color:var(--vermilion);width:120px;vertical-align:middle}
+
+#settings{
+  margin:10px clamp(16px,3vw,34px) 0;padding:2px 0 14px;
+  border:1px solid var(--washi-3);border-radius:2px;
+  background:rgba(255,255,255,.26);
+}
+#settings .chipset{padding-left:15px;padding-right:15px}
+#btn-settings[aria-expanded="true"]{background:var(--sumi);color:var(--washi);border-color:var(--sumi)}
+.warn{
+  margin:14px clamp(16px,3vw,34px) 0;padding:11px 14px;
+  border-left:3px solid var(--vermilion);background:rgba(192,57,43,.09);
+  font-size:13px;line-height:1.65;color:var(--sumi);max-width:78ch;
+}
+.warn.ok{border-left-color:var(--jade);background:rgba(110,143,125,.12)}
+.warn code{font-family:var(--mono);font-size:12px;background:rgba(34,30,25,.1);padding:1px 5px;border-radius:2px}
+.warn .ask{margin-top:10px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.warn .ask b{margin-right:4px}
+.warn .ask button{
+  font-family:var(--body);font-size:12.5px;padding:6px 11px;cursor:pointer;
+  border:1px solid var(--sumi-2);background:rgba(255,255,255,.45);color:var(--sumi);border-radius:2px;
+}
+.warn .ask button:hover{background:var(--sumi);color:var(--washi)}
+.warn .dx{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--sumi-2);margin-top:7px}
+
+.gridwrap{flex:1 1 auto;overflow-y:auto;padding:18px clamp(16px,3vw,34px) 30px}
+.grid{
+  display:grid;gap:10px;
+  grid-template-columns:repeat(auto-fill,minmax(92px,1fr));
+}
+/* memorisation view: a real 五十音図, five vowel columns with its gaps intact */
+.grid.asTable{display:block;max-width:640px}
+.gojuon,.vowelhead{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.vowelhead{margin-bottom:7px}
+.vowelhead span{
+  font-family:var(--kana);font-size:16px;color:var(--sumi-2);
+  text-align:center;opacity:.65;
+}
+.gojuon .blank{
+  border:1px dashed var(--washi-3);border-radius:2px;opacity:.4;
+  aspect-ratio:1/1.1;
+}
+.gojuon-head{
+  font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--sumi-2);margin:26px 0 10px;padding-top:14px;border-top:1px solid var(--washi-3);
+}
+.gojuon-head:first-child{margin-top:0;padding-top:0;border-top:0}
+.card{perspective:700px;cursor:pointer;background:none;border:0;padding:0;aspect-ratio:1/1.1}
+.card-inner{
+  display:block;position:relative;width:100%;height:100%;transform-style:preserve-3d;
+  transition:transform .48s cubic-bezier(.2,.8,.2,1);
+}
+.card.flip .card-inner{transform:rotateY(180deg)}
+.face{
+  position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  border:1px solid var(--washi-3);border-radius:2px;
+}
+.face.front{background:rgba(255,255,255,.42);box-shadow:0 1px 0 rgba(0,0,0,.06)}
+.card:hover .face.front{background:rgba(255,255,255,.7);border-color:var(--sumi-2)}
+.face.front .k{font-family:var(--kana);font-size:clamp(30px,4.6vw,44px);color:var(--sumi);line-height:1}
+.face.front .grp{
+  display:none;                 /* it gives away the romaji onset — opt in only */
+  font-family:var(--mono);font-size:9px;letter-spacing:.14em;
+  color:var(--sumi-2);opacity:.55;
+}
+body.showtags .face.front .grp{display:block}
+.face.back{
+  transform:rotateY(180deg);background:var(--sumi);border-color:var(--sumi);color:var(--washi);
+}
+.face.back .r{
+  font-family:var(--mono);font-size:clamp(15px,2.4vw,20px);letter-spacing:.06em;
+  display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.15;
+}
+.face.back .r em{font-style:normal;font-size:11px;color:var(--washi-3);letter-spacing:.08em}
+.face.back .k2{font-family:var(--kana);font-size:clamp(30px,4.6vw,44px);color:var(--washi-3);line-height:1}
+
+.dojo-foot{
+  padding:12px clamp(16px,3vw,34px);border-top:1px solid var(--washi-3);
+  font-size:12.5px;color:var(--sumi-2);display:flex;gap:18px;flex-wrap:wrap;align-items:center;
+}
+.dojo-foot kbd{
+  font-family:var(--mono);font-size:11px;background:var(--sumi);color:var(--washi);
+  padding:2px 6px;border-radius:2px;
+}
+
+/* ==========================================================
+   DUEL — first-person 3D
+   ========================================================== */
+#s-duel{background:var(--ink)}
+#scene{
+  position:absolute;inset:0;overflow:hidden;
+  perspective:820px;perspective-origin:50% 44%;
+  background:
+    radial-gradient(62% 42% at 50% 30%, rgba(120,152,196,.20), transparent 70%),
+    linear-gradient(#04060A 0%, #0A1018 40%, #121A26 60%, #070A0F 100%);
+}
+#camera{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform}
+
+.moon{
+  position:absolute;left:50%;top:11%;width:150px;height:150px;margin-left:-75px;
+  border-radius:50%;background:radial-gradient(circle at 40% 36%, #F2F6FB, #C3D3E4 62%, #8FA6BF 100%);
+  box-shadow:0 0 90px 24px rgba(159,182,208,.20);
+  transform:translateZ(-1900px) scale(2.6);opacity:.9;
+}
+.ridge{position:absolute;left:-20%;width:140%;bottom:34%;height:280px;opacity:.9}
+.ridge.far{
+  transform:translateZ(-1650px) scale(2.4);
+  background:var(--ink-3);
+  clip-path:polygon(0 100%,6% 62%,15% 78%,24% 40%,33% 70%,44% 46%,54% 74%,63% 52%,73% 76%,84% 44%,93% 70%,100% 56%,100% 100%);
+  opacity:.55;
+}
+.ridge.near{
+  transform:translateZ(-1200px) scale(1.9);
+  background:#0D131B;
+  clip-path:polygon(0 100%,9% 70%,19% 86%,30% 56%,41% 80%,52% 62%,64% 84%,75% 58%,87% 82%,100% 66%,100% 100%);
+}
+.torii{
+  position:absolute;left:50%;bottom:32%;width:520px;height:340px;margin-left:-260px;
+  transform:translateZ(-820px);
+}
+.torii i{position:absolute;background:#0B0E14;display:block}
+.torii .p1{left:74px;top:44px;width:26px;height:296px}
+.torii .p2{right:74px;top:44px;width:26px;height:296px}
+.torii .b1{left:0;top:16px;width:520px;height:26px;border-radius:3px}
+.torii .b2{left:44px;top:78px;width:432px;height:17px}
+.torii .cap{left:-10px;top:0;width:540px;height:15px;border-radius:8px 8px 0 0;background:#141A22}
+.bamboo{position:absolute;bottom:26%;width:22px;height:520px;background:#0A0F16;border-radius:3px}
+.bamboo::after{
+  content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg, transparent 0 62px, rgba(159,182,208,.10) 62px 65px);
+}
+.bamboo.l1{left:6%;transform:translateZ(-560px)}
+.bamboo.l2{left:14%;transform:translateZ(-980px);height:640px}
+.bamboo.r1{right:7%;transform:translateZ(-620px)}
+.bamboo.r2{right:16%;transform:translateZ(-1040px);height:600px}
+
+.floor{
+  position:absolute;left:50%;top:60%;width:4200px;height:3000px;margin-left:-2100px;
+  transform-origin:50% 0;transform:rotateX(76deg);
+  background:
+    repeating-linear-gradient(0deg, rgba(159,182,208,.085) 0 2px, transparent 2px 110px),
+    repeating-linear-gradient(90deg, rgba(159,182,208,.055) 0 2px, transparent 2px 150px),
+    linear-gradient(#18212D 0%, #0A0E14 55%, #05070A 100%);
+  -webkit-mask-image:linear-gradient(#000 0 30%, rgba(0,0,0,.25) 62%, transparent 88%);
+  mask-image:linear-gradient(#000 0 30%, rgba(0,0,0,.25) 62%, transparent 88%);
+  animation:floorRun 2.6s linear infinite;
+}
+@keyframes floorRun{from{background-position:0 0,0 0,0 0}to{background-position:0 110px,0 0,0 0}}
+
+/* ---- tearoom: no weapons, and nothing charges you ---- */
+.teaset{
+  display:none;position:absolute;inset:0;z-index:0;
+  perspective:820px;perspective-origin:50% 44%;
+}
+#camera{z-index:1}
+#scene.tearoom .moon,#scene.tearoom .ridge,#scene.tearoom .torii,
+#scene.tearoom .bamboo,#scene.tearoom .floor{display:none}
+#scene.tearoom{
+  background:
+    radial-gradient(60% 40% at 50% 26%, rgba(190,160,110,.16), transparent 70%),
+    linear-gradient(#15120E 0%, #221C15 46%, #100E0A 100%);
+}
+#scene.tearoom .teaset{display:block}
+.teaset .wall{
+  position:absolute;left:-10%;right:-10%;top:0;height:64%;
+  background:linear-gradient(#2A2318,#1C1710);
+  transform:translateZ(-760px) scale(1.7);
+}
+.teaset .tokonoma{
+  position:absolute;left:50%;top:8%;width:300px;height:360px;margin-left:-150px;
+  background:linear-gradient(#100D09,#1A150F);
+  border:2px solid rgba(190,160,110,.16);
+  transform:translateZ(-540px) scale(1.5);
+  box-shadow:inset 0 20px 50px rgba(0,0,0,.75);
+}
+.teaset .scroll{
+  position:absolute;left:50%;top:26px;width:150px;height:298px;margin-left:-75px;
+  background:linear-gradient(#E8DFC6,#CFC1A0);
+  box-shadow:0 8px 26px rgba(0,0,0,.6);
+}
+.teaset .scroll i{
+  position:absolute;left:-10px;right:-10px;height:13px;background:#3A2E20;display:block;
+}
+.teaset .scroll i:first-child{top:-7px}
+.teaset .scroll::after{
+  content:"";position:absolute;left:-10px;right:-10px;bottom:-7px;height:13px;background:#3A2E20;
+}
+.teaset .tatami{
+  position:absolute;left:50%;top:62%;width:3400px;height:2200px;margin-left:-1700px;
+  transform-origin:50% 0;transform:rotateX(76deg);
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.34) 0 3px, transparent 3px 300px),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 3px, transparent 3px 150px),
+    linear-gradient(#3E3423, #241E14 60%, #14110B);
+  -webkit-mask-image:linear-gradient(#000 0 34%, transparent 82%);
+  mask-image:linear-gradient(#000 0 34%, transparent 82%);
+}
+.teaset .kama{
+  position:absolute;left:22%;top:60%;width:96px;height:78px;margin-left:-48px;
+  border-radius:46% 46% 38% 38%;
+  background:linear-gradient(#241E17,#100D09);
+  box-shadow:0 0 40px rgba(201,162,39,.22), inset 0 -8px 14px rgba(0,0,0,.6);
+  transform:translateZ(-260px);
+}
+.teaset .kama::after{
+  content:"";position:absolute;left:50%;top:-26px;width:26px;height:30px;margin-left:-13px;
+  background:radial-gradient(ellipse at 50% 100%, rgba(230,220,200,.5), transparent 70%);
+  filter:blur(3px);
+}
+
+#enemy{
+  position:absolute;left:50%;top:50%;width:440px;height:560px;margin:-320px 0 0 -220px;
+  transform-style:preserve-3d;will-change:transform;
+}
+#enemy svg{width:100%;height:100%;overflow:visible;
+  filter:drop-shadow(0 24px 40px rgba(0,0,0,.85)) drop-shadow(0 0 26px rgba(159,182,208,.42))}
+#enemy.hurt{animation:foeHurt .34s steps(2) 2}
+@keyframes foeHurt{0%,100%{filter:none}50%{filter:brightness(3.4) saturate(0)}}
+.eye{fill:var(--vermilion-hot);animation:eyeGlow 2.4s ease-in-out infinite}
+@keyframes eyeGlow{0%,100%{opacity:.62}50%{opacity:1}}
+
+/* the flashing character the opponent charges with */
+#promptKana{
+  position:absolute;left:50%;top:37%;width:340px;height:340px;margin:-170px 0 0 -170px;
+  display:grid;place-items:center;pointer-events:none;will-change:transform;
+}
+#promptKana b{
+  font-family:var(--kana);font-weight:400;font-size:230px;line-height:1;color:#F6EFDD;
+  text-shadow:0 0 34px rgba(228,87,63,.85), 0 0 90px rgba(0,0,0,.9);
+  animation:kanaFlash 1.05s ease-in-out infinite;
+}
+@keyframes kanaFlash{0%,100%{opacity:1}52%{opacity:.42}}
+#promptKana.miss b{animation:none;color:var(--vermilion-hot)}
+
+/* the shogun's volley: three characters abreast */
+#volley{
+  position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);
+  display:flex;gap:clamp(18px,4vw,54px);pointer-events:none;
+}
+#volley[hidden]{display:none}
+
+/* the interlude: she dances, and nothing is asked of you */
+#enemy.dancing{animation:danceSway 3.4s ease-in-out infinite}
+@keyframes danceSway{
+  0%,100%{filter:none}
+  25%{transform:translate3d(-46px,-6px,-560px) rotate(-4deg) scale(.86)}
+  50%{transform:translate3d(0,-16px,-520px) rotate(0deg) scale(.9)}
+  75%{transform:translate3d(46px,-6px,-560px) rotate(4deg) scale(.86)}
+}
+.mote{
+  position:absolute;font-family:var(--kana);color:rgba(232,223,198,.20);
+  pointer-events:none;animation:moteRise linear forwards;
+}
+@keyframes moteRise{
+  from{transform:translateY(0) rotate(0);opacity:0}
+  15%{opacity:.5}
+  to{transform:translateY(-320px) rotate(14deg);opacity:0}
+}
+/* then the fan opens */
+#fan{
+  position:absolute;left:50%;top:34%;width:min(420px,58vw);aspect-ratio:224/136;
+  transform:translate(-50%,-50%);pointer-events:none;z-index:2;
+  animation:fanOpen .45s cubic-bezier(.2,1.4,.4,1) backwards;
+  filter:drop-shadow(0 10px 30px rgba(0,0,0,.7)) drop-shadow(0 0 26px rgba(228,87,63,.45));
+}
+#fan[hidden]{display:none}
+#fan svg{width:100%;height:100%;display:block}
+#fan span{
+  position:absolute;left:0;right:0;top:36%;text-align:center;
+  font-family:var(--kana);font-size:clamp(50px,7.5vw,96px);line-height:1;
+  color:#1A0C08;text-shadow:0 1px 0 rgba(255,255,255,.18);
+}
+@keyframes fanOpen{
+  from{opacity:0;transform:translate(-50%,-50%) scale(.25) rotate(-46deg)}
+  to{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}
+}
+/* in the tearoom the character is brushed on the scroll: sumi on paper */
+#scene.tearoom #promptKana{top:30%}
+#scene.tearoom #promptKana b{
+  font-size:clamp(70px,11vw,132px);
+  color:#221E19;
+  text-shadow:0 2px 10px rgba(120,96,60,.35);
+  animation:none;
+}
+#scene.tearoom #promptKana.miss b{color:var(--vermilion)}
+#volley b{
+  font-family:var(--kana);font-weight:400;font-size:clamp(56px,9vw,116px);line-height:1;
+  color:#F6EFDD;text-shadow:0 0 26px rgba(201,162,39,.75), 0 0 70px rgba(0,0,0,.9);
+  opacity:.42;transition:opacity .2s ease,transform .2s ease;
+}
+#volley b.live{opacity:1;animation:kanaFlash 1.05s ease-in-out infinite}
+#volley b.spent{opacity:.12;transform:scale(.7) rotate(-8deg);text-shadow:none}
+
+/* offense target nodes, mapped over the stunned enemy */
+.node{
+  position:absolute;width:118px;height:118px;margin:-59px 0 0 -59px;
+  display:grid;place-items:center;border-radius:50%;
+  border:2px solid rgba(159,182,208,.75);
+  background:radial-gradient(circle at 50% 45%, rgba(6,9,13,.97), rgba(6,9,13,.82));
+  box-shadow:0 0 26px rgba(159,182,208,.28), inset 0 0 22px rgba(159,182,208,.14);
+  transform:translateZ(70px);
+  font-family:var(--kana);font-size:58px;color:#F2EADA;
+  animation:nodeIn .32s cubic-bezier(.2,1.4,.4,1) backwards;
+}
+@keyframes nodeIn{from{opacity:0;transform:translateZ(70px) scale(.4)}to{opacity:1;transform:translateZ(70px) scale(1)}}
+.node.live{border-color:var(--gold);box-shadow:0 0 40px rgba(201,162,39,.6), inset 0 0 26px rgba(201,162,39,.25)}
+.node.cut{opacity:0;transform:translateZ(70px) scale(1.7) rotate(14deg);transition:all .42s ease-out}
+.node.wrong{border-color:var(--vermilion-hot);animation:nodeWrong .42s ease-out}
+@keyframes nodeWrong{
+  0%,100%{transform:translateZ(70px) translateX(0)}
+  25%{transform:translateZ(70px) translateX(-11px)}
+  62%{transform:translateZ(70px) translateX(9px)}
+}
+
+/* ---------- canvas ---------- */
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
+
+/* ---------- HUD ---------- */
+#hud{position:absolute;inset:0;z-index:3;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between}
+.hud-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:clamp(12px,2vw,22px)}
+.side{display:flex;flex-direction:column;gap:7px;min-width:190px}
+.side.right{align-items:flex-end;text-align:right}
+.who{display:flex;align-items:baseline;gap:9px}
+.who b{font-family:var(--brush);font-size:26px;font-weight:400;line-height:1;color:#F2EADA}
+.who span{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--slate)}
+.bar{width:100%;height:9px;background:rgba(159,182,208,.14);border:1px solid rgba(159,182,208,.24);border-radius:1px;overflow:hidden}
+.bar i{display:block;height:100%;width:100%;transition:width .28s cubic-bezier(.2,.8,.2,1)}
+.bar.foe i{background:linear-gradient(90deg,#8E2A20,var(--vermilion-hot))}
+.bar.me i{background:linear-gradient(90deg,#4B7A63,var(--jade))}
+.metrics{display:flex;gap:16px;align-items:baseline;font-family:var(--mono)}
+.metrics .sc{font-size:26px;color:var(--washi);font-variant-numeric:tabular-nums}
+.metrics .sc small{font-family:var(--brush);font-size:13px;color:var(--slate);margin-left:3px}
+.metrics .cb{font-size:13px;color:var(--gold);letter-spacing:.08em}
+.metrics .cb.pop{animation:cbPop .34s ease-out}
+@keyframes cbPop{0%{transform:scale(1)}40%{transform:scale(1.34)}100%{transform:scale(1)}}
+.phase-tag{
+  position:absolute;left:50%;top:clamp(12px,2vw,22px);transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.phase-tag b{font-family:var(--brush);font-size:34px;font-weight:400;line-height:1;color:#F2EADA;text-shadow:0 0 20px rgba(0,0,0,.9)}
+.phase-tag span{font-family:var(--mono);font-size:10px;letter-spacing:.34em;text-transform:uppercase}
+.phase-tag.parry span{color:var(--moon)}
+.phase-tag.strike span{color:var(--gold)}
+
+.hud-bottom{padding:0 clamp(12px,2vw,22px) clamp(16px,3vh,30px);display:flex;flex-direction:column;align-items:center;gap:12px}
+#timerWrap{width:min(560px,86vw);height:4px;background:rgba(159,182,208,.16);border-radius:2px;overflow:hidden}
+#timerBar{display:block;height:100%;width:100%;background:var(--moon);transform-origin:left center}
+#timerBar.urgent{background:var(--vermilion-hot)}
+.bufferRow{display:flex;align-items:center;gap:12px;pointer-events:auto}
+.spk{
+  width:46px;height:46px;border-radius:50%;border:1px solid rgba(159,182,208,.4);
+  background:rgba(10,14,20,.6);color:var(--moon);cursor:pointer;font-size:17px;
+  display:grid;place-items:center;transition:border-color .16s ease,color .16s ease;
+}
+.spk:hover{border-color:var(--gold);color:var(--gold)}
+.spk[disabled]{opacity:.25;cursor:default}
+#bufferBox{
+  position:relative;min-width:min(430px,74vw);height:66px;
+  border:1px solid rgba(159,182,208,.34);border-radius:2px;
+  background:linear-gradient(180deg, rgba(10,14,20,.82), rgba(10,14,20,.62));
+  box-shadow:0 10px 40px rgba(0,0,0,.55), inset 0 1px 0 rgba(159,182,208,.1);
+  display:grid;place-items:center;overflow:hidden;
+}
+#bufferBox.bad{animation:bufBad .3s ease-out;border-color:var(--vermilion-hot)}
+@keyframes bufBad{0%,100%{transform:translateX(0)}22%{transform:translateX(-9px)}62%{transform:translateX(7px)}}
+#bufferBox.good{border-color:var(--gold);box-shadow:0 0 34px rgba(201,162,39,.45)}
+#tiles{display:flex;gap:7px;align-items:center;font-family:var(--mono);pointer-events:none}
+#tiles .t{
+  min-width:34px;height:42px;display:grid;place-items:center;font-size:23px;
+  background:rgba(159,182,208,.1);border-bottom:2px solid var(--moon);color:#F2EADA;
+  animation:tileIn .13s ease-out;text-transform:lowercase;
+}
+@keyframes tileIn{from{transform:translateY(6px);opacity:0}to{transform:none;opacity:1}}
+#tiles .caret{width:2px;height:34px;background:var(--gold);animation:blink 1s steps(1) infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+#tiles .ph{font-size:13px;letter-spacing:.28em;color:var(--slate);text-transform:uppercase}
+#bufferInput{
+  position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;background:transparent;
+  font-size:16px;color:transparent;caret-color:transparent;padding:0 12px;
+}
+#imeWarn{
+  font-family:var(--body);font-size:13.5px;line-height:1.5;color:#FDF6E7;
+  background:var(--vermilion);border-radius:2px;padding:8px 16px;text-align:center;
+  max-width:min(600px,90vw);pointer-events:auto;box-shadow:0 6px 24px rgba(0,0,0,.5);
+}
+#imeWarn kbd{font-family:var(--mono);font-size:12px;background:rgba(0,0,0,.28);padding:1px 6px;border-radius:2px}
+#hintLine{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--slate);text-transform:uppercase;min-height:14px}
+
+#flash{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .12s linear}
+#flash.hit{opacity:1;background:radial-gradient(circle at 50% 50%, transparent 42%, rgba(192,57,43,.55) 100%)}
+#flash.heal{opacity:1;background:radial-gradient(circle at 50% 50%, transparent 48%, rgba(110,143,125,.4) 100%)}
+
+#tiercard{
+  position:absolute;inset:0;z-index:5;display:none;place-items:center;pointer-events:none;
+  background:radial-gradient(60% 50% at 50% 50%, rgba(4,6,10,.72), rgba(4,6,10,.94));
+}
+#tiercard.on{display:grid}
+.tc{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:24px}
+.tc .rank{font-family:var(--mono);font-size:11px;letter-spacing:.42em;text-transform:uppercase;color:var(--slate)}
+.tc .jp{font-family:var(--brush);font-size:clamp(64px,15vmin,140px);line-height:1;color:#F4ECD9;
+  text-shadow:0 0 40px rgba(0,0,0,.9);animation:tcIn .7s cubic-bezier(.2,.9,.3,1) backwards}
+@keyframes tcIn{from{opacity:0;letter-spacing:.5em;filter:blur(9px)}to{opacity:1;letter-spacing:.06em;filter:none}}
+.tc .en{font-family:var(--mono);font-size:14px;letter-spacing:.4em;text-transform:uppercase;color:var(--gold)}
+.tc .line{font-size:16px;color:var(--washi-3);max-width:32ch;line-height:1.75;text-wrap:balance}
+
+/* ==========================================================
+   REPORT
+   ========================================================== */
+#s-report{overflow-y:auto;display:none}
+#s-report.on{display:block}
+.rep{max-width:960px;margin:0 auto;padding:clamp(26px,5vh,56px) clamp(18px,4vw,40px) 70px}
+.rep-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  border-bottom:2px solid var(--sumi);padding-bottom:16px}
+.rep-head .verdict{display:flex;align-items:baseline;gap:14px}
+.rep-head .verdict .big{font-family:var(--brush);font-size:clamp(52px,10vw,88px);line-height:.9;color:var(--sumi)}
+.rep-head .verdict .big.loss{color:var(--sumi-2)}
+.rep-head .verdict .sub{display:flex;flex-direction:column;gap:2px}
+.rep-head .verdict .sub b{font-family:var(--mono);font-size:15px;letter-spacing:.28em;text-transform:uppercase}
+.rep-head .verdict .sub span{
+  font-size:13.5px;color:var(--sumi-2);line-height:1.65;
+  max-width:52ch;display:block;text-wrap:pretty;
+}
+.rep-head .stamp{
+  position:relative;width:74px;height:74px;display:grid;place-items:center;
+  background:var(--vermilion);color:#FBF4E4;
+  font-family:var(--brush);font-size:26px;border-radius:3px;
+  writing-mode:vertical-rl;line-height:1.06;letter-spacing:.02em;
+  transform:rotate(-8deg);
+  box-shadow:0 1px 2px rgba(34,30,25,.18);
+}
+/* uneven ink, the way a seal actually presses */
+.rep-head .stamp::after{
+  content:"";position:absolute;inset:0;border-radius:3px;pointer-events:none;
+  background:
+    repeating-linear-gradient(28deg, rgba(255,255,255,.10) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at 68% 22%, rgba(255,255,255,.14), transparent 55%);
+}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--washi-3);border:1px solid var(--washi-3);margin-top:26px}
+@media (max-width:680px){.tiles{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:400px){.tiles{grid-template-columns:1fr}}
+.tile{background:rgba(255,255,255,.34);padding:18px 16px;display:flex;flex-direction:column;gap:6px}
+.tile .k{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--sumi-2)}
+.tile .v{font-family:var(--mono);font-size:32px;color:var(--sumi);font-variant-numeric:tabular-nums;line-height:1}
+.tile .v em{font-style:normal;font-size:15px;color:var(--sumi-2);margin-left:3px}
+.rep h3{display:flex;align-items:baseline;gap:14px;font-weight:400;margin:38px 0 6px}
+.rep h3 .jp{font-family:var(--brush);font-size:30px;line-height:1;color:var(--sumi)}
+.rep h3 .en{
+  font-family:var(--mono);font-size:11px;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--sumi-2);
+}
+.rep h3 + p{margin:0 0 16px;font-size:13.5px;color:var(--sumi-2);max-width:60ch;line-height:1.7}
+.review{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:9px}
+.rv{border:1px solid var(--washi-3);background:rgba(255,255,255,.4);padding:13px 12px;
+  display:flex;align-items:center;gap:12px;border-left:3px solid var(--vermilion)}
+.rv .k{font-family:var(--kana);font-size:38px;line-height:1;color:var(--sumi)}
+.rv .m{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rv .m b{font-family:var(--mono);font-size:14px;color:var(--sumi)}
+.rv .m span{font-family:var(--mono);font-size:10.5px;color:var(--vermilion);letter-spacing:.08em}
+.clean{font-size:15px;color:var(--jade);font-family:var(--mono);letter-spacing:.06em}
+.rep-acts{display:flex;gap:12px;flex-wrap:wrap;margin-top:40px;padding-top:22px;border-top:1px solid var(--washi-3)}
+
+/* ==========================================================
+   responsive + motion
+   ========================================================== */
+@media (max-width:760px){
+  .chip{font-size:13px;padding:5px 10px}
+  .chip .jp{font-size:15px}
+  .chipset{padding-top:10px}
+  .dojo-bar{padding-top:14px;padding-bottom:10px}
+  .rail h2{font-size:26px}
+  .side{min-width:0}
+  .metrics .sc{font-size:20px}
+  .who b{font-size:20px}
+  #promptKana b{font-size:150px}
+  .node{width:88px;height:88px;margin:-44px 0 0 -44px;font-size:44px}
+  .rail{flex:0 0 62px}
+  .bamboo{display:none}
+  .dojo-bar .lede p{font-size:13px}
+  .dojo-bar .acts{width:100%}
+  .dojo-bar .acts .btn{flex:1 1 auto}
+}
+/* portrait: the scene is composed for landscape, so raise the horizon
+   and let the floor carry more of the frame */
+@media (orientation:portrait){
+  #scene{perspective-origin:50% 38%}
+  .floor{top:52%}
+  .moon{top:16%}
+  #promptKana{top:32%}
+}
+@media (max-width:480px){
+  .jpx{display:none}
+}
+@media (max-height:560px){
+  .hud-bottom{gap:7px;padding-bottom:10px}
+  #bufferBox{height:52px}
+  #tiles .t{height:34px;font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+  .floor{animation:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ TITLE ============ -->
+  <section class="screen on" id="s-title">
+    <div class="disc" aria-hidden="true"></div>
+    <div class="title-stack">
+      <h1 class="vtitle">仮名決闘</h1>
+      <p class="romline">Kana Duel</p>
+      <p class="tag">Read the brush. Type the romaji. Parry the blade before it lands.</p>
+      <button class="btn big" id="btn-enter"><span class="jpx">道場へ入る　</span>Enter the Dojo</button>
+      <p class="fine">Hardware keyboard recommended · Sound on</p>
+    </div>
+  </section>
+
+  <!-- ============ DOJO ============ -->
+  <section class="screen paper" id="s-dojo">
+    <aside class="rail">
+      <h2>練習道場</h2>
+      <p class="rail-en">Practice Dojo</p>
+      <div class="seal" aria-hidden="true">臨</div>
+    </aside>
+
+    <div class="dojo-main">
+      <div class="dojo-bar">
+        <div class="lede">
+          <p>Tap any character to hear it spoken and see its romaji. Nothing is timed here — learn the mappings, then take them into the duel.</p>
+        </div>
+        <div class="acts">
+          <button class="btn dark tiny" id="btn-revealall">Reveal all</button>
+          <button class="btn solid" id="btn-duel"><span class="jpx">決闘開始　</span>Begin Campaign</button>
+        </div>
+      </div>
+
+      <div class="chipset">
+        <span class="lbl">Lesson pool</span>
+        <span id="chips"></span>
+      </div>
+      <div class="chipset">
+        <span class="seg" id="segDojo">
+          <button data-d="ordered" aria-pressed="true">五十音図 Table</button>
+          <button data-d="shuffle" aria-pressed="false">シャッフル Shuffle</button>
+        </span>
+        <span class="seg" id="segScript">
+          <button data-s="hira" aria-pressed="true">ひらがな</button>
+          <button data-s="kata" aria-pressed="false">カタカナ</button>
+          <button data-s="both" aria-pressed="false">Both</button>
+        </span>
+        <button class="chip" id="preset-basic"><span class="jp">五十音</span> Kana 48</button>
+        <button class="chip" id="preset-all"><span class="jp">全</span> Everything</button>
+        <button class="btn dark tiny" id="btn-settings" aria-expanded="false" aria-controls="settings">設定 Settings ▾</button>
+      </div>
+
+      <div id="settings" hidden>
+        <div class="chipset">
+          <span class="lbl">Strike phase</span>
+          <span class="seg" id="segOffense">
+            <button data-o="ltr" aria-pressed="true">左→右 Read in order</button>
+            <button data-o="gojuon" aria-pressed="false">五十音順 Gojūon</button>
+            <button data-o="listen" aria-pressed="false">聞き取り Listen</button>
+          </span>
+          <label class="switch"><input type="checkbox" id="hitSpeakToggle" checked> Speak each character after you hit it</label>
+          <label class="switch"><input type="checkbox" id="altToggle" checked> Accept Kunrei-shiki as well as Hepburn (si · ti · tu · hu · zi · sya…)</label>
+        </div>
+        <div class="chipset">
+          <span class="lbl">Glyph</span>
+          <span class="seg" id="segGlyph">
+            <button data-g="brush" aria-pressed="true">筆 Brush</button>
+            <button data-g="hand" aria-pressed="false">手書き Hand</button>
+            <button data-g="print" aria-pressed="false">明朝 Print</button>
+          </span>
+          <label class="switch"><input type="checkbox" id="tagToggle"> Show 行 label on card fronts</label>
+          <label class="switch"><input type="checkbox" id="aidToggle"> Ring the spoken target (for rooms without audio)</label>
+          <label class="switch"><input type="checkbox" id="twiceToggle"> Say each target twice</label>
+        </div>
+        <div class="chipset">
+          <span class="lbl">Voice</span>
+          <select id="voicePick" class="pick" aria-label="Japanese voice"></select>
+          <button class="btn dark tiny" id="voicePreview">Preview は・へ・ふ・く</button>
+          <button class="btn dark tiny" id="btn-audio">Test audio</button>
+          <span class="lbl" style="margin-left:10px">Speed</span>
+          <input type="range" id="rate" class="rate" min="0.6" max="1.1" step="0.05" value="0.9" aria-label="Speech speed">
+        </div>
+        <div class="chipset">
+          <span class="lbl">Audio pack</span>
+          <label class="btn dark tiny" for="packInput">Load recordings…</label>
+          <input id="packInput" type="file" accept="audio/*" multiple hidden>
+          <button class="btn dark tiny" id="packClear">Clear</button>
+          <input id="packCredit" class="pick" style="max-width:270px" placeholder="Credit line for these recordings">
+          <span class="lbl" id="packInfo"></span>
+        </div>
+      </div>
+      <div class="warn" id="voicewarn" hidden></div>
+      <div class="gridwrap"><div class="grid" id="grid"></div></div>
+
+      <footer class="dojo-foot">
+        <span><kbd>click</kbd> flip &amp; speak</span>
+        <span id="poolCount">0 characters selected</span><span id="creditFoot"></span>
+        <span id="dojoHint"></span><span>Duel: type romaji · <kbd>enter</kbd> replays the spoken target · <kbd>esc</kbd> to withdraw</span>
+      </footer>
+    </div>
+  </section>
+
+  <!-- ============ DUEL ============ -->
+  <section class="screen" id="s-duel">
+    <div id="scene">
+      <div class="teaset" aria-hidden="true">
+        <div class="wall"></div>
+        <div class="tokonoma"><div class="scroll"><i></i></div></div>
+        <div class="tatami"></div>
+        <div class="kama"></div>
+      </div>
+      <div id="camera">
+        <div class="moon" aria-hidden="true"></div>
+        <div class="ridge far" aria-hidden="true"></div>
+        <div class="ridge near" aria-hidden="true"></div>
+        <div class="torii" aria-hidden="true"><i class="cap"></i><i class="b1"></i><i class="b2"></i><i class="p1"></i><i class="p2"></i></div>
+        <div class="bamboo l1" aria-hidden="true"></div>
+        <div class="bamboo l2" aria-hidden="true"></div>
+        <div class="bamboo r1" aria-hidden="true"></div>
+        <div class="bamboo r2" aria-hidden="true"></div>
+        <div class="floor" aria-hidden="true"></div>
+        <div id="enemy"></div>
+        <div id="promptKana"><b></b></div>
+        <div id="volley" hidden></div>
+        <div id="fan" hidden>
+          <svg viewBox="-12 8 224 136" aria-hidden="true">
+            <path d="M100 132 L-3.4 94.4 A110 110 0 0 1 203.4 94.4 Z" fill="url(#fanPaper)"/>
+            <g stroke="rgba(60,26,18,.5)" stroke-width="1.6" fill="none">
+              <path d="M100 132 L14 66"/><path d="M100 132 L57 33"/>
+              <path d="M100 132 L100 22"/>
+              <path d="M100 132 L143 33"/><path d="M100 132 L186 66"/>
+            </g>
+            <path d="M100 132 L-3.4 94.4 A110 110 0 0 1 203.4 94.4 Z"
+                  fill="none" stroke="rgba(60,26,18,.65)" stroke-width="2.5"/>
+            <circle cx="100" cy="132" r="7" fill="#3A2018"/>
+            <defs><linearGradient id="fanPaper" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#E4573F"/><stop offset="1" stop-color="#A32A20"/>
+            </linearGradient></defs>
+          </svg>
+          <span></span>
+        </div>
+      </div>
+    </div>
+
+    <canvas id="fx"></canvas>
+
+    <div id="hud">
+      <div class="hud-top">
+        <div class="side">
+          <div class="who"><b id="foeJp">忍者</b><span id="foeEn">Ninja</span></div>
+          <div class="bar foe"><i id="foeHp"></i></div>
+        </div>
+        <div class="phase-tag parry" id="phaseTag"><b>受</b><span>Parry</span></div>
+        <div class="side right">
+          <div class="metrics">
+            <span class="cb" id="combo">連撃 ×0</span>
+            <span class="sc"><span id="score">0</span><small>点</small></span>
+          </div>
+          <div class="bar me"><i id="myHp"></i></div>
+        </div>
+      </div>
+
+      <div class="hud-bottom">
+        <div id="imeWarn" hidden></div>
+        <div id="timerWrap"><i id="timerBar"></i></div>
+        <div class="bufferRow">
+          <button class="spk" id="replay" title="Replay the spoken target" aria-label="Replay the spoken target" disabled>🔊</button>
+          <div id="bufferBox">
+            <div id="tiles"></div>
+            <input id="bufferInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="latin" aria-label="Romaji input">
+          </div>
+        </div>
+        <div id="hintLine"></div>
+      </div>
+    </div>
+
+    <div id="flash" aria-hidden="true"></div>
+    <div id="tiercard"><div class="tc" id="tcBody"></div></div>
+  </section>
+
+  <!-- ============ REPORT ============ -->
+  <section class="screen paper" id="s-report">
+    <div class="rep">
+      <div class="rep-head">
+        <div class="verdict">
+          <span class="big" id="verdictJp">勝</span>
+          <span class="sub"><b id="verdictEn">Victory</b><span id="verdictSub"></span></span>
+        </div>
+        <div class="stamp" id="stamp">沙汰</div>
+      </div>
+
+      <div class="tiles" id="statTiles"></div>
+
+      <h3><span class="jp">要復習</span><span class="en">Needs Review</span></h3>
+      <p id="reviewNote">The characters that cost you the most keystrokes. Take these back to the dojo first.</p>
+      <div class="review" id="review"></div>
+
+      <div class="rep-acts">
+        <button class="btn solid" id="btn-rematch"><span class="jpx">再戦　</span>Rematch</button>
+        <button class="btn dark" id="btn-back"><span class="jpx">道場へ戻る　</span>Return to Dojo</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+<script>
+"use strict";
+/* ==========================================================
+   1. KANA DATA
+   ぢ / づ are deliberately excluded: they collide exactly with
+   じ / ず in romaji, which makes them unteachable in a typing
+   duel (two characters, one required string).
+   ========================================================== */
+const ROWS = [
+  {g:"a",  jp:"あ", label:"a i u e o", items:[["あ","ア","a"],["い","イ","i"],["う","ウ","u"],["え","エ","e"],["お","オ","o"]]},
+  {g:"k",  jp:"か", label:"k-",  items:[["か","カ","ka"],["き","キ","ki"],["く","ク","ku"],["け","ケ","ke"],["こ","コ","ko"]]},
+  {g:"s",  jp:"さ", label:"s-",  items:[["さ","サ","sa"],["し","シ","shi",["si"]],["す","ス","su"],["せ","セ","se"],["そ","ソ","so"]]},
+  {g:"t",  jp:"た", label:"t-",  items:[["た","タ","ta"],["ち","チ","chi",["ti"]],["つ","ツ","tsu",["tu"]],["て","テ","te"],["と","ト","to"]]},
+  {g:"n",  jp:"な", label:"n-",  items:[["な","ナ","na"],["に","ニ","ni"],["ぬ","ヌ","nu"],["ね","ネ","ne"],["の","ノ","no"]]},
+  {g:"h",  jp:"は", label:"h-",  items:[["は","ハ","ha"],["ひ","ヒ","hi"],["ふ","フ","fu",["hu"]],["へ","ヘ","he"],["ほ","ホ","ho"]]},
+  {g:"m",  jp:"ま", label:"m-",  items:[["ま","マ","ma"],["み","ミ","mi"],["む","ム","mu"],["め","メ","me"],["も","モ","mo"]]},
+  {g:"y",  jp:"や", label:"y-",  items:[["や","ヤ","ya"],["ゆ","ユ","yu"],["よ","ヨ","yo"]]},
+  {g:"r",  jp:"ら", label:"r-",  items:[["ら","ラ","ra"],["り","リ","ri"],["る","ル","ru"],["れ","レ","re"],["ろ","ロ","ro"]]},
+  {g:"w",  jp:"わ", label:"わ行 w-", items:[["わ","ワ","wa"],["ゐ","ヰ","wi"],["ゑ","ヱ","we"],["を","ヲ","wo"]]},
+  {g:"nn", jp:"ん", label:"n",   items:[["ん","ン","n"]]},
+  {g:"daku",jp:"濁音", label:"g z d b p", items:[
+    ["が","ガ","ga"],["ぎ","ギ","gi"],["ぐ","グ","gu"],["げ","ゲ","ge"],["ご","ゴ","go"],
+    ["ざ","ザ","za"],["じ","ジ","ji",["zi"]],["ず","ズ","zu"],["ぜ","ゼ","ze"],["ぞ","ゾ","zo"],
+    ["だ","ダ","da"],["で","デ","de"],["ど","ド","do"],
+    ["ば","バ","ba"],["び","ビ","bi"],["ぶ","ブ","bu"],["べ","ベ","be"],["ぼ","ボ","bo"],
+    ["ぱ","パ","pa"],["ぴ","ピ","pi"],["ぷ","プ","pu"],["ぺ","ペ","pe"],["ぽ","ポ","po"]]},
+  {g:"yoon",jp:"拗音", label:"-ya -yu -yo", items:[
+    ["きゃ","キャ","kya"],["きゅ","キュ","kyu"],["きょ","キョ","kyo"],
+    ["しゃ","シャ","sha",["sya"]],["しゅ","シュ","shu",["syu"]],["しょ","ショ","sho",["syo"]],
+    ["ちゃ","チャ","cha",["tya"]],["ちゅ","チュ","chu",["tyu"]],["ちょ","チョ","cho",["tyo"]],
+    ["にゃ","ニャ","nya"],["にゅ","ニュ","nyu"],["にょ","ニョ","nyo"],
+    ["ひゃ","ヒャ","hya"],["ひゅ","ヒュ","hyu"],["ひょ","ヒョ","hyo"],
+    ["みゃ","ミャ","mya"],["みゅ","ミュ","myu"],["みょ","ミョ","myo"],
+    ["りゃ","リャ","rya"],["りゅ","リュ","ryu"],["りょ","リョ","ryo"],
+    ["ぎゃ","ギャ","gya"],["ぎゅ","ギュ","gyu"],["ぎょ","ギョ","gyo"],
+    ["じゃ","ジャ","ja",["zya"]],["じゅ","ジュ","ju",["zyu"]],["じょ","ジョ","jo",["zyo"]],
+    ["びゃ","ビャ","bya"],["びゅ","ビュ","byu"],["びょ","ビョ","byo"],
+    ["ぴゃ","ピャ","pya"],["ぴゅ","ピュ","pyu"],["ぴょ","ピョ","pyo"]]}
+];
+const BASIC_GROUPS = ["a","k","s","t","n","h","m","y","r","w","nn"];
+const ADVANCED_GROUPS = ["daku","yoon"];
+
+/* every character as a flat record */
+const ALL = [];
+ROWS.forEach(row => row.items.forEach(([h,k,r,alt]) => {
+  ALL.push({h, k, r, alt: alt || [], g: row.g, id: row.g + ":" + r + ":" + h});
+}));
+/* Gojuon rank must come from the syllabary itself, not from the order the
+   lesson groups happen to sit in this file -- otherwise ゐ / ゑ sort after
+   the dakuten instead of inside the wa-row (わ・ゐ・う・ゑ・を).
+   Convention used: base row order, then plain < dakuten < handakuten, with
+   each yoon following the mora it is built on. */
+const GOJUON_BASE = [
+  "a","i","u","e","o", "ka","ki","ku","ke","ko", "sa","shi","su","se","so",
+  "ta","chi","tsu","te","to", "na","ni","nu","ne","no", "ha","hi","fu","he","ho",
+  "ma","mi","mu","me","mo", "ya","yu","yo", "ra","ri","ru","re","ro",
+  "wa","wi","we","wo", "n"
+];
+/* voiced / semi-voiced mora and yoon, mapped back to the mora they derive from */
+const DERIVED = {
+  ga:["ka",1], gi:["ki",1], gu:["ku",1], ge:["ke",1], go:["ko",1],
+  za:["sa",1], ji:["shi",1], zu:["su",1], ze:["se",1], zo:["so",1],
+  da:["ta",1], de:["te",1], "do":["to",1],
+  ba:["ha",1], bi:["hi",1], bu:["fu",1], be:["he",1], bo:["ho",1],
+  pa:["ha",2], pi:["hi",2], pu:["fu",2], pe:["he",2], po:["ho",2],
+  kya:["ki",0,0], kyu:["ki",0,1], kyo:["ki",0,2],
+  sha:["shi",0,0], shu:["shi",0,1], sho:["shi",0,2],
+  cha:["chi",0,0], chu:["chi",0,1], cho:["chi",0,2],
+  nya:["ni",0,0], nyu:["ni",0,1], nyo:["ni",0,2],
+  hya:["hi",0,0], hyu:["hi",0,1], hyo:["hi",0,2],
+  mya:["mi",0,0], myu:["mi",0,1], myo:["mi",0,2],
+  rya:["ri",0,0], ryu:["ri",0,1], ryo:["ri",0,2],
+  gya:["ki",1,0], gyu:["ki",1,1], gyo:["ki",1,2],
+  ja:["shi",1,0], ju:["shi",1,1], jo:["shi",1,2],
+  bya:["hi",1,0], byu:["hi",1,1], byo:["hi",1,2],
+  pya:["hi",2,0], pyu:["hi",2,1], pyo:["hi",2,2]
+};
+/* The 五十音図 as it is actually printed, including its gaps: や row has no
+   i/e, the wa row borrows う from the a row, and だ row lacks ぢ/づ because
+   they are excluded from this game. Rendering the real shape is the point —
+   the gaps are part of what makes the table memorable. */
+const GOJUON_TABLE = [
+  ["a","i","u","e","o"],
+  ["ka","ki","ku","ke","ko"],
+  ["sa","shi","su","se","so"],
+  ["ta","chi","tsu","te","to"],
+  ["na","ni","nu","ne","no"],
+  ["ha","hi","fu","he","ho"],
+  ["ma","mi","mu","me","mo"],
+  ["ya",null,"yu",null,"yo"],
+  ["ra","ri","ru","re","ro"],
+  ["wa","wi",null,"we","wo"],
+  ["n",null,null,null,null],
+  ["ga","gi","gu","ge","go"],
+  ["za","ji","zu","ze","zo"],
+  ["da",null,null,"de","do"],
+  ["ba","bi","bu","be","bo"],
+  ["pa","pi","pu","pe","po"],
+  ["kya",null,"kyu",null,"kyo"],
+  ["sha",null,"shu",null,"sho"],
+  ["cha",null,"chu",null,"cho"],
+  ["nya",null,"nyu",null,"nyo"],
+  ["hya",null,"hyu",null,"hyo"],
+  ["mya",null,"myu",null,"myo"],
+  ["rya",null,"ryu",null,"ryo"],
+  ["gya",null,"gyu",null,"gyo"],
+  ["ja",null,"ju",null,"jo"],
+  ["bya",null,"byu",null,"byo"],
+  ["pya",null,"pyu",null,"pyo"]
+];
+function gojuonRank(r){
+  const d = DERIVED[r];
+  const base = d ? d[0] : r;
+  const variant = d ? d[1] : 0;
+  const yoon = (d && d.length > 2) ? 10 + d[2] : 0;
+  const idx = GOJUON_BASE.indexOf(base);
+  return (idx < 0 ? 999 : idx) * 1000 + variant * 100 + yoon;
+}
+ALL.forEach(it => { it.ord = gojuonRank(it.r); });
+
+/* ==========================================================
+   2. TIERS
+   ========================================================== */
+/* Six encounters. Each owns a distinct defense mechanic — the thing that
+   comes at you differs, so reading pressure arrives a different way each time.
+   `hidden` keeps an encounter off the ladder count until it reveals itself. */
+const TIERS = [
+  {key:"ashigaru", jp:"足軽", en:"Ashigaru", hp:6, def:5.4, off:3.6,
+   style:"thrust", accent:"#9FB6D0",
+   line:"A conscript with a borrowed spear. More reach than skill — but reach is enough."},
+
+  {key:"archer", jp:"弓兵", en:"Archer", hp:8, def:5.0, off:3.2,
+   style:"arrow", accent:"#8FA9C4",
+   line:"He looses from across the field. The character is small when it leaves the bow."},
+
+  {key:"kiba", jp:"騎馬武者", en:"Mounted Warrior", hp:10, def:5.0, off:2.9,
+   style:"ride", accent:"#B4726A",
+   line:"He will not stop to fight you. The tachi comes level with your neck as he passes."},
+
+  {key:"shirabyoshi", jp:"白拍子", en:"Shirabyōshi", hp:8, def:5.6, off:2.4,
+   style:"dance", hidden:true, accent:"#C9A227",
+   line:"An interlude. A dancer is brought in to ease the evening. Rest your hands."},
+
+  {key:"daimyo", jp:"大名", en:"Daimyō", hp:11, def:4.8, off:2.9,
+   style:"tea", scene:"tearoom", accent:"#6E8F7D",
+   line:"No blades in the tearoom. He asks only that you read the scroll in the tokonoma."},
+
+  {key:"shogun", jp:"将軍", en:"Shōgun", hp:14, def:4.2, off:2.2,
+   style:"cannon", accent:"#C9A227",
+   line:"He did not become shōgun by fighting fair. The guns are already loaded."}
+];
+/* the ladder the player is shown — the hidden one is not counted */
+const LADDER_COUNT = TIERS.filter(t => !t.hidden).length;
+const MAX_HP = 5;
+
+/* The opponent closes distance as you wear them down: the target glyphs grow
+   (easier to read) while the strike window tightens (harder to answer). The
+   distance is fixed for the whole strike phase — moving it mid-phase would
+   shift the characters under the reader's eye. */
+const STUN_FAR = -300, STUN_NEAR = -100, STRIKE_URGENCY = 0.25;
+/* How the threat arrives, per encounter. enemy = the figure's charge, prompt =
+   the character's own travel. The archer's shot starts far enough to be barely
+   legible; the rider crosses laterally instead of closing head-on. */
+const STYLE = {
+  thrust: {enemy:[-980, 165], prompt:[-300, 90],  sway:0,    promptSway:0},
+  arrow:  {enemy:[-980, 40],  prompt:[-680, 150], sway:0,    promptSway:0},
+  /* The rider crosses the field, but the character he carries only drifts.
+     A glyph that slides off the edge cannot be read, and reading is the game. */
+  ride:   {enemy:[-620, -170],prompt:[-250, 40],  sway:0.62, promptSway:0.20},
+  dance:  {enemy:[-900, 120], prompt:[-280, 70],  sway:0.30, promptSway:0.14},
+  /* the scroll hangs in the alcove at negative z, so the brushed character
+     must sit in front of it or the tokonoma planes occlude it entirely */
+  tea:    {enemy:[-330, -330],prompt:[-30, -30],  sway:0,    promptSway:0},
+  cannon: {enemy:[-880, 60],  prompt:[-320, 80],  sway:0,    promptSway:0}
+};
+function styleOf(){ return (TIERS[G.tier] && TIERS[G.tier].style) || "thrust"; }
+function envelope(){ return STYLE[styleOf()] || STYLE.thrust; }
+function approachProgress(){
+  return G.foeMax ? Math.min(1, Math.max(0, 1 - G.foeHp / G.foeMax)) : 0;
+}
+
+
+/* ==========================================================
+   3. SILHOUETTES — stylized ink figures, built from primitives
+   ========================================================== */
+function silhouette(kind){
+  const body = "#070A0F", trim = "#161E29", steel = "#2A3444";
+  const eyes = '<g class="eye">';
+
+  if(kind === "ashigaru") return `
+  <svg viewBox="0 0 440 560" role="img" aria-label="Ashigaru with spear">
+    <g fill="${body}">
+      <path d="M186 552 L196 402 L246 402 L256 552 L230 552 L222 432 L212 552 Z"/>
+      <path d="M158 268 Q220 244 282 268 L296 392 Q220 422 144 392 Z"/>
+      <ellipse cx="152" cy="276" rx="27" ry="21"/><ellipse cx="288" cy="276" rx="27" ry="21"/>
+      <path d="M146 284 L112 352 L134 366 L172 300 Z"/>
+      <path d="M294 284 L330 340 L310 356 L272 296 Z"/>
+      <path d="M204 250 h32 v-20 h-32 z"/>
+      <circle cx="220" cy="198" r="34"/>
+      <path d="M120 186 q100 -62 200 0 q-100 -26 -200 0 z"/>
+      <path d="M132 188 h176 v9 H132 z"/>
+    </g>
+    <path d="M96 470 L372 92" stroke="${steel}" stroke-width="9" fill="none"/>
+    <path d="M372 92 l30 -44 l10 12 l-28 44 z" fill="${steel}"/>
+    ${eyes}<rect x="200" y="196" width="16" height="7" rx="3"/><rect x="226" y="196" width="16" height="7" rx="3"/></g>
+  </svg>`;
+
+  if(kind === "archer") return `
+  <svg viewBox="0 0 440 560" role="img" aria-label="Archer drawing a bow">
+    <g fill="${body}">
+      <path d="M176 552 L190 400 L244 400 L262 552 L232 552 L220 430 L206 552 Z"/>
+      <path d="M150 266 Q220 240 290 266 L304 392 Q220 424 136 392 Z"/>
+      <ellipse cx="144" cy="274" rx="28" ry="22"/><ellipse cx="296" cy="274" rx="28" ry="22"/>
+      <path d="M300 280 L214 300 L218 320 L304 306 Z"/>
+      <path d="M140 282 L206 296 L202 316 L136 308 Z"/>
+      <path d="M204 248 h32 v-20 h-32 z"/>
+      <ellipse cx="220" cy="196" rx="36" ry="34"/>
+      <path d="M186 168 q34 -30 68 0 q-34 -12 -68 0 z"/>
+    </g>
+    <path d="M338 70 Q408 280 338 490" stroke="${trim}" stroke-width="10" fill="none"/>
+    <path d="M338 70 L338 490" stroke="${steel}" stroke-width="3" fill="none"/>
+    <path d="M150 280 L344 280" stroke="${steel}" stroke-width="5" fill="none"/>
+    <path d="M150 280 l26 -9 l0 18 z" fill="${steel}"/>
+    ${eyes}<path d="M196 192 l30 -6 l0 10 l-30 4 z"/></g>
+  </svg>`;
+
+  if(kind === "kiba") return `
+  <svg viewBox="0 0 440 560" role="img" aria-label="Mounted warrior">
+    <g fill="${body}">
+      <ellipse cx="216" cy="392" rx="146" ry="62"/>
+      <path d="M96 372 L52 300 L74 286 L128 350 Z"/>
+      <path d="M52 300 q-26 -34 -6 -58 q22 6 30 34 z"/>
+      <path d="M40 244 q-16 -20 -2 -30 q14 8 16 26 z"/>
+      <path d="M120 440 L104 540 L126 540 L146 444 Z"/>
+      <path d="M182 448 L172 546 L194 546 L212 450 Z"/>
+      <path d="M270 448 L262 546 L284 546 L300 450 Z"/>
+      <path d="M330 436 L336 536 L358 536 L352 438 Z"/>
+      <path d="M338 356 q30 26 22 68 q-16 -34 -34 -50 z"/>
+      <path d="M214 336 Q262 306 306 336 L316 380 Q260 400 206 380 Z"/>
+      <ellipse cx="212" cy="330" rx="26" ry="20"/><ellipse cx="308" cy="330" rx="26" ry="20"/>
+      <path d="M250 310 h30 v-18 h-30 z"/>
+      <ellipse cx="266" cy="264" rx="36" ry="34"/>
+      <path d="M266 196 q58 0 62 50 q2 16 -12 18 l-100 0 q-14 -2 -12 -18 q4 -50 62 -50 z"/>
+      <path d="M196 240 q-24 6 -26 28 q20 6 32 -6 z"/>
+      <path d="M336 240 q24 6 26 28 q-20 6 -32 -6 z"/>
+      <path d="M232 196 q34 -46 68 0 q-34 -18 -68 0 z" fill="${trim}"/>
+      <path d="M306 322 L352 300 L360 318 L316 342 Z"/>
+    </g>
+    <path d="M352 306 L436 176 L440 196 L364 328 Z" fill="${steel}"/>
+    ${eyes}<rect x="240" y="260" width="22" height="8" rx="3"/><rect x="272" y="260" width="22" height="8" rx="3"/></g>
+  </svg>`;
+
+  if(kind === "shirabyoshi") return `
+  <svg viewBox="0 0 440 560" role="img" aria-label="Shirabyoshi dancer">
+    <g fill="${body}">
+      <path d="M220 300 L118 552 L322 552 Z"/>
+      <path d="M170 286 Q220 262 270 286 L286 356 Q220 380 154 356 Z"/>
+      <ellipse cx="166" cy="292" rx="24" ry="19"/><ellipse cx="274" cy="292" rx="24" ry="19"/>
+      <path d="M162 298 L118 250 L136 234 L184 288 Z"/>
+      <path d="M278 298 L322 356 L304 372 L262 308 Z"/>
+      <path d="M206 268 h28 v-20 h-28 z"/>
+      <ellipse cx="220" cy="216" rx="34" ry="33"/>
+      <path d="M198 188 q22 -104 44 -104 q-6 60 -14 104 z"/>
+      <path d="M188 230 q-30 40 -20 96 q-16 -46 4 -100 z"/>
+      <path d="M252 230 q30 40 20 96 q16 -46 -4 -100 z"/>
+    </g>
+    <g fill="${trim}">
+      <path d="M118 250 q-52 -40 -46 -86 q30 34 62 62 z"/>
+      <path d="M72 164 q-14 -22 -4 -34 q12 10 14 30 z"/>
+    </g>
+    ${eyes}<path d="M200 212 l26 -5 l0 9 l-26 3 z"/><path d="M240 207 l24 5 l0 8 l-24 -3 z"/></g>
+  </svg>`;
+
+  if(kind === "daimyo") return `
+  <svg viewBox="0 0 440 560" role="img" aria-label="Daimyo seated">
+    <g fill="${body}">
+      <path d="M96 552 Q220 470 344 552 Z"/>
+      <path d="M110 470 Q220 420 330 470 L344 552 L96 552 Z"/>
+      <path d="M62 356 L220 272 L378 356 L360 470 Q220 428 80 470 Z"/>
+      <path d="M182 274 h76 v-26 h-76 z"/>
+      <ellipse cx="220" cy="206" rx="40" ry="38"/>
+      <path d="M180 178 q40 -34 80 0 q-40 -14 -80 0 z"/>
+      <path d="M212 168 q8 -46 34 -58 q-6 34 -18 58 z"/>
+      <path d="M196 380 q24 -14 48 0 l-6 46 q-18 8 -36 0 z" fill="${trim}"/>
+    </g>
+    ${eyes}<rect x="194" y="202" width="22" height="8" rx="3"/><rect x="226" y="202" width="22" height="8" rx="3"/></g>
+  </svg>`;
+
+  if(kind === "kunoichi") return `
+  <svg viewBox="0 0 440 560" role="img" aria-label="Concealed ninja">
+    <g fill="${body}">
+      <path d="M188 552 L196 402 L244 402 L252 552 L226 552 L220 432 L214 552 Z"/>
+      <path d="M156 266 Q220 240 284 266 L300 392 Q220 424 140 392 Z"/>
+      <ellipse cx="150" cy="274" rx="30" ry="23"/><ellipse cx="290" cy="274" rx="30" ry="23"/>
+      <path d="M142 282 L100 358 L124 372 L166 300 Z"/>
+      <path d="M298 282 L344 344 L322 362 L280 302 Z"/>
+      <path d="M204 246 h32 v-20 h-32 z"/>
+      <path d="M220 140 q46 0 50 50 q4 48 -50 52 q-54 -4 -50 -52 q4 -50 50 -50 z"/>
+      <path d="M268 178 q46 10 70 -8 q-32 36 -68 24 z"/>
+      <path d="M270 196 q50 20 78 6 q-36 40 -76 18 z"/>
+      <path d="M344 348 L426 154 L438 161 L360 360 Z" fill="${steel}"/>
+    </g>
+    ${eyes}<path d="M196 190 l30 -7 l0 10 l-30 5 z"/><path d="M244 183 l28 7 l0 8 l-28 -5 z"/></g>
+  </svg>`;
+
+  /* shogun */
+  return `
+  <svg viewBox="0 0 440 560" role="img" aria-label="Shogun">
+    <g fill="${body}">
+      <path d="M150 552 L172 400 L268 400 L290 552 L252 552 L240 436 L204 436 L192 552 Z"/>
+      <path d="M120 300 Q220 258 320 300 L344 420 Q220 470 96 420 Z" opacity=".92"/>
+      <path d="M138 268 Q220 236 302 268 L316 392 Q220 428 124 392 Z"/>
+      <path d="M96 262 q40 -38 74 -8 l10 74 q-46 24 -94 10 z"/>
+      <path d="M344 262 q-40 -38 -74 -8 l-10 74 q46 24 94 10 z"/>
+      <path d="M104 344 L66 414 L94 430 L136 358 Z"/>
+      <path d="M336 344 L380 408 L354 426 L312 356 Z"/>
+      <path d="M202 246 h36 v-24 h-36 z"/>
+      <ellipse cx="220" cy="188" rx="48" ry="46"/>
+      <path d="M220 100 q76 0 82 68 q2 22 -16 24 l-132 0 q-18 -2 -16 -24 q6 -68 82 -68 z"/>
+      <path d="M124 168 q-38 8 -42 40 q30 8 48 -10 z"/>
+      <path d="M316 168 q38 8 42 40 q-30 8 -48 -10 z"/>
+    </g>
+    <g fill="#C9A227">
+      <path d="M170 104 q-42 -78 -18 -92 q6 46 42 74 z"/>
+      <path d="M270 104 q42 -78 18 -92 q-6 46 -42 74 z"/>
+      <circle cx="220" cy="112" r="13"/>
+    </g>
+    <path d="M380 412 L440 200 L440 240 L394 424 Z" fill="${trim}"/>
+    ${eyes}<path d="M188 186 l30 -5 l0 12 l-30 -2 z"/><path d="M252 186 l-30 -5 l0 12 l30 -2 z"/></g>
+  </svg>`;
+}
+
+/* ==========================================================
+   4. AUDIO — Web Speech + a small WebAudio kit
+   ========================================================== */
+let jaVoice = null, voicesChecked = false;
+function save(k, v){ try{ localStorage.setItem("kanaduel:" + k, v); }catch(e){} }
+function load(k){ try{ return localStorage.getItem("kanaduel:" + k); }catch(e){ return null; } }
+
+/* macOS ships novelty character voices that also report ja-JP — Eddy, Flo,
+   Grandma, Rocko and friends — and they sort ahead of Kyoko in getVoices().
+   They mangle isolated mora badly enough to make fu/ku indistinguishable, so
+   rank explicitly instead of taking the first match. */
+const JA_PREFERRED = [/kyoko/i, /o-?ren/i, /otoya/i, /hattori/i, /nanami/i,
+                      /ayumi/i, /haruka/i, /mizuki/i, /sayaka/i, /ichiro/i, /google/i];
+const JA_NOVELTY = /^(eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley|bubbles|bahh|boing|bells|jester|organ|superstar|trinoids|whisper|wobble|zarvox|albert|cellos|good news|bad news)\b/i;
+function japaneseVoices(){
+  if(!("speechSynthesis" in window)) return [];
+  return speechSynthesis.getVoices().filter(v => /^ja([-_]|$)/i.test(v.lang));
+}
+function bestVoice(ja){
+  for(const re of JA_PREFERRED){
+    const m = ja.find(v => re.test(v.name));
+    if(m) return m;
+  }
+  return ja.find(v => !JA_NOVELTY.test(v.name)) || ja[0] || null;
+}
+function renderVoices(ja){
+  const sel = document.getElementById("voicePick");
+  if(!sel) return;
+  if(sel.dataset.n === String(ja.length) && ja.length) return;
+  sel.dataset.n = String(ja.length);
+  sel.disabled = !ja.length;
+  if(!ja.length){ sel.innerHTML = "<option>No Japanese voice installed</option>"; return; }
+  sel.innerHTML = ja.map(v => {
+    const nm = v.name.replace(/[<>"]/g, "");
+    return '<option value="' + nm + '">' + nm + '</option>';
+  }).join("");
+  const saved = load("voice");
+  const want = (saved && ja.find(v => v.name === saved)) || jaVoice || bestVoice(ja);
+  if(want){ jaVoice = want; sel.value = want.name; }
+}
+function pickVoice(){
+  if(!("speechSynthesis" in window)) return;
+  const vs = speechSynthesis.getVoices();
+  if(!vs.length) return;
+  const ja = japaneseVoices();
+  if(!jaVoice || ja.indexOf(jaVoice) < 0) jaVoice = bestVoice(ja);
+  renderVoices(ja);
+  voicesChecked = true;
+  const w = document.getElementById("voicewarn");
+  if(!ja.length && w && !w.dataset.locked){
+    w.hidden = false;
+    w.innerHTML = "<b>No Japanese system voice found.</b> Pronunciation will fall back to reading the romaji aloud in English. On macOS add one under System Settings \u203A Accessibility \u203A Spoken Content \u203A System Voice \u203A Manage Voices \u203A Japanese.";
+  }
+}
+if("speechSynthesis" in window){
+  pickVoice();
+  speechSynthesis.addEventListener("voiceschanged", pickVoice);
+  setTimeout(pickVoice, 900);
+}
+/* speechOK: null = untested, true = confirmed audible, false = unreliable.
+   Chrome wedges permanently if cancel() and speak() land in the same tick:
+   speaking stays true, no events fire, and every later utterance is dropped.
+   So only cancel when something is actually queued, and always speak on a
+   later tick. A watchdog demotes to the visual aid if nothing ever starts. */
+let speechOK = null, speechMisses = 0;
+function noteSpeechMiss(){
+  speechMisses++;
+  if(speechMisses >= 2 && speechOK !== false){
+    speechOK = false;
+    syncTargetAid();
+    reportSilence();
+  }
+}
+function inFrame(){ try{ return window.self !== window.top; }catch(e){ return true; } }
+function audioReport(html, ok){
+  const w = document.getElementById("voicewarn");
+  if(!w) return;
+  w.hidden = false;
+  w.dataset.locked = "1";
+  w.className = "warn" + (ok ? " ok" : "");
+  w.innerHTML = html;
+}
+/* The browser accepted speak() but never started. Say so plainly, and switch
+   the duel to the visual target so the game stays playable. */
+function reportSilence(){
+  const framed = inFrame();
+  audioReport(
+    "<b>No sound is reaching you.</b> The browser accepted the pronunciation request but never started speaking" +
+    (framed
+      ? ", which is what happens when the page runs inside an embedded frame \u2014 browsers block speech synthesis there. For audio, open <code>index.html</code> directly in Chrome or Safari."
+      : ". Check your output device and volume.") +
+    " The duel stays fully playable either way: <b>Ring the spoken target</b> has been switched on, so the character to strike is circled."
+  );
+  const t = document.getElementById("aidToggle");
+  if(t && !t.checked){ t.checked = true; G.aid = true; syncTargetAid(); }
+}
+/* Silent probe at duel start, so a blocked audio environment is known
+   before the first offense target instead of costing the student a round. */
+function probeSpeech(){
+  if(speechOK !== null || !("speechSynthesis" in window)) return;
+  const fail = () => {
+    if(speechOK === true) return;
+    speechOK = false; syncTargetAid(); reportSilence();
+  };
+  try{
+    const u = new SpeechSynthesisUtterance("a");
+    u.volume = 0; u.rate = 2;
+    u.onstart = () => { speechOK = true; speechMisses = 0; syncTargetAid(); };
+    u.onerror = fail;
+    if(speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+    setTimeout(() => { try{ speechSynthesis.speak(u); }catch(e){ fail(); } }, 60);
+    setTimeout(() => { if(speechOK !== true) fail(); }, 1300);
+  }catch(e){ fail(); }
+}
+function chime(){
+  const c = ac();
+  if(!c) return "no-audiocontext";
+  const t = c.currentTime;
+  [880, 1320].forEach((hz, i) => {
+    const o = c.createOscillator(), g = c.createGain();
+    const at = t + i * 0.24;
+    o.type = "sine"; o.frequency.setValueAtTime(hz, at);
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(0.32, at + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.22);
+    o.connect(g); g.connect(c.destination);
+    o.start(at); o.stop(at + 0.26);
+  });
+  return c.state;
+}
+/* Verdicts, once the student says what they actually heard. WebAudio and the
+   speech engine fail independently, so separating them is the whole point. */
+function verdict(heard){
+  const framed = inFrame();
+  if(heard === "both"){
+    speechOK = true; speechMisses = 0;
+    const t = document.getElementById("aidToggle");
+    if(t){ t.checked = false; G.aid = false; }
+    syncTargetAid();
+    return audioReport("<b>Everything works.</b> Pronunciation will play on card taps and on offense targets. Ear training is on.", true);
+  }
+  speechOK = false;
+  const t = document.getElementById("aidToggle");
+  if(t && !t.checked){ t.checked = true; G.aid = true; }
+  syncTargetAid();
+  if(heard === "chime"){
+    return audioReport(
+      "<b>Your sound is fine \u2014 it is speech that is blocked.</b> The chimes reached you, so this page can play audio; the speech engine is what will not run" +
+      (framed
+        ? ", which is the normal behaviour inside an embedded frame. Open <code>index.html</code> directly in Chrome or Safari and pronunciation should work."
+        : ". On macOS check System Settings \u203A Accessibility \u203A Spoken Content, and that a Japanese voice is downloaded.") +
+      " <b>Ring the spoken target</b> is now on, so the duel plays as a reading drill.");
+  }
+  return audioReport(
+    "<b>No audio at all is reaching this page.</b> Not even the plain chime got through, so this is not a speech problem. Check the output device, the system volume, and whether this browser tab is muted (right-click the tab \u203A Unmute). <b>Ring the spoken target</b> is now on so you can keep playing meanwhile.");
+}
+
+function testAudio(){
+  if(!("speechSynthesis" in window)){
+    return audioReport("<b>This browser has no speech support.</b> Turn on <b>Ring the spoken target</b> and the duel plays as a reading drill.");
+  }
+  const state = chime();
+  const vs = speechSynthesis.getVoices();
+  const ja = vs.filter(v => /^ja/i.test(v.lang));
+  audioReport("Listening test running \u2014 two chimes, then a Japanese syllable\u2026", true);
+  const u = new SpeechSynthesisUtterance(ja.length ? "\u3057" : "shi");
+  if(ja.length){ u.voice = ja[0]; u.lang = "ja-JP"; }
+  u.rate = 0.8;
+  let started = false;
+  u.onstart = () => { started = true; };
+  try{
+    if(speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+    setTimeout(() => { try{ speechSynthesis.speak(u); }catch(e){} }, 130);
+  }catch(e){}
+  setTimeout(() => {
+    audioReport(
+      "<b>Test finished.</b> You should have heard two short chimes, then the syllable \u300C\u3057\u300D (shi)." +
+      "<div class='ask'><b>What did you hear?</b>" +
+      "<button data-h='both'>Chimes and the syllable</button>" +
+      "<button data-h='chime'>Only the chimes</button>" +
+      "<button data-h='none'>Nothing at all</button></div>" +
+      "<div class='dx'>engine: " + (started ? "started" : "never started") +
+      " \u00b7 audiocontext: " + state +
+      " \u00b7 voices: " + vs.length + " (" + ja.length + " Japanese" + (ja.length ? ", " + ja[0].name : "") + ")" +
+      " \u00b7 frame: " + (inFrame() ? "embedded" : "top level") + "</div>",
+      true);
+  }, 1600);
+}
+/* ---- recorded audio packs ----
+   Recorded human mora beat synthesis outright for fu/ku discrimination, but
+   the recordings have to be supplied by the user: their licence is theirs to
+   honour, not ours to assume. Clips win where present; TTS covers the rest. */
+const clips = new Map();                       // romaji -> {url}
+const ROMAJI_SET = new Set(ALL.map(i => i.r));
+const KANA_TO_R = new Map();
+ALL.forEach(i => { KANA_TO_R.set(i.h, i.r); KANA_TO_R.set(i.k, i.r); });
+
+let packDB = null;
+function openPackDB(){
+  return new Promise(res => {
+    try{
+      const rq = indexedDB.open("kanaduel", 1);
+      rq.onupgradeneeded = () => { try{ rq.result.createObjectStore("clips"); }catch(e){} };
+      rq.onsuccess = () => res(rq.result);
+      rq.onerror = () => res(null);
+      rq.onblocked = () => res(null);
+    }catch(e){ res(null); }
+  });
+}
+function packPut(r, rec){
+  if(!packDB) return;
+  try{ packDB.transaction("clips", "readwrite").objectStore("clips").put(rec, r); }catch(e){}
+}
+function packClearAll(){
+  clips.forEach(c => { try{ URL.revokeObjectURL(c.url); }catch(e){} });
+  clips.clear();
+  if(packDB){ try{ packDB.transaction("clips", "readwrite").objectStore("clips").clear(); }catch(e){} }
+  updateCoverage();
+}
+function setClip(r, buf, type){
+  const old = clips.get(r);
+  if(old){ try{ URL.revokeObjectURL(old.url); }catch(e){} }
+  clips.set(r, {url: URL.createObjectURL(new Blob([buf], {type: type || "audio/mpeg"}))});
+}
+/* "ka_44000.mp3", "shi.mp3", "し.wav" all resolve to their mora */
+function clipKey(name){
+  let b = name.replace(/\.[^.]+$/, "").toLowerCase().trim();
+  b = b.replace(/[\s_-]*\d+$/, "").replace(/^[\s_-]+|[\s_-]+$/g, "");
+  if(ROMAJI_SET.has(b)) return b;
+  if(KANA_TO_R.has(b)) return KANA_TO_R.get(b);
+  return null;
+}
+async function importPack(files){
+  let added = 0; const skipped = [];
+  for(const f of files){
+    const r = clipKey(f.name);
+    if(!r){ skipped.push(f.name); continue; }
+    try{
+      const buf = await f.arrayBuffer();
+      setClip(r, buf, f.type);
+      packPut(r, {buf: buf, type: f.type || "audio/mpeg"});
+      added++;
+    }catch(e){ skipped.push(f.name); }
+  }
+  updateCoverage(added, skipped);
+}
+async function restorePack(){
+  packDB = await openPackDB();
+  if(!packDB) return updateCoverage();
+  try{
+    const st = packDB.transaction("clips", "readonly").objectStore("clips");
+    const keys = st.getAllKeys(), vals = st.getAll();
+    await new Promise(res => { vals.onsuccess = res; vals.onerror = res; });
+    const ks = keys.result || [], vs = vals.result || [];
+    ks.forEach((k, i) => { if(vs[i] && vs[i].buf) setClip(k, vs[i].buf, vs[i].type); });
+  }catch(e){}
+  updateCoverage();
+}
+function updateCoverage(added, skipped){
+  const el = document.getElementById("packInfo");
+  if(!el) return;
+  const have = G.pool.filter(i => clips.has(i.r)).length;
+  let t = clips.size
+    ? have + " / " + G.pool.length + " selected characters have recordings"
+    : "no recordings loaded — using the system voice";
+  if(added != null) t = "loaded " + added + " clip" + (added === 1 ? "" : "s") + " · " + t;
+  if(skipped && skipped.length) t += " · " + skipped.length + " unrecognised filename" + (skipped.length === 1 ? "" : "s");
+  el.textContent = t;
+}
+
+let curClip = null;
+function playClip(r, repeat){
+  const c = clips.get(r);
+  if(!c) return false;
+  try{
+    if(curClip){ try{ curClip.pause(); }catch(e){} }
+    const a = new Audio(c.url);
+    curClip = a;
+    a.play().catch(() => {});
+    if(repeat){
+      a.addEventListener("ended", () => {
+        setTimeout(() => {
+          if(curClip !== a) return;
+          const b = new Audio(c.url);
+          curClip = b;
+          b.play().catch(() => {});
+        }, 200);
+      }, {once: true});
+    }
+    return true;
+  }catch(e){ return false; }
+}
+
+/* A Japanese engine normalising text sees a lone は and reads the topic
+   particle "wa"; へ likewise becomes "e". Katakana is never a particle, so
+   feeding it ハ / ヘ / ヲ forces the syllabic reading. The character on
+   screen is unchanged — this only affects what is sent to the synthesiser. */
+const SPEAK_AS = {"\u306F":"\u30CF", "\u3078":"\u30D8", "\u3092":"\u30F2", "\u3090":"\u30A4", "\u3091":"\u30A8"};
+function spokenForm(item){
+  const base = item.h || item.k;
+  return SPEAK_AS[base] || base;
+}
+function speakKana(item, repeat){
+  if(!item) return noteSpeechMiss();
+  if(playClip(item.r, repeat)) return;          // recorded audio wins
+  const base = jaVoice ? spokenForm(item) : item.r;
+  speakText(repeat ? base + (jaVoice ? "\u3001" : ", ") + base : base, !jaVoice);
+}
+function speakText(text, forceEnglish){
+  if(!("speechSynthesis" in window) || !text){ noteSpeechMiss(); return; }
+  const ss = window.speechSynthesis;
+  const fire = () => {
+    try{
+      const u = new SpeechSynthesisUtterance(text);
+      if(jaVoice && !forceEnglish){ u.voice = jaVoice; u.lang = "ja-JP"; } else { u.lang = "en-US"; }
+      u.rate = (G && G.rate) || 0.9; u.pitch = 1;
+      let started = false;
+      u.onstart = () => {
+        started = true; speechMisses = 0;
+        if(speechOK !== true){ speechOK = true; syncTargetAid(); }
+      };
+      u.onerror = () => noteSpeechMiss();
+      ss.speak(u);
+      setTimeout(() => { if(!started) noteSpeechMiss(); }, 1000);
+    }catch(e){ noteSpeechMiss(); }
+  };
+  try{
+    if(ss.speaking || ss.pending){ ss.cancel(); setTimeout(fire, 140); }
+    else fire();
+  }catch(e){ noteSpeechMiss(); }
+}
+
+let AC = null, noiseBuf = null, muted = false;
+function ac(){
+  if(!AC){
+    const C = window.AudioContext || window.webkitAudioContext;
+    if(!C) return null;
+    AC = new C();
+  }
+  if(AC.state === "suspended") AC.resume();
+  return AC;
+}
+function noise(){
+  const c = ac(); if(!c) return null;
+  if(!noiseBuf){
+    noiseBuf = c.createBuffer(1, c.sampleRate * 0.6, c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i] = Math.random()*2 - 1;
+  }
+  return noiseBuf;
+}
+function sfxSlash(){
+  const c = ac(); if(!c || muted) return;
+  const s = c.createBufferSource(); s.buffer = noise();
+  const f = c.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 1.6;
+  const g = c.createGain();
+  const t = c.currentTime;
+  f.frequency.setValueAtTime(5200, t);
+  f.frequency.exponentialRampToValueAtTime(520, t + 0.26);
+  g.gain.setValueAtTime(0.35, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+  s.connect(f); f.connect(g); g.connect(c.destination);
+  s.start(t); s.stop(t + 0.32);
+}
+function sfxParry(){
+  const c = ac(); if(!c || muted) return;
+  const t = c.currentTime;
+  [1860, 2790, 4120].forEach((hz, i) => {
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = "triangle"; o.frequency.setValueAtTime(hz, t);
+    g.gain.setValueAtTime(0.14 / (i+1), t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.7 - i*0.16);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.8);
+  });
+}
+function sfxHurt(){
+  const c = ac(); if(!c || muted) return;
+  const t = c.currentTime;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = "sine"; o.frequency.setValueAtTime(180, t);
+  o.frequency.exponentialRampToValueAtTime(42, t + 0.4);
+  g.gain.setValueAtTime(0.4, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+  o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.5);
+}
+function sfxBad(){
+  const c = ac(); if(!c || muted) return;
+  const t = c.currentTime;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = "square"; o.frequency.setValueAtTime(150, t);
+  g.gain.setValueAtTime(0.08, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+  o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.14);
+}
+
+/* ==========================================================
+   5. CANVAS INK ENGINE
+   ========================================================== */
+const cv = document.getElementById("fx");
+const ctx = cv.getContext("2d");
+let CW = 0, CH = 0, DPR = 1;
+function sizeCanvas(){
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  CW = cv.clientWidth || window.innerWidth;
+  CH = cv.clientHeight || window.innerHeight;
+  cv.width = Math.round(CW * DPR); cv.height = Math.round(CH * DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+window.addEventListener("resize", sizeCanvas);
+
+const strokes = [], sparks = [];
+function addStroke(x1,y1,x2,y2,opt){
+  opt = opt || {};
+  const mx = (x1+x2)/2, my = (y1+y2)/2;
+  const dx = x2-x1, dy = y2-y1;
+  const len = Math.hypot(dx,dy) || 1;
+  const bow = (opt.bow == null ? (Math.random()*0.11 - 0.055) : opt.bow) * len;
+  if(strokes.length > 6) strokes.shift();
+  strokes.push({
+    x1,y1,x2,y2,
+    cx: mx - dy/len*bow, cy: my + dx/len*bow,
+    w: opt.w || 26, life: 0, max: opt.max || 1.5,
+    color: opt.color || "#F2EADA", glow: opt.glow || "rgba(228,87,63,.85)",
+    draw: opt.drawTime || 0.11, seed: Math.random()*10
+  });
+}
+function addSparks(x,y,n,opt){
+  opt = opt || {};
+  for(let i=0;i<n;i++){
+    const a = Math.random()*Math.PI*2, sp = (opt.speed||280)*(0.25+Math.random());
+    sparks.push({
+      x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp - (opt.lift||60),
+      r: (opt.r||3)*(0.4+Math.random()), life: 0, max: (opt.max||0.9)*(0.5+Math.random()),
+      g: opt.g == null ? 620 : opt.g,
+      color: opt.color || "#0C0F14"
+    });
+  }
+}
+function quadPoint(s,t){
+  const u = 1-t;
+  return [u*u*s.x1 + 2*u*t*s.cx + t*t*s.x2, u*u*s.y1 + 2*u*t*s.cy + t*t*s.y2];
+}
+/* stable per-stroke pseudo-random, so the dry patches don't flicker */
+function hash(x){ const v = Math.sin(x * 127.1) * 43758.5453; return v - Math.floor(v); }
+
+/* asymmetric brush profile: quick swell at the head, long dry tail.
+   t^a * (1-t)^b, normalised so the belly peaks at 1. */
+function brushW(t){
+  const a = 0.50, b = 1.50, peak = 0.3248;
+  return Math.pow(Math.max(t, 1e-4), a) * Math.pow(Math.max(1 - t, 1e-4), b) / peak;
+}
+function strokeSpine(s, rev){
+  const N = 44, spine = [];
+  for(let i=0;i<=N;i++){
+    const t = (i/N) * rev;
+    const p = quadPoint(s, t);
+    const q = quadPoint(s, Math.min(1, t + 0.01));
+    let dx = q[0]-p[0], dy = q[1]-p[1];
+    const m = Math.hypot(dx,dy) || 1; dx/=m; dy/=m;
+    spine.push({x:p[0], y:p[1], nx:-dy, ny:dx, t:t});
+  }
+  return spine;
+}
+/* Build a closed ribbon around the spine. wAt gives half-width at a point,
+   cAt (optional) shifts the ribbon's centre sideways across the stroke. */
+function ribbon(spine, wAt, cAt){
+  ctx.beginPath();
+  const c = i => (cAt ? cAt(spine[i], i) : 0);
+  for(let i=0;i<spine.length;i++){
+    const p = spine[i], w = wAt(p, i), o = c(i);
+    const x = p.x + p.nx*(o + w), y = p.y + p.ny*(o + w);
+    if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  for(let i=spine.length-1;i>=0;i--){
+    const p = spine[i], w = wAt(p, i), o = c(i);
+    ctx.lineTo(p.x + p.nx*(o - w), p.y + p.ny*(o - w));
+  }
+  ctx.closePath();
+}
+function drawStroke(s){
+  const rev = Math.min(1, s.life / s.draw);
+  const fade = s.life < s.draw ? 1 : Math.max(0, 1 - (s.life - s.draw) / (s.max - s.draw));
+  if(fade <= 0) return;
+  const spine = strokeSpine(s, rev);
+  const body = p => s.w * brushW(p.t) * (0.6 + 0.4*fade);
+
+  ctx.save();
+  ctx.globalAlpha = fade;
+  ctx.shadowColor = s.glow;
+  ctx.shadowBlur = 30 * fade;
+  ribbon(spine, body);
+  ctx.fillStyle = s.color;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  /* split bristles: carve hairline gaps out of the dry tail */
+  /* kasure — broken ink where the loaded brush runs dry. Irregular short
+     gaps, not continuous lanes, or it reads as engraved rails. */
+  const START = 0.38;
+  ctx.globalCompositeOperation = "destination-out";
+  for(let j=0;j<10;j++){
+    const r1 = hash(s.seed + j * 1.73), r2 = hash(s.seed + j * 3.31), r3 = hash(s.seed + j * 5.17);
+    const len = 0.03 + 0.07 * r3;
+    const t0 = START + (1 - START - len) * r1, t1 = t0 + len;
+    const lane = (r2 * 2 - 1) * 0.5;
+    ctx.globalAlpha = fade * (0.3 + 0.4 * r3);
+    ribbon(
+      spine,
+      p => (p.t < t0 || p.t > t1) ? 0
+           : s.w * brushW(p.t) * 0.22 * Math.sin(Math.PI * (p.t - t0) / len),
+      p => s.w * brushW(p.t) * lane
+    );
+    ctx.fill();
+  }
+  ctx.globalCompositeOperation = "source-over";
+  ctx.restore();
+}
+/* Bring any live strokes to a close quickly. The strike phase is a reading
+   task now, so ink must never sit on top of a character still to be read. */
+function fadeStrokes(within){
+  const w = within == null ? 0.16 : within;
+  strokes.forEach(s => {
+    s.max = Math.max(s.draw + 0.01, Math.min(s.max, s.life + w));
+  });
+}
+function stepFx(dt){
+  ctx.clearRect(0,0,CW,CH);
+  for(let i=strokes.length-1;i>=0;i--){
+    const s = strokes[i]; s.life += dt;
+    if(s.life > s.max){ strokes.splice(i,1); continue; }
+    drawStroke(s);
+  }
+  for(let i=sparks.length-1;i>=0;i--){
+    const p = sparks[i]; p.life += dt;
+    if(p.life > p.max){ sparks.splice(i,1); continue; }
+    p.vy += p.g * dt; p.x += p.vx*dt; p.y += p.vy*dt;
+    const a = 1 - p.life/p.max;
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.ellipse(p.x, p.y, p.r*(0.4+a), p.r*(0.4+a)*1.25, Math.atan2(p.vy,p.vx), 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+/* ==========================================================
+   6. STATE + DOM HANDLES
+   ========================================================== */
+const $ = id => document.getElementById(id);
+const enemyEl = $("enemy"), cameraEl = $("camera"), promptWrap = $("promptKana"),
+      promptB = promptWrap.querySelector("b"), volleyEl = $("volley"), fanEl = $("fan"), bufferInput = $("bufferInput"),
+      bufferBox = $("bufferBox"), tilesEl = $("tiles"), timerBar = $("timerBar"),
+      hintLine = $("hintLine"), replayBtn = $("replay"), phaseTag = $("phaseTag"),
+      flashEl = $("flash"), tierCard = $("tiercard"), tcBody = $("tcBody");
+
+const G = {
+  groups: new Set(BASIC_GROUPS),
+  script: "hira",
+  alt: true,
+  pool: [],
+  running: false, phase: "idle",
+  tier: 0, foeHp: 0, foeMax: 0, hp: MAX_HP,
+  required: null, answers: [], buffer: "", lastKey: null, promptAt: 0,
+  tStart: 0, tDur: 0, tActive: false, replayed: false,
+  nodes: [], order: [], nodeIdx: 0, decoys: [], aid: false, offenseMode: "ltr",
+  stunZ: STUN_FAR, offTime: 0, volley: [], volleyIdx: 0, revealed: false, lateral: 0,
+  enemyZ: -1400, zFrom: -1400, zTo: -1400, zT: 1, zDur: 1, zEase: "out",
+  bob: 0, shake: 0, shakeDirty: false, scale: 1, rate: 0.9, twice: false, speakOnHit: true,
+  dojoMode: "ordered",
+  stats: null, withdrawn: false
+};
+function rescale(){ G.scale = Math.max(0.66, Math.min(1, window.innerWidth / 880)); }
+rescale();
+window.addEventListener("resize", rescale);
+
+/* ==========================================================
+   7. POOL + DOJO
+   ========================================================== */
+function answersFor(it){ return [it.r].concat(G.alt ? it.alt : []); }
+
+function buildPool(){
+  const out = [];
+  ALL.filter(i => G.groups.has(i.g)).forEach(i => {
+    if(G.script === "hira" || G.script === "both") out.push(Object.assign({}, i, {disp:i.h, key:"h|"+i.id}));
+    if(G.script === "kata" || G.script === "both") out.push(Object.assign({}, i, {disp:i.k, key:"k|"+i.id}));
+  });
+  G.pool = out;
+  $("poolCount").textContent = out.length + " character" + (out.length === 1 ? "" : "s") + " selected";
+  $("btn-duel").disabled = out.length < 4;
+  $("btn-duel").style.opacity = out.length < 4 ? .4 : 1;
+  if(typeof updateCoverage === "function") updateCoverage();
+}
+
+function renderChips(){
+  const wrap = $("chips");
+  wrap.innerHTML = "";
+  ROWS.forEach(row => {
+    const b = document.createElement("button");
+    b.className = "chip";
+    b.setAttribute("aria-pressed", G.groups.has(row.g));
+    b.innerHTML = '<span class="jp">' + row.jp + '</span>' + row.label +
+                  '<span class="ct">' + row.items.length + '</span>';
+    b.addEventListener("click", () => {
+      if(G.groups.has(row.g)) G.groups.delete(row.g); else G.groups.add(row.g);
+      if(!G.groups.size) G.groups.add(row.g);
+      b.setAttribute("aria-pressed", G.groups.has(row.g));
+      refreshDojo();
+    });
+    wrap.appendChild(b);
+  });
+}
+function syncChips(){
+  [...$("chips").children].forEach((b, i) => b.setAttribute("aria-pressed", G.groups.has(ROWS[i].g)));
+}
+
+const GROUP_TAG = {a:"A", k:"K", s:"S", t:"T", n:"N", h:"H", m:"M",
+                   y:"Y", r:"R", w:"W", nn:"N", daku:"DAKUTEN", yoon:"YOON"};
+function makeCard(it){
+  const card = document.createElement("button");
+  card.className = "card";
+  card.type = "button";
+  card.setAttribute("aria-label", it.disp + " — " + it.r);
+  card.innerHTML =
+    '<span class="card-inner">' +
+      '<span class="face front"><span class="k">' + it.disp + '</span>' +
+        '<span class="grp">' + (GROUP_TAG[it.g] || it.g.toUpperCase()) + '</span></span>' +
+      '<span class="face back"><span class="r">' + it.r +
+        (G.alt && it.alt.length ? '<em>' + it.alt.join(" · ") + '</em>' : '') + '</span>' +
+        '<span class="k2">' + it.disp + '</span></span>' +
+    '</span>';
+  card.addEventListener("click", () => {
+    card.classList.toggle("flip");
+    if(card.classList.contains("flip")) speakKana(it);
+  });
+  return card;
+}
+
+/* Memorisation view: the real syllabary grid, one script table at a time. */
+function renderOrdered(grid){
+  const scripts = G.script === "both" ? ["h", "k"] : [G.script === "kata" ? "k" : "h"];
+  const VOWELS = G.script === "kata" ? ["ア","イ","ウ","エ","オ"] : ["あ","い","う","え","お"];
+  scripts.forEach(sc => {
+    const mine = G.pool.filter(i => i.key.indexOf(sc + "|") === 0);
+    if(!mine.length) return;
+    const byRomaji = new Map(mine.map(i => [i.r, i]));
+
+    if(scripts.length > 1){
+      const h = document.createElement("p");
+      h.className = "gojuon-head";
+      h.textContent = sc === "h" ? "ひらがな Hiragana" : "カタカナ Katakana";
+      grid.appendChild(h);
+    }
+    const head = document.createElement("div");
+    head.className = "vowelhead";
+    (sc === "k" ? ["ア","イ","ウ","エ","オ"] : ["あ","い","う","え","お"])
+      .forEach(v => { const c = document.createElement("span"); c.textContent = v; head.appendChild(c); });
+    grid.appendChild(head);
+
+    const table = document.createElement("div");
+    table.className = "gojuon";
+    GOJUON_TABLE.forEach(row => {
+      if(!row.some(r => r && byRomaji.has(r))) return;      // row not in this lesson pool
+      row.forEach(r => {
+        if(r && byRomaji.has(r)) table.appendChild(makeCard(byRomaji.get(r)));
+        else { const b = document.createElement("div"); b.className = "blank"; table.appendChild(b); }
+      });
+    });
+    grid.appendChild(table);
+    void VOWELS;
+  });
+}
+
+/* Self-test view: no positional crutch. */
+function renderShuffled(grid){
+  const deck = G.pool.slice();
+  for(let i = deck.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = deck[i]; deck[i] = deck[j]; deck[j] = t;
+  }
+  const frag = document.createDocumentFragment();
+  deck.forEach(it => frag.appendChild(makeCard(it)));
+  grid.appendChild(frag);
+}
+
+function renderGrid(){
+  const grid = $("grid");
+  grid.innerHTML = "";
+  const ordered = G.dojoMode === "ordered";
+  grid.className = "grid" + (ordered ? " asTable" : "");
+  if(ordered) renderOrdered(grid); else renderShuffled(grid);
+}
+function refreshDojo(){ buildPool(); renderGrid(); }
+
+/* ==========================================================
+   8. SCREENS
+   ========================================================== */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("on", s.id === id));
+}
+
+/* ==========================================================
+   9. DUEL
+   ========================================================== */
+function setZ(from, to, dur, ease){
+  G.zFrom = from; G.zTo = to; G.zDur = Math.max(0.001, dur); G.zT = 0; G.zEase = ease || "inout";
+}
+function shake(amp){ G.shake = Math.max(G.shake, amp); G.shakeDirty = true; }
+function flash(kind){
+  flashEl.className = kind;
+  setTimeout(() => { flashEl.className = ""; }, kind === "heal" ? 420 : 240);
+}
+function setPhaseTag(mode){
+  phaseTag.className = "phase-tag " + mode;
+  phaseTag.innerHTML = mode === "parry" ? "<b>受</b><span>Parry</span>" : "<b>斬</b><span>Strike</span>";
+}
+function updateBars(){
+  $("foeHp").style.width = (G.foeMax ? (G.foeHp / G.foeMax) * 100 : 0) + "%";
+  $("myHp").style.width = (G.hp / MAX_HP) * 100 + "%";
+}
+function updateHud(){
+  $("score").textContent = G.stats.points;
+  const c = $("combo");
+  c.textContent = "連撃 ×" + G.stats.combo;
+  c.classList.remove("pop"); void c.offsetWidth; c.classList.add("pop");
+}
+function renderTiles(v){
+  if(!v){ tilesEl.innerHTML = '<span class="ph">type romaji</span>'; return; }
+  tilesEl.innerHTML = [...v].map(ch => '<span class="t">' + ch + '</span>').join("") + '<span class="caret"></span>';
+}
+function focusInput(){ try{ bufferInput.focus({preventScroll:true}); }catch(e){ bufferInput.focus(); } }
+
+function startTimer(sec){ G.tStart = performance.now(); G.tDur = sec * 1000; G.tActive = true; G.replayed = false; }
+function stopTimer(){ G.tActive = false; timerBar.classList.remove("urgent"); }
+
+function setPrompt(it){
+  G.required = it;
+  G.answers = answersFor(it);
+  G.decoys = [];
+  G.buffer = ""; bufferInput.value = ""; renderTiles("");
+  bufferBox.classList.remove("bad", "good");
+  G.promptAt = performance.now();
+}
+function markError(it){
+  if(!it) return;
+  const m = G.stats.perChar;
+  const rec = m.get(it.key) || {item: it, n: 0};
+  rec.n++; m.set(it.key, rec);
+  G.stats.errors++;
+}
+function breakCombo(){ G.stats.combo = 0; updateHud(); }
+function award(){
+  clearIME();
+  G.stats.correct++;
+  const el = (performance.now() - G.promptAt) / 1000;
+  G.stats.time += el;
+  G.stats.combo++;
+  if(G.stats.combo > G.stats.best) G.stats.best = G.stats.combo;
+  const mult = Math.min(4, 1 + Math.floor(G.stats.combo / 4) * 0.5);
+  const bonus = Math.max(0, Math.round((TIERS[G.tier].def - el) * 18));
+  G.stats.points += Math.round((100 + bonus) * mult);
+  updateHud();
+}
+
+/* The listening challenge only works if the student can actually hear.
+   Fall back to ringing the live target when speech is unavailable, or
+   whenever the teacher has switched the aid on. */
+function targetAidOn(){
+  if(G.offenseMode === "ltr") return true;        // next target is obvious anyway
+  if(G.offenseMode === "gojuon") return false;    // deducing the order IS the task
+  if(G.aid) return true;
+  if(G.required && clips.has(G.required.r)) return false;   // recording covers this one
+  return speechOK === false;
+}
+function updateTargetHint(){
+  if(G.phase !== "offense") return;
+  const num = Math.min(G.nodeIdx + 1, G.order.length || 3);
+  const pre = "Target " + num + " of 3 — ";
+  hintLine.textContent =
+    G.offenseMode === "ltr"    ? pre + "read and strike left to right" :
+    G.offenseMode === "gojuon" ? pre + "strike in gojūon order — read all three first" :
+    targetAidOn()              ? pre + "strike the ringed character" :
+                                 pre + "type the one you hear · Enter to replay";
+}
+function syncTargetAid(){
+  if(!G.nodes || !G.nodes.length) return;
+  G.nodes.forEach(nd => nd.el.classList.remove("live"));
+  if(targetAidOn() && G.phase === "offense" && G.nodeIdx < G.order.length){
+    const nd = G.nodes[G.order[G.nodeIdx]];
+    if(nd) nd.el.classList.add("live");
+  }
+  updateTargetHint();
+}
+
+function pickItem(){
+  let src = G.pool;
+  if(G.tier <= 1){
+    const basic = G.pool.filter(i => BASIC_GROUPS.indexOf(i.g) >= 0);
+    if(basic.length >= 4) src = basic;
+  } else if(styleOf() === "cannon" || G.tier >= 4){
+    const errs = [...G.stats.perChar.values()];
+    /* "tests you with all the kana you got wrong previously" */
+    if(errs.length && Math.random() < (styleOf() === "cannon" ? 0.7 : 0.45)){
+      const pick = errs[Math.floor(Math.random() * errs.length)].item;
+      G.lastKey = pick.key;
+      return pick;
+    }
+    const adv = G.pool.filter(i => ADVANCED_GROUPS.indexOf(i.g) >= 0);
+    if(adv.length >= 4 && Math.random() < 0.5) src = adv;
+  }
+  let it, guard = 0;
+  do { it = src[Math.floor(Math.random() * src.length)]; guard++; }
+  while(src.length > 1 && it.key === G.lastKey && guard < 14);
+  G.lastKey = it.key;
+  return it;
+}
+/* ---- acoustic separation of simultaneous targets ----
+   Identifying a bare mora by ear is hard; identifying it against two
+   acoustically adjacent decoys is unfair. ふ / く / す differ only in a short
+   voiceless onset, and before /u/ and /i/ the vowel devoices, so almost
+   nothing is left to hear. Keep the three targets phonetically apart. */
+const ONSET_CLASS = {
+  "":"V", k:"K", g:"K", ky:"K", gy:"K",
+  s:"S", z:"S", sh:"S", j:"S", ts:"S", ch:"S", sy:"S", zy:"S", ty:"S",
+  t:"T", d:"T",
+  n:"N", m:"N", ny:"N", my:"N",
+  h:"H", b:"H", p:"H", f:"H", hy:"H", by:"H", py:"H",
+  r:"R", ry:"R", w:"W", y:"Y"
+};
+const VOICELESS_ONSET = /^(k|s|t|h|f|p|sh|ch|ts|ky|hy|py)$/;
+/* Synthesised isolated mora carry two further artifacts, both reported from
+   real play: an abrupt vowel attack is heard as a plosive burst (あ mistaken
+   for ぱ), and the nasal cue on /n/ is too weak to separate it from the /r/
+   flap (ぬ mistaken for る). Neither is fixable from this side, so the pairs
+   must never appear in the same round. */
+const STOP_ONSET = /^(p|b|k|g|t|d|py|by|ky|gy)$/;
+const SONORANT_ONSET = /^(n|m|r|ny|my|ry)$/;
+const NASAL_ONSET = /^(n|m|ny|my)$/;
+function onsetOf(r){ return r.replace(/[aiueo]+$/, ""); }
+function vowelOf(r){ const m = /[aiueo](?![\s\S]*[aiueo])/.exec(r); return m ? m[0] : "n"; }
+/* Modern を is /o/, identical to お. No engine and no recording can separate
+   them by ear, so they must never share a round. */
+const SPOKEN_READING = {wo: "o", wi: "i", we: "e"};
+function reading(r){ return SPOKEN_READING[r] || r; }
+function confusable(a, b){
+  if(reading(a.r) === reading(b.r)) return true;      // true homophones
+  /* ん is a bare nasal, and む / ぬ with a devoiced vowel reduce to almost
+     the same thing — so this one ignores the vowel entirely. */
+  const aN = a.r === "n", bN = b.r === "n";
+  if(aN || bN){
+    if(aN && bN) return true;
+    return NASAL_ONSET.test(onsetOf((aN ? b : a).r));
+  }
+  const va = vowelOf(a.r), vb = vowelOf(b.r);
+  if(va !== vb) return false;                       // different vowel carries the contrast
+  const oa = onsetOf(a.r), ob = onsetOf(b.r);
+  if(oa === ob) return true;
+  if((ONSET_CLASS[oa] || oa) === (ONSET_CLASS[ob] || ob)) return true;   // ka/ga, shi/chi, nu/mu
+  if((va === "u" || va === "i") && VOICELESS_ONSET.test(oa) && VOICELESS_ONSET.test(ob)) return true;  // fu/ku/su/tsu
+  if((oa === "" && STOP_ONSET.test(ob)) || (ob === "" && STOP_ONSET.test(oa))) return true;             // a/pa
+  if(SONORANT_ONSET.test(oa) && SONORANT_ONSET.test(ob)) return true;                                   // nu/ru, na/ma
+  return false;
+}
+/* を is spoken "o" but typed "wo". Hearing it can never tell you what to
+   type, so it is barred from the listening phase. It still appears in the
+   dojo and in the defense phase, where it is read, not heard. */
+const EAR_UNSUITABLE = new Set(["wo", "wi", "we"]);
+function pickDistinct(n, preferErrors){
+  const out = [], seen = new Set();
+  const listening = G.offenseMode === "listen";
+  if(preferErrors && G.stats){
+    [...G.stats.perChar.values()]
+      .sort((a, b) => b.n - a.n)
+      .forEach(rec => {
+        if(out.length >= n) return;
+        const it = rec.item;
+        if(!it || seen.has(it.r) || seen.has(it.key)) return;
+        if(out.some(o => confusable(o, it))) return;
+        seen.add(it.r); seen.add(it.key); out.push(it);
+      });
+  }
+  const usable = listening ? G.pool.filter(i => !EAR_UNSUITABLE.has(i.r)) : G.pool;
+  const src = usable.length >= n ? usable : G.pool;
+  const draw = (respectAcoustics) => {
+    let guard = 0;
+    while(out.length < n && guard < 600){
+      guard++;
+      const it = src[Math.floor(Math.random() * src.length)];
+      if(seen.has(it.r) || seen.has(it.key)) continue;
+      if(listening && respectAcoustics && out.some(o => confusable(o, it))) continue;
+      seen.add(it.r); seen.add(it.key);
+      out.push(it);
+    }
+  };
+  draw(true);
+  draw(false);   // pool too homogeneous to separate — better to play than to stall
+  while(out.length < n) out.push(src[out.length % src.length]);
+  return out;
+}
+
+function startDuel(){
+  buildPool();
+  if(G.pool.length < 4) return;
+  ac();
+  probeSpeech();
+  G.stats = {correct:0, errors:0, time:0, combo:0, best:0, points:0, perChar:new Map()};
+  G.hp = MAX_HP; G.tier = 0; G.running = true; G.withdrawn = false;
+  show("s-duel");
+  sizeCanvas();
+  strokes.length = 0; sparks.length = 0;
+  updateBars(); updateHud();
+  focusInput();
+  startTier();
+}
+
+function startTier(){
+  const T = TIERS[G.tier];
+  strokes.length = 0; sparks.length = 0;
+  G.revealed = false; G.beats = 0;
+  clearTimeout(G.danceTimer); clearInterval(G.motes);
+  fanEl.hidden = true; enemyEl.classList.remove("dancing");
+  document.querySelectorAll(".mote").forEach(m => m.remove());
+  G.volley = []; volleyEl.hidden = true;
+  document.getElementById("scene").classList.toggle("tearoom", T.scene === "tearoom");
+  G.foeMax = T.hp; G.foeHp = T.hp;
+  enemyEl.innerHTML = silhouette(T.key);
+  $("foeJp").textContent = T.jp;
+  $("foeEn").textContent = T.en;
+  updateBars();
+  setZ(-1600, -1000, 1.4, "out");
+  G.phase = "intro";
+  promptWrap.style.opacity = 0;
+  hintLine.textContent = "";
+  tcBody.innerHTML =
+    (T.hidden ? '<p class="rank">Interlude</p>'
+              : '<p class="rank">Opponent ' + (TIERS.slice(0, G.tier + 1).filter(x => !x.hidden).length) +
+                ' of ' + LADDER_COUNT + '</p>') +
+    '<p class="jp">' + T.jp + '</p>' +
+    '<p class="en">' + T.en + '</p>' +
+    '<p class="line">' + T.line + '</p>';
+  tierCard.classList.add("on");
+  setTimeout(() => {
+    tierCard.classList.remove("on");
+    if(!G.running) return;
+    if(T.style === "dance") danceInterlude(); else nextDefense();
+  }, 2400);
+}
+
+function clearNodes(){
+  G.nodes.forEach(n => n.el.remove());
+  G.nodes = []; G.order = []; G.nodeIdx = 0;
+}
+
+function renderVolley(){
+  volleyEl.innerHTML = G.volley.map((it, i) =>
+    '<b class="' + (i < G.volleyIdx ? "spent" : i === G.volleyIdx ? "live" : "") + '">' +
+    it.disp + '</b>').join("");
+}
+function nextDefense(){
+  if(!G.running) return;
+  if(G.hp <= 0) return endGame(false);
+  clearNodes();
+  G.phase = "defense";
+  setPhaseTag("parry");
+  replayBtn.disabled = true;
+  const st = styleOf(), env = envelope();
+  G.beats++;
+  const dur = TIERS[G.tier].def;
+
+  if(st === "cannon"){
+    /* three at once, because he does not fight fair */
+    G.volley = pickDistinct(3, true);
+    G.volleyIdx = 0;
+    setPrompt(G.volley[0]);
+    promptWrap.style.opacity = 0;
+    volleyEl.hidden = false;
+    renderVolley();
+    hintLine.textContent = "Three at once — clear them left to right";
+  }else{
+    G.volley = []; volleyEl.hidden = true;
+    const it = pickItem();
+    setPrompt(it);
+    promptB.textContent = it.disp;
+    promptWrap.style.opacity = 1;
+    hintLine.textContent =
+      st === "arrow" ? "It is small when it leaves the bow — read it early" :
+      st === "ride"  ? "He crosses fast — read it as it passes" :
+      st === "tea"   ? "Read the scroll in the tokonoma" :
+      st === "dance" && !G.revealed ? "An interlude. Read at your leisure." :
+                       "Parry — type the romaji before it lands";
+  }
+  promptWrap.classList.remove("miss");
+  setZ(env.enemy[0], env.enemy[1], dur, st === "arrow" ? "in" : st === "ride" ? "inout" : "in");
+  startTimer(dur);
+  focusInput();
+}
+
+/* One correct answer clears a normal attack; a cannon volley needs all three. */
+function defenseHit(){
+  if(styleOf() === "dance") return dancerSlain();
+  if(styleOf() === "cannon" && G.volleyIdx < G.volley.length - 1){
+    award();
+    G.volleyIdx++;
+    renderVolley();
+    setPrompt(G.volley[G.volleyIdx]);
+    sfxParry();
+    const r = volleyEl.getBoundingClientRect();
+    addSparks(r.left + r.width * (0.2 + 0.3 * G.volleyIdx), r.top + r.height / 2, 14,
+              {color:"#C9A227", speed:260, g:200, max:0.5, r:2});
+    return;
+  }
+  volleyEl.hidden = true;
+  return parry();
+}
+
+const DANCE_SECONDS = 30;
+function danceInterlude(){
+  G.phase = "perform";
+  fanEl.hidden = true;
+  promptWrap.style.opacity = 0;
+  volleyEl.hidden = true;
+  enemyEl.classList.add("dancing");
+  phaseTag.className = "phase-tag";
+  phaseTag.innerHTML = "<b>舞</b><span>Interlude</span>";
+  hintLine.textContent = "Nothing is asked of you. Watch the dance.";
+  timerBar.style.transform = "scaleX(0)";
+  /* characters drift up like incense while she performs */
+  G.motes = setInterval(() => {
+    if(G.phase !== "perform") return;
+    const m = document.createElement("div");
+    m.className = "mote";
+    m.textContent = G.pool[Math.floor(Math.random() * G.pool.length)].disp;
+    m.style.left = (12 + Math.random() * 76) + "%";
+    m.style.top = (46 + Math.random() * 22) + "%";
+    m.style.fontSize = (22 + Math.random() * 34) + "px";
+    m.style.animationDuration = (5 + Math.random() * 4) + "s";
+    $("hud").appendChild(m);
+    setTimeout(() => m.remove(), 9000);
+  }, 900);
+  G.danceTimer = setTimeout(() => { if(G.running) fanStrike(); }, DANCE_SECONDS * 1000);
+}
+
+/* the fan opens, and there is exactly one chance */
+function fanStrike(){
+  clearInterval(G.motes);
+  enemyEl.classList.remove("dancing");
+  G.phase = "defense";
+  setPhaseTag("parry");
+  const it = pickItem();
+  setPrompt(it);
+  fanEl.querySelector("span").textContent = it.disp;
+  fanEl.hidden = false;
+  sfxParry();
+  shake(0.5);
+  hintLine.textContent = "The fan. Read it now.";
+  startTimer(3.4);
+  focusInput();
+}
+
+function dancerSlain(){
+  stopTimer();
+  award();
+  fanEl.hidden = true;
+  G.foeHp = 0;
+  updateBars();
+  revealDancer();
+  G.phase = "clear";
+  setTimeout(() => { if(G.running) tierClear(); }, 1800);
+}
+
+function revealDancer(){
+  G.revealed = true;
+  enemyEl.innerHTML = silhouette("kunoichi");
+  $("foeJp").textContent = "くノ一";
+  $("foeEn").textContent = "Kunoichi";
+  flash("hit");
+  shake(0.9);
+  sfxHurt();
+  addStroke(-40, CH * 0.30, CW + 40, CH * 0.42,
+            {w:22, color:"#C0392B", glow:"rgba(192,57,43,.95)", max:1.0});
+  hintLine.textContent = "Now you know what a real ninja looks like.";
+}
+
+function parry(){
+  stopTimer();
+  award();
+  const cx = CW / 2, cy = CH * 0.4;
+  addStroke(cx - CW*0.3, cy + CH*0.28, cx + CW*0.3, cy - CH*0.28,
+            {w:15, color:"#F4EDDD", glow:"rgba(159,182,208,.95)", max:1.5});
+  addSparks(cx, cy, 30, {color:"#9FB6D0", speed:380, g:340, max:0.8, r:2.6});
+  sfxParry();
+  shake(0.5);
+  promptWrap.style.opacity = 0;
+  bufferBox.classList.add("good");
+  const prog = approachProgress();
+  G.stunZ = STUN_FAR + (STUN_NEAR - STUN_FAR) * prog;
+  G.offTime = TIERS[G.tier].off * (1 - STRIKE_URGENCY * prog);
+  setZ(G.enemyZ, G.stunZ, 0.45, "out");
+  G.phase = "stun";
+  hintLine.textContent = "Parried — press the advantage";
+  setTimeout(() => { bufferBox.classList.remove("good"); if(G.running) startOffense(); }, 520);
+}
+
+function failDefense(){
+  stopTimer();
+  volleyEl.hidden = true;
+  if(styleOf() === "dance"){
+    /* she does not need a second opening */
+    fanEl.hidden = true;
+    markError(G.required);
+    G.hp = 0; updateBars();
+    revealDancer();
+    sfxHurt(); shake(1); flash("hit");
+    G.phase = "over";
+    setTimeout(() => endGame(false), 1900);
+    return;
+  }
+  markError(G.required);
+  breakCombo();
+  G.hp = Math.max(0, G.hp - 1);
+  updateBars();
+  sfxHurt(); shake(0.9); flash("hit");
+  promptWrap.classList.add("miss");
+  addStroke(-40, CH * 0.18, CW + 40, CH * 0.78,
+            {w:26, color:"#C0392B", glow:"rgba(192,57,43,.95)", max:1.3});
+  addSparks(CW/2, CH*0.45, 22, {color:"#8E2A20", speed:300, g:520});
+  hintLine.textContent = (styleOf() === "tea" ? "The poison spreads — it was 「" : "Struck — it was 「") +
+    G.required.disp + "」= " + G.required.r;
+  if(G.hp <= 0){ G.phase = "over"; setTimeout(() => endGame(false), 1100); return; }
+  G.phase = "recover";
+  setZ(G.enemyZ, -980, 0.55, "out");
+  setTimeout(() => { promptWrap.style.opacity = 0; if(G.running) nextDefense(); }, 1150);
+}
+
+const NODE_POS = [[22, 28], [50, 56], [78, 31]];
+function startOffense(){
+  G.phase = "offense";
+  setPhaseTag("strike");
+  promptWrap.style.opacity = 0;
+  fadeStrokes();          // clear the parry sweep before anything must be read
+  clearNodes();
+  const picks = pickDistinct(3);
+  G.nodes = picks.map((it, i) => {
+    const el = document.createElement("div");
+    el.className = "node";
+    el.textContent = it.disp;
+    el.style.left = NODE_POS[i][0] + "%";
+    el.style.top = NODE_POS[i][1] + "%";
+    el.style.animationDelay = (i * 0.08) + "s";
+    enemyEl.appendChild(el);
+    return {it, el};
+  });
+  /* The order is the puzzle now. Left-to-right and gojuon order both force
+     the student to READ each glyph to produce its romaji; a spoken cue does
+     not, because hearing the mora hands over the romaji directly. */
+  if(G.offenseMode === "gojuon"){
+    G.order = [0,1,2].sort((x, y) => G.nodes[x].it.ord - G.nodes[y].it.ord);
+  }else if(G.offenseMode === "ltr"){
+    G.order = [0,1,2].sort((x, y) => NODE_POS[x][0] - NODE_POS[y][0]);
+  }else{
+    G.order = [0,1,2].sort(() => Math.random() - 0.5);
+  }
+  G.nodeIdx = 0;
+  setTimeout(() => { if(G.running && G.phase === "offense") nextTarget(); }, 340);
+}
+
+function nextTarget(){
+  if(!G.running) return;
+  if(G.nodeIdx >= G.order.length) return finishOffense();
+  G.phase = "offense";
+  fadeStrokes();
+  const n = G.nodes[G.order[G.nodeIdx]];
+  setPrompt(n.it);
+  G.decoys = G.nodes
+    .filter(x => x !== n && !x.el.classList.contains("cut"))
+    .map(x => ({item: x.it, el: x.el, answers: answersFor(x.it)}));
+  const listening = G.offenseMode === "listen";
+  replayBtn.disabled = !listening;
+  if(listening) speakKana(n.it, G.twice);
+  syncTargetAid();
+  startTimer(G.offTime || TIERS[G.tier].off);
+  focusInput();
+}
+
+function strike(){
+  stopTimer();
+  award();
+  const n = G.nodes[G.order[G.nodeIdx]];
+  const r = n.el.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const ang = (Math.random() * 0.8 - 0.4) + (Math.random() < 0.5 ? Math.PI * 0.25 : Math.PI * 0.75);
+  /* scaled to the node, so the cut lands on the character it removes and
+     leaves the other two legible */
+  const L = Math.max(r.width, r.height) * 1.7;
+  addStroke(cx - Math.cos(ang)*L, cy - Math.sin(ang)*L, cx + Math.cos(ang)*L, cy + Math.sin(ang)*L,
+            {w:12, color:"#F8F2E2", glow:"rgba(201,162,39,.95)", max:0.85});
+  addSparks(cx, cy, 26, {color:"#0C0F14", speed:380, g:760, r:3});
+  addSparks(cx, cy, 14, {color:"#C9A227", speed:280, g:140, max:0.6, r:2});
+  n.el.classList.add("cut");
+  /* Speak it AFTER the strike: reinforcement once they have committed,
+     never a hint beforehand. */
+  if(G.offenseMode !== "listen" && G.speakOnHit) speakKana(n.it, false);
+  sfxSlash();
+  shake(0.72);
+  enemyEl.classList.remove("hurt"); void enemyEl.offsetWidth; enemyEl.classList.add("hurt");
+  G.foeHp = Math.max(0, G.foeHp - 1);
+  updateBars();
+  G.nodeIdx++;
+  if(G.foeHp <= 0){ G.phase = "clear"; return setTimeout(tierClear, 820); }
+  G.phase = "between";
+  setTimeout(() => { if(G.running && G.phase === "between") nextTarget(); }, 430);
+}
+
+function wrongTarget(d){
+  markError(G.required);
+  sfxBad();
+  d.el.classList.remove("wrong"); void d.el.offsetWidth; d.el.classList.add("wrong");
+  setTimeout(() => d.el.classList.remove("wrong"), 480);
+  hintLine.textContent = G.offenseMode === "listen"
+    ? "「" + d.item.disp + "」= " + d.item.r + " is not the one you heard — Enter to replay"
+    : "「" + d.item.disp + "」= " + d.item.r + " comes later — wrong order";
+  bufferInput.value = ""; G.buffer = ""; renderTiles("");
+  bufferBox.classList.remove("bad"); void bufferBox.offsetWidth; bufferBox.classList.add("bad");
+}
+
+function missTarget(){
+  stopTimer();
+  markError(G.required);
+  breakCombo();
+  hintLine.textContent = "He recovers — 「" + G.required.disp + "」was " + G.required.r;
+  sfxBad();
+  G.phase = "recover";
+  clearNodes();
+  setZ(G.enemyZ, -980, 0.5, "out");
+  setTimeout(() => { if(G.running) nextDefense(); }, 900);
+}
+
+function finishOffense(){
+  clearNodes();
+  G.phase = "recover";
+  hintLine.textContent = "";
+  setZ(G.enemyZ, -980, 0.6, "out");
+  setTimeout(() => { if(G.running) nextDefense(); }, 700);
+}
+
+function tierClear(){
+  clearNodes();
+  stopTimer();
+  const cx = CW/2, cy = CH*0.42;
+  for(let i=0;i<3;i++){
+    const a = Math.PI * (0.18 + i * 0.28);
+    const L = Math.max(CW,CH) * 0.42;
+    setTimeout(() => {
+      addStroke(cx - Math.cos(a)*L, cy - Math.sin(a)*L, cx + Math.cos(a)*L, cy + Math.sin(a)*L,
+                {w:21, color:"#F8F2E2", glow:"rgba(228,87,63,.9)", max:2.3});
+      addSparks(cx, cy, 26, {color:"#0C0F14", speed:500, g:700, r:4});
+      sfxSlash(); shake(0.9);
+    }, i * 190);
+  }
+  setZ(G.enemyZ, -2200, 1.1, "in");
+  G.tier++;
+  if(G.tier >= TIERS.length){ G.phase = "won"; return setTimeout(() => endGame(true), 1500); }
+  G.hp = Math.min(MAX_HP, G.hp + 2);
+  updateBars();
+  setTimeout(() => { flash("heal"); if(G.running) startTier(); }, 1500);
+}
+
+/* ---------- input ---------- */
+/* A Japanese input source turns "sa" into さ before it ever reaches us, so
+   the sanitiser would silently eat the whole answer and the round would time
+   out looking like the student got it wrong. Say what is actually happening. */
+function flagIME(){
+  const w = $("imeWarn");
+  if(!w || !w.hidden) return;
+  w.hidden = false;
+  w.innerHTML = "Your keyboard is in <b>Japanese input mode</b>, so your typing arrives as kana and the duel cannot read it. Switch your input source to English \u2014 <kbd>\u2303 Space</kbd> or <kbd>caps lock</kbd> on macOS.";
+}
+function clearIME(){
+  const w = $("imeWarn");
+  if(w && !w.hidden) w.hidden = true;
+}
+function onInput(){
+  if(G.phase !== "defense" && G.phase !== "offense"){ bufferInput.value = ""; return; }
+  const raw = bufferInput.value;
+  if(raw && /[^a-zA-Z]/.test(raw)) flagIME();
+  let v = raw.toLowerCase().replace(/[^a-z]/g, "");
+  if(v.length > 6) v = v.slice(0, 6);
+  bufferInput.value = v;
+  G.buffer = v;
+  renderTiles(v);
+  if(!v) return;
+  if(G.answers.indexOf(v) >= 0){
+    bufferInput.value = ""; G.buffer = "";
+    return G.phase === "defense" ? defenseHit() : strike();
+  }
+  /* During offense all three kana are legal things to type. Judge only on a
+     complete match, so picking a decoy reads as "wrong target" instead of
+     detonating on its first letter. */
+  const decoy = G.decoys.find(d => d.answers.indexOf(v) >= 0);
+  if(decoy) return wrongTarget(decoy);
+  const onPath = G.answers.some(a => a.indexOf(v) === 0) ||
+                 G.decoys.some(d => d.answers.some(a => a.indexOf(v) === 0));
+  if(onPath){
+    bufferBox.classList.remove("bad");
+    return;
+  }
+  /* not a prefix of any accepted spelling — a real mistake */
+  markError(G.required);
+  breakCombo();
+  sfxBad();
+  bufferBox.classList.remove("bad"); void bufferBox.offsetWidth; bufferBox.classList.add("bad");
+  bufferInput.value = ""; G.buffer = ""; renderTiles("");
+}
+bufferInput.addEventListener("input", onInput);
+bufferInput.addEventListener("compositionstart", flagIME);
+bufferInput.addEventListener("blur", () => { if(G.running) setTimeout(focusInput, 30); });
+$("s-duel").addEventListener("pointerdown", () => { if(G.running) setTimeout(focusInput, 0); });
+replayBtn.addEventListener("click", e => {
+  e.preventDefault();
+  if(G.phase === "offense" && G.required && G.offenseMode === "listen") speakKana(G.required, G.twice);
+  setTimeout(focusInput, 0);
+});
+window.addEventListener("keydown", e => {
+  if(e.key === "Escape" && G.running){ G.withdrawn = true; endGame(false); }
+  if(e.key === "Enter" && G.phase === "offense" && G.required){
+    e.preventDefault();
+    if(G.offenseMode === "listen") speakKana(G.required, G.twice);
+  }
+});
+
+/* ---------- end + report ---------- */
+function endGame(won){
+  if(!G.running) return;
+  clearTimeout(G.danceTimer); clearInterval(G.motes);
+  fanEl.hidden = true;
+  document.querySelectorAll(".mote").forEach(m => m.remove());
+  G.running = false;
+  G.phase = "idle";
+  stopTimer();
+  clearNodes();
+  if("speechSynthesis" in window) speechSynthesis.cancel();
+  const s = G.stats;
+  const attempts = s.correct + s.errors;
+  const acc = attempts ? Math.round((s.correct / attempts) * 100) : 0;
+  const avg = s.correct ? (s.time / s.correct) : 0;
+
+  $("verdictJp").textContent = won ? "勝" : "敗";
+  $("verdictJp").classList.toggle("loss", !won);
+  $("verdictEn").textContent = won ? "Victory" : (G.withdrawn ? "Withdrawn" : "Defeat");
+  const foe = TIERS[Math.min(G.tier, TIERS.length - 1)].en;
+  $("verdictSub").textContent = won
+    ? "You have conquered every foe, vanquished all of your enemies, and for this " +
+      "your name shall be inscribed in the annals of valor, to inspire future " +
+      "generations to persevere in the study of letters and arms."
+    : (G.withdrawn
+        ? "You abandoned the battlefield instead of fighting the " + foe +
+          " to the death. Have you no shame?"
+        : "You died a glorious death on the field of battle, and your enemies weep " +
+          "over the loss of such a worthy opponent.");
+  $("stamp").textContent = "沙汰";
+
+  $("statTiles").innerHTML = [
+    ["Points", s.points, ""],
+    ["Best combo", "×" + s.best, ""],
+    ["Accuracy", acc, "%"],
+    ["Avg. per character", avg.toFixed(2), "s"],
+    ["Characters cleared", s.correct, ""],
+    ["Opponents reached", Math.min(G.tier + (won ? 0 : 1), TIERS.length), " / " + TIERS.length]
+  ].map(t =>
+    '<div class="tile"><span class="k">' + t[0] + '</span>' +
+    '<span class="v">' + t[1] + (t[2] ? '<em>' + t[2] + '</em>' : '') + '</span></div>'
+  ).join("");
+
+  const bad = [...s.perChar.values()].sort((a, b) => b.n - a.n).slice(0, 12);
+  const rv = $("review");
+  if(!bad.length){
+    rv.innerHTML = '<p class="clean">CLEAN SHEET — no character cost you a single keystroke.</p>';
+    $("reviewNote").textContent = "Nothing to review. Raise the lesson pool or the script setting and go again.";
+  }else{
+    $("reviewNote").textContent = "The characters that cost you the most keystrokes, worst first. Take these back to the dojo.";
+    rv.innerHTML = bad.map(b =>
+      '<div class="rv"><span class="k">' + b.item.disp + '</span>' +
+      '<span class="m"><b>' + b.item.r + '</b><span>' + b.n + ' error' + (b.n === 1 ? '' : 's') + '</span></span></div>'
+    ).join("");
+  }
+  show("s-report");
+  document.getElementById("s-report").scrollTop = 0;
+}
+
+/* ==========================================================
+   10. FRAME LOOP
+   ========================================================== */
+let last = 0;
+function frame(ts){
+  requestAnimationFrame(frame);
+  const t = ts / 1000;
+  const dt = last ? Math.min(0.05, t - last) : 0.016;
+  last = t;
+
+  if(G.running){
+    /* timer */
+    if(G.tActive){
+      const el = performance.now() - G.tStart;
+      const p = Math.max(0, 1 - el / G.tDur);
+      timerBar.style.transform = "scaleX(" + p + ")";
+      timerBar.classList.toggle("urgent", p < 0.3);
+      if(G.phase === "offense" && !G.replayed && p < 0.5 && !G.buffer){
+        G.replayed = true;
+        if(G.offenseMode === "listen") speakKana(G.required, G.twice);
+      }
+      if(el >= G.tDur){
+        G.tActive = false;
+        if(G.phase === "defense") failDefense();
+        else if(G.phase === "offense") missTarget();
+      }
+    }
+    /* enemy */
+    if(G.zT < G.zDur) G.zT = Math.min(G.zDur, G.zT + dt);
+    const k = G.zDur ? G.zT / G.zDur : 1;
+    const e = G.zEase === "out" ? 1 - Math.pow(1 - k, 3)
+            : G.zEase === "in" ? k * k * k
+            : (k < 0.5 ? 4*k*k*k : 1 - Math.pow(-2*k + 2, 3) / 2);
+    G.enemyZ = G.zFrom + (G.zTo - G.zFrom) * e;
+    G.bob += dt;
+    const sway = Math.sin(G.bob * 2.0) * 9, bobY = Math.sin(G.bob * 1.35) * 11;
+    enemyEl.style.transform =
+      "translate3d(" + sway.toFixed(1) + "px," + bobY.toFixed(1) + "px," + G.enemyZ.toFixed(1) + "px) scale(" + G.scale.toFixed(3) + ")";
+    const env = envelope();
+    const span = (env.enemy[1] - env.enemy[0]) || 1;
+    const travel = Math.max(0, Math.min(1, (G.enemyZ - env.enemy[0]) / span));
+    const kz = env.prompt[0] + (env.prompt[1] - env.prompt[0]) * travel;
+    const arc = Math.sin(travel * Math.PI - Math.PI / 2);
+    G.lateral = (env.sway || 0) * arc * 430;
+    /* clamp the character inside the window whatever its width, allowing for
+       the fact that a nearer character projects wider */
+    const depthScale = 820 / Math.max(120, 820 - kz);
+    const halfSafe = Math.max(0, (window.innerWidth / 2 - 210) / depthScale);
+    const promptX = Math.max(-halfSafe, Math.min(halfSafe, (env.promptSway || 0) * arc * 430));
+    promptWrap.style.transform =
+      "translate3d(" + promptX.toFixed(1) + "px,0," + kz.toFixed(1) + "px)";
+    if(env.sway){
+      enemyEl.style.transform =
+        "translate3d(" + G.lateral.toFixed(1) + "px," + bobY.toFixed(1) +
+        "px," + G.enemyZ.toFixed(1) + "px) scale(" + G.scale.toFixed(3) + ")";
+    }
+    /* shake */
+    if(G.shake > 0.002){
+      G.shake = Math.max(0, G.shake - dt * 2.4);
+      const a = G.shake;
+      cameraEl.style.transform =
+        "translate3d(" + ((Math.random()*2-1)*26*a).toFixed(1) + "px," +
+        ((Math.random()*2-1)*20*a).toFixed(1) + "px,0) rotate(" +
+        ((Math.random()*2-1)*1.5*a).toFixed(2) + "deg)";
+    }else if(G.shakeDirty){
+      cameraEl.style.transform = "none"; G.shakeDirty = false;
+    }
+  }
+  stepFx(dt);
+}
+requestAnimationFrame(frame);
+
+/* ==========================================================
+   11. WIRING
+   ========================================================== */
+$("btn-enter").addEventListener("click", () => { ac(); show("s-dojo"); });
+$("btn-duel").addEventListener("click", startDuel);
+$("btn-rematch").addEventListener("click", startDuel);
+$("btn-back").addEventListener("click", () => { show("s-dojo"); refreshDojo(); });
+$("btn-audio").addEventListener("click", testAudio);
+$("voicewarn").addEventListener("click", e => {
+  const b = e.target.closest("button[data-h]");
+  if(b) verdict(b.dataset.h);
+});
+$("btn-revealall").addEventListener("click", () => {
+  const cards = [...document.querySelectorAll(".card")];
+  const anyClosed = cards.some(c => !c.classList.contains("flip"));
+  cards.forEach(c => c.classList.toggle("flip", anyClosed));
+  $("btn-revealall").textContent = anyClosed ? "Hide all" : "Reveal all";
+});
+const GLYPH_FACES = {
+  brush: '"Yuji Syuku","Hiragino Mincho ProN","Yu Mincho",serif',
+  hand:  '"Klee One","Hiragino Mincho ProN","Yu Mincho",serif',
+  print: '"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif'
+};
+$("segGlyph").addEventListener("click", e => {
+  const b = e.target.closest("button[data-g]");
+  if(!b) return;
+  document.documentElement.style.setProperty("--kana", GLYPH_FACES[b.dataset.g]);
+  save("glyph", b.dataset.g);
+  [...e.currentTarget.children].forEach(x => x.setAttribute("aria-pressed", x === b));
+});
+$("btn-settings").addEventListener("click", () => {
+  const panel = $("settings"), open = panel.hidden;
+  panel.hidden = !open;
+  const b = $("btn-settings");
+  b.setAttribute("aria-expanded", String(open));
+  b.textContent = open ? "設定 Settings ▴" : "設定 Settings ▾";
+  save("settingsOpen", open ? "1" : "0");
+});
+$("segDojo").addEventListener("click", e => {
+  const b = e.target.closest("button[data-d]");
+  if(!b) return;
+  G.dojoMode = b.dataset.d;
+  save("dojo", G.dojoMode);
+  [...e.currentTarget.children].forEach(x => x.setAttribute("aria-pressed", x === b));
+  renderGrid();                       // clicking Shuffle again reshuffles
+  $("btn-revealall").textContent = "Reveal all";
+});
+$("segOffense").addEventListener("click", e => {
+  const b = e.target.closest("button[data-o]");
+  if(!b) return;
+  G.offenseMode = b.dataset.o;
+  save("offense", G.offenseMode);
+  [...e.currentTarget.children].forEach(x => x.setAttribute("aria-pressed", x === b));
+});
+$("hitSpeakToggle").addEventListener("change", e => {
+  G.speakOnHit = e.target.checked;
+  save("hitspeak", e.target.checked ? "1" : "0");
+});
+$("segScript").addEventListener("click", e => {
+  const b = e.target.closest("button[data-s]");
+  if(!b) return;
+  G.script = b.dataset.s;
+  [...e.currentTarget.children].forEach(x => x.setAttribute("aria-pressed", x === b));
+  refreshDojo();
+});
+$("altToggle").addEventListener("change", e => {
+  G.alt = e.target.checked;
+  save("alt", e.target.checked ? "1" : "0");
+  renderGrid();                        // card backs list the accepted spellings
+});
+$("tagToggle").addEventListener("change", e => {
+  document.body.classList.toggle("showtags", e.target.checked);
+  save("tags", e.target.checked ? "1" : "0");
+});
+$("aidToggle").addEventListener("change", e => { G.aid = e.target.checked; syncTargetAid(); });
+$("twiceToggle").addEventListener("change", e => { G.twice = e.target.checked; save("twice", e.target.checked ? "1" : "0"); });
+$("preset-basic").addEventListener("click", () => {
+  G.groups = new Set(BASIC_GROUPS); syncChips(); refreshDojo();
+});
+$("preset-all").addEventListener("click", () => {
+  G.groups = new Set(ROWS.map(r => r.g)); syncChips(); refreshDojo();
+});
+
+$("voicePick").addEventListener("change", e => {
+  const v = japaneseVoices().find(x => x.name === e.target.value);
+  if(v){ jaVoice = v; save("voice", v.name); previewVoice(); }
+});
+$("voicePreview").addEventListener("click", previewVoice);
+$("packInput").addEventListener("change", e => {
+  if(e.target.files && e.target.files.length) importPack([...e.target.files]);
+  e.target.value = "";
+});
+$("packClear").addEventListener("click", packClearAll);
+$("packCredit").addEventListener("input", e => {
+  save("credit", e.target.value);
+  $("creditFoot").textContent = e.target.value ? "Audio: " + e.target.value : "";
+});
+$("rate").addEventListener("input", e => {
+  G.rate = parseFloat(e.target.value) || 0.9;
+  save("rate", e.target.value);
+});
+/* The characters that actually decide whether a voice is usable: the two
+   particles an engine tends to misread, then the devoiced-onset set. */
+const PREVIEW_MORA = ["ha", "he", "fu", "ku", "tsu", "su"];
+function previewVoice(){
+  ac();
+  const items = PREVIEW_MORA.map(r => ALL.find(i => i.r === r)).filter(Boolean);
+  if(jaVoice) speakText(items.map(spokenForm).join("\u3001"), false);
+  else speakText(items.map(i => i.r).join(", "), true);
+}
+
+(function restore(){
+  const r = load("rate");
+  if(r){ G.rate = parseFloat(r) || 0.9; $("rate").value = r; }
+  if(load("settingsOpen") === "1"){
+    $("settings").hidden = false;
+    $("btn-settings").setAttribute("aria-expanded", "true");
+    $("btn-settings").textContent = "設定 Settings ▴";
+  }
+  const al = load("alt");
+  if(al !== null){ G.alt = al === "1"; $("altToggle").checked = G.alt; }
+  if(load("tags") === "1"){
+    $("tagToggle").checked = true;
+    document.body.classList.add("showtags");
+  }
+  const dm = load("dojo");
+  if(dm){
+    G.dojoMode = dm;
+    [...$("segDojo").children].forEach(x => x.setAttribute("aria-pressed", x.dataset.d === dm));
+  }
+  const om = load("offense");
+  if(om){
+    G.offenseMode = om;
+    [...$("segOffense").children].forEach(x => x.setAttribute("aria-pressed", x.dataset.o === om));
+  }
+  const hs = load("hitspeak");
+  if(hs !== null){ G.speakOnHit = hs === "1"; $("hitSpeakToggle").checked = G.speakOnHit; }
+  const cr = load("credit");
+  if(cr){ $("packCredit").value = cr; $("creditFoot").textContent = "Audio: " + cr; }
+  const tw = load("twice");
+  if(tw !== null){ G.twice = tw === "1"; $("twiceToggle").checked = G.twice; }
+  const g = load("glyph");
+  if(g && GLYPH_FACES[g]){
+    document.documentElement.style.setProperty("--kana", GLYPH_FACES[g]);
+    [...$("segGlyph").children].forEach(x => x.setAttribute("aria-pressed", x.dataset.g === g));
+  }
+})();
+
+renderChips();
+refreshDojo();
+restorePack();
+renderTiles("");
+sizeCanvas();
+</script>
+</body>
+</html>

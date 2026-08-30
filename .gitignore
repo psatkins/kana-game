@@ -1,0 +1,11 @@
+# Generated audio pack — regenerate with make_audio_pack.py
+audiopack/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# macOS
+.DS_Store
