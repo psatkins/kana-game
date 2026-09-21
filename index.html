@@ -463,7 +463,7 @@ body.showtags .face.front .grp{display:block}
   to{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}
 }
 /* in the tearoom the character is brushed on the scroll: sumi on paper */
-#scene.tearoom #promptKana{top:30%}
+#scene.tearoom #promptKana{top:34%}
 #scene.tearoom #promptKana b{
   font-size:clamp(70px,11vw,132px);
   color:#221E19;
@@ -1066,9 +1066,11 @@ const STYLE = {
      A glyph that slides off the edge cannot be read, and reading is the game. */
   ride:   {enemy:[-620, -170],prompt:[-250, 40],  sway:0.62, promptSway:0.20},
   dance:  {enemy:[-900, 120], prompt:[-280, 70],  sway:0.30, promptSway:0.14},
-  /* the scroll hangs in the alcove at negative z, so the brushed character
-     must sit in front of it or the tokonoma planes occlude it entirely */
-  tea:    {enemy:[-330, -330],prompt:[-30, -30],  sway:0,    promptSway:0},
+  /* The scroll hangs in the alcove at negative z, so the brushed character
+     must sit in front of it or the tokonoma planes occlude it entirely — and
+     the daimyo himself sits to one side, clear of the paper. The alcove is
+     painted behind the camera layer, so no depth will put him behind it. */
+  tea:    {enemy:[-330, -330],prompt:[-30, -30],  sway:0,    promptSway:0, offsetX:340},
   cannon: {enemy:[-880, 60],  prompt:[-320, 80],  sway:0,    promptSway:0}
 };
 function styleOf(){ return (TIERS[G.tier] && TIERS[G.tier].style) || "thrust"; }
@@ -2652,14 +2654,22 @@ function frame(ts){
     G.enemyZ = G.zFrom + (G.zTo - G.zFrom) * e;
     G.bob += dt;
     const sway = Math.sin(G.bob * 2.0) * 9, bobY = Math.sin(G.bob * 1.35) * 11;
-    enemyEl.style.transform =
-      "translate3d(" + sway.toFixed(1) + "px," + bobY.toFixed(1) + "px," + G.enemyZ.toFixed(1) + "px) scale(" + G.scale.toFixed(3) + ")";
     const env = envelope();
     const span = (env.enemy[1] - env.enemy[0]) || 1;
     const travel = Math.max(0, Math.min(1, (G.enemyZ - env.enemy[0]) / span));
     const kz = env.prompt[0] + (env.prompt[1] - env.prompt[0]) * travel;
     const arc = Math.sin(travel * Math.PI - Math.PI / 2);
     G.lateral = (env.sway || 0) * arc * 430;
+    /* An encounter may seat the figure off-centre — the daimyo must not stand
+       in front of the scroll the player is being asked to read. Keep him on
+       screen: a narrow window would otherwise crop him in half. */
+    const enemyDepth = 820 / Math.max(120, 820 - G.enemyZ);
+    const enemySafe = Math.max(0, (window.innerWidth / 2) / enemyDepth - 220 * G.scale);
+    const enemyX = Math.max(-enemySafe, Math.min(enemySafe, env.offsetX || 0)) +
+                   (env.sway ? G.lateral : sway);
+    enemyEl.style.transform =
+      "translate3d(" + enemyX.toFixed(1) + "px," + bobY.toFixed(1) +
+      "px," + G.enemyZ.toFixed(1) + "px) scale(" + G.scale.toFixed(3) + ")";
     /* clamp the character inside the window whatever its width, allowing for
        the fact that a nearer character projects wider */
     const depthScale = 820 / Math.max(120, 820 - kz);
@@ -2667,11 +2677,6 @@ function frame(ts){
     const promptX = Math.max(-halfSafe, Math.min(halfSafe, (env.promptSway || 0) * arc * 430));
     promptWrap.style.transform =
       "translate3d(" + promptX.toFixed(1) + "px,0," + kz.toFixed(1) + "px)";
-    if(env.sway){
-      enemyEl.style.transform =
-        "translate3d(" + G.lateral.toFixed(1) + "px," + bobY.toFixed(1) +
-        "px," + G.enemyZ.toFixed(1) + "px) scale(" + G.scale.toFixed(3) + ")";
-    }
     /* shake */
     if(G.shake > 0.002){
       G.shake = Math.max(0, G.shake - dt * 2.4);
