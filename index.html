@@ -649,6 +649,89 @@ body.showtags .face.front .grp{display:block}
 .rep-acts{display:flex;gap:12px;flex-wrap:wrap;margin-top:40px;padding-top:22px;border-top:1px solid var(--washi-3)}
 
 /* ==========================================================
+   KEIKO — the drill floor
+   The dojo grid teaches recognition: you turn a card and agree with it.
+   Nothing there ever asks you to produce an answer from nothing, which is
+   the one thing the duel demands. This is that practice with the stakes
+   taken out — no clock, no hit points, no death, and a way out on every
+   screen. Same washi, same ink; only the asking is new.
+   ========================================================== */
+#s-keiko{overflow-y:auto;display:none}
+#s-keiko.on{display:block}
+.keiko{max-width:780px;margin:0 auto;padding:clamp(22px,4vh,44px) clamp(18px,4vw,40px) 60px}
+.keiko-head{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  border-bottom:2px solid var(--sumi);padding-bottom:14px;
+}
+.kh-title{display:flex;align-items:baseline;gap:14px}
+.kh-title .big{font-family:var(--brush);font-size:clamp(40px,8vw,66px);line-height:.9;color:var(--sumi)}
+.kh-title .sub{display:flex;flex-direction:column;gap:3px}
+.kh-title .sub b{font-family:var(--mono);font-size:13px;letter-spacing:.28em;text-transform:uppercase}
+.kh-title .sub span{font-size:13px;color:var(--sumi-2);line-height:1.65;max-width:48ch;text-wrap:pretty}
+
+/* how far through the pass — a finish line, never a clock */
+.kprog{display:flex;align-items:center;gap:13px;margin-top:17px}
+.kprog .track{flex:1 1 auto;height:3px;background:var(--washi-3)}
+.kprog .track i{display:block;height:100%;width:0;background:var(--sumi);transition:width .3s ease}
+.kprog .ct{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--sumi-2);
+  font-variant-numeric:tabular-nums;
+}
+
+.kglyph{display:flex;align-items:center;justify-content:center;gap:20px;margin-top:clamp(16px,4vh,40px)}
+.kglyph b{
+  font-family:var(--kana);font-weight:400;font-size:clamp(104px,24vw,190px);
+  line-height:1.1;color:var(--sumi);
+}
+.spk.paper{border-color:var(--washi-3);background:rgba(255,255,255,.42);color:var(--sumi-2)}
+.spk.paper:hover{border-color:var(--sumi);color:var(--sumi)}
+
+#kChoices{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:clamp(16px,3.5vh,32px)}
+@media (min-width:640px){#kChoices{grid-template-columns:repeat(4,1fr)}}
+#kChoices[hidden],#kTypeWrap[hidden]{display:none}
+.kopt{
+  font-family:var(--mono);font-size:19px;letter-spacing:.07em;padding:17px 10px;
+  border:1px solid var(--washi-3);background:rgba(255,255,255,.42);color:var(--sumi);
+  cursor:pointer;border-radius:2px;
+  transition:background .14s ease,border-color .14s ease,color .14s ease,opacity .14s ease;
+}
+.kopt:hover:not(:disabled){border-color:var(--sumi);background:rgba(255,255,255,.72)}
+.kopt:disabled{cursor:default}
+.kopt.right{background:var(--jade);border-color:var(--jade);color:#F6EEDD}
+.kopt.wrong{background:var(--vermilion);border-color:var(--vermilion);color:#F6EEDD}
+.kopt.dim{opacity:.34}
+
+#kTypeWrap{display:flex;justify-content:center;margin-top:clamp(16px,3.5vh,32px)}
+#kType{
+  font-family:var(--mono);font-size:26px;letter-spacing:.24em;text-align:center;
+  width:min(320px,72vw);padding:15px 16px;border:1px solid var(--washi-3);
+  background:rgba(255,255,255,.5);color:var(--sumi);border-radius:2px;
+}
+#kType:focus{outline:0;border-color:var(--sumi);background:rgba(255,255,255,.72)}
+#kType.right{border-color:var(--jade);background:rgba(110,143,125,.16)}
+#kType.wrong{border-color:var(--vermilion);background:rgba(192,57,43,.10)}
+
+/* the verdict holds its own height so the glyph never jumps between rounds */
+#kVerdict{
+  min-height:82px;margin:18px 0 0;text-align:center;font-size:14px;line-height:1.7;
+  color:var(--sumi-2);display:flex;flex-direction:column;align-items:center;gap:9px;
+}
+#kVerdict .call{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase}
+#kVerdict .call.ok{color:var(--jade)}
+#kVerdict .call.no{color:var(--vermilion)}
+#kVerdict .was b{font-family:var(--mono);font-size:17px;color:var(--sumi);letter-spacing:.1em}
+#kVerdict .was em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--sumi-2)}
+
+.keiko h3{display:flex;align-items:baseline;gap:14px;font-weight:400;margin:38px 0 6px}
+.keiko h3 .jp{font-family:var(--brush);font-size:30px;line-height:1;color:var(--sumi)}
+.keiko h3 .en{
+  font-family:var(--mono);font-size:11px;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--sumi-2);
+}
+.keiko h3 + p{margin:0 0 16px;font-size:13.5px;color:var(--sumi-2);max-width:60ch;line-height:1.7}
+#kDone[hidden],#kPlay[hidden]{display:none}
+
+/* ==========================================================
    responsive + motion
    ========================================================== */
 @media (max-width:760px){
@@ -720,6 +803,7 @@ body.showtags .face.front .grp{display:block}
         </div>
         <div class="acts">
           <button class="btn dark tiny" id="btn-revealall">Reveal all</button>
+          <button class="btn dark" id="btn-keiko"><span class="jpx">稽古　</span>Drill</button>
           <button class="btn solid" id="btn-duel"><span class="jpx">決闘開始　</span>Begin Campaign</button>
         </div>
       </div>
@@ -790,6 +874,45 @@ body.showtags .face.front .grp{display:block}
         <span id="poolCount">0 characters selected</span><span id="creditFoot"></span>
         <span id="dojoHint"></span><span>Duel: type romaji · <kbd>enter</kbd> replays the spoken target · <kbd>esc</kbd> to withdraw</span>
       </footer>
+    </div>
+  </section>
+
+  <!-- ============ KEIKO (drill) ============ -->
+  <section class="screen paper" id="s-keiko">
+    <div class="keiko">
+      <div class="keiko-head">
+        <div class="kh-title">
+          <span class="big" id="kStageJp">選</span>
+          <span class="sub"><b id="kStageEn">Choose</b><span id="kStageNote"></span></span>
+        </div>
+        <button class="btn dark tiny" id="k-quit"><span class="jpx">道場へ戻る　</span>Return to Dojo</button>
+      </div>
+
+      <div class="kprog"><span class="track"><i id="kProgBar"></i></span><span class="ct" id="kProgText"></span></div>
+
+      <div id="kPlay">
+        <div class="kglyph">
+          <b id="kKana"></b>
+          <button class="spk paper" id="kHear" title="Hear this character" aria-label="Hear this character">🔊</button>
+        </div>
+        <div id="kChoices"></div>
+        <div id="kTypeWrap">
+          <input id="kType" type="text" autocomplete="off" autocorrect="off" autocapitalize="off"
+                 spellcheck="false" inputmode="latin" aria-label="Romaji for the character shown">
+        </div>
+        <div id="kVerdict"></div>
+      </div>
+
+      <div id="kDone" hidden>
+        <div class="tiles" id="kTiles"></div>
+        <h3><span class="jp">要復習</span><span class="en">Needs Review</span></h3>
+        <p id="kReviewNote"></p>
+        <div class="review" id="kReview"></div>
+        <div class="rep-acts">
+          <button class="btn dark" id="k-again"><span class="jpx">もう一度　</span>Drill Again</button>
+          <button class="btn dark" id="k-done-back"><span class="jpx">道場へ戻る　</span>Return to Dojo</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1818,8 +1941,13 @@ function buildPool(){
   });
   G.pool = out;
   $("poolCount").textContent = out.length + " character" + (out.length === 1 ? "" : "s") + " selected";
-  $("btn-duel").disabled = out.length < 4;
-  $("btn-duel").style.opacity = out.length < 4 ? .4 : 1;
+  /* Both the duel and the drill need enough characters to offer a choice
+     that is not the answer by elimination. */
+  const thin = out.length < 4;
+  ["btn-duel", "btn-keiko"].forEach(id => {
+    $(id).disabled = thin;
+    $(id).style.opacity = thin ? .4 : 1;
+  });
   if(typeof updateCoverage === "function") updateCoverage();
 }
 
@@ -1922,6 +2050,228 @@ function renderGrid(){
   if(ordered) renderOrdered(grid); else renderShuffled(grid);
 }
 function refreshDojo(){ buildPool(); renderGrid(); }
+
+/* ==========================================================
+   7b. KEIKO — the drill floor
+   One pass of the lesson pool by multiple choice, then the same pool
+   again by hand. Wrong costs nothing but the truth, and the voice speaks
+   only once an answer is committed: hearing "fu" before you answer would
+   hand over the very thing you are trying to recall. The dojo already
+   works this way — a card speaks when it is turned, not before.
+   ========================================================== */
+const K_STAGES = [
+  {jp:"選", en:"Choose",
+   note:"Read the character, then choose its romaji. Nothing is timed and nothing is lost."},
+  {jp:"書", en:"Write",
+   note:"The same characters, with no choices offered. Type the romaji — the duel's own verb."}
+];
+const K = {stage:0, deck:[], idx:0, item:null, answers:[], locked:false, done:false,
+           miss:new Map(), score:[0,0], size:0};
+
+function kOn(){ return $("s-keiko").classList.contains("on"); }
+function kShuffle(a){
+  const d = a.slice();
+  for(let i = d.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = d[i]; d[i] = d[j]; d[j] = t;
+  }
+  return d;
+}
+
+/* Near-misses teach; random wrong answers only pad the row. confusable()
+   already knows which mora the eye and ear run together, so the decoys come
+   from there first. Homophones are barred outright — お against を has no
+   right answer once the clip plays. */
+function kDecoys(it, n){
+  const seen = new Set([it.r, reading(it.r)]);
+  const out = [];
+  const push = x => {
+    if(seen.has(x.r) || seen.has(reading(x.r))) return;
+    seen.add(x.r); seen.add(reading(x.r)); out.push(x);
+  };
+  kShuffle(G.pool).forEach(x => { if(out.length < n && confusable(it, x)) push(x); });
+  kShuffle(G.pool).forEach(x => { if(out.length < n) push(x); });
+  return out;
+}
+
+function kStageHead(){
+  const st = K_STAGES[K.stage];
+  $("kStageJp").textContent = st.jp;
+  $("kStageEn").textContent = st.en;
+  $("kStageNote").textContent = st.note;
+}
+function kProgress(){
+  const p = K.size ? K.idx / K.size : 0;
+  $("kProgBar").style.width = (p * 100).toFixed(1) + "%";
+  $("kProgText").textContent =
+    Math.min(K.idx + 1, K.size) + " / " + K.size +
+    "   ·   " + (K.stage === 0 ? "PASS 1 OF 2" : "PASS 2 OF 2");
+}
+
+function kAsk(){
+  const it = K.deck[K.idx];
+  K.item = it; K.answers = answersFor(it); K.locked = false;
+  kProgress();
+  $("kKana").textContent = it.disp;
+  $("kVerdict").innerHTML = "";
+  const choosing = K.stage === 0;
+  $("kChoices").hidden = !choosing;
+  $("kTypeWrap").hidden = choosing;
+  if(choosing){
+    $("kChoices").innerHTML = kShuffle(kDecoys(it, 3).concat([it]))
+      .map(o => '<button class="kopt" type="button" data-r="' + o.r + '">' + o.r + '</button>')
+      .join("");
+  }else{
+    const f = $("kType");
+    f.value = ""; f.className = ""; f.disabled = false;
+    setTimeout(() => { try{ f.focus({preventScroll:true}); }catch(e){ f.focus(); } }, 0);
+  }
+}
+
+/* One answer, judged once. Right moves on by itself; wrong waits, because
+   the correct reading is the only thing on screen worth reading. */
+function kJudge(ok, chosen){
+  if(K.locked) return;
+  K.locked = true;
+  const it = K.item;
+  if(ok){
+    K.score[K.stage]++;
+  }else{
+    const rec = K.miss.get(it.key) || {item: it, n: 0};
+    rec.n++; K.miss.set(it.key, rec);
+  }
+  speakKana(it);
+
+  if(K.stage === 0){
+    [...$("kChoices").children].forEach(b => {
+      b.disabled = true;
+      if(b.dataset.r === it.r) b.classList.add("right");
+      else if(b.dataset.r === chosen) b.classList.add("wrong");
+      else b.classList.add("dim");
+    });
+  }else{
+    const f = $("kType");
+    f.disabled = true;
+    f.className = ok ? "right" : "wrong";
+    if(!ok && chosen) f.value = chosen;
+  }
+
+  const v = $("kVerdict");
+  const alts = G.alt && it.alt.length ? ' <em>· ' + it.alt.join(" · ") + '</em>' : "";
+  if(ok){
+    v.innerHTML = '<span class="call ok">Correct</span>' +
+                  '<span class="was">' + it.disp + ' = <b>' + it.r + '</b>' + alts + '</span>';
+    setTimeout(() => { if(kOn() && !K.done) kNext(); }, 800);
+  }else{
+    v.innerHTML = '<span class="call no">Not quite</span>' +
+                  '<span class="was">' + it.disp + ' = <b>' + it.r + '</b>' + alts + '</span>' +
+                  '<button class="btn dark tiny" id="kGo">Continue <kbd>enter</kbd></button>';
+    $("kGo").addEventListener("click", kNext);
+    setTimeout(() => { const g = $("kGo"); if(g) g.focus(); }, 0);
+  }
+}
+
+function kNext(){
+  if(K.done) return;
+  K.idx++;
+  if(K.idx < K.size) return kAsk();
+  if(K.stage === 0){                 // the easy pass is done; now say it unaided
+    K.stage = 1; K.idx = 0; K.deck = kShuffle(K.deck);
+    kStageHead();
+    return kAsk();
+  }
+  kFinish();
+}
+
+function kFinish(){
+  K.done = true;
+  if("speechSynthesis" in window) speechSynthesis.cancel();
+  $("kPlay").hidden = true;
+  $("kDone").hidden = false;
+  $("kStageJp").textContent = "終";
+  $("kStageEn").textContent = "Finished";
+  $("kStageNote").textContent =
+    "Both passes done. What is listed below is not failure — it is the shortlist.";
+  $("kProgBar").style.width = "100%";
+  $("kProgText").textContent = K.size + " / " + K.size + "   ·   COMPLETE";
+
+  const total = K.size * 2, right = K.score[0] + K.score[1];
+  $("kTiles").innerHTML = [
+    ["Chosen", K.score[0], " / " + K.size],
+    ["Written", K.score[1], " / " + K.size],
+    ["First time right", total ? Math.round((right / total) * 100) : 0, "%"]
+  ].map(t =>
+    '<div class="tile"><span class="k">' + t[0] + '</span>' +
+    '<span class="v">' + t[1] + '<em>' + t[2] + '</em></span></div>'
+  ).join("");
+
+  const bad = [...K.miss.values()].sort((a, b) => b.n - a.n).slice(0, 24);
+  if(!bad.length){
+    $("kReviewNote").textContent = "Nothing missed in either pass. Widen the lesson pool, or take these into the duel.";
+    $("kReview").innerHTML = '<p class="clean">CLEAN SHEET — every character, both passes.</p>';
+  }else{
+    $("kReviewNote").textContent = "Missed at least once. Turn these in the grid, then drill again.";
+    $("kReview").innerHTML = bad.map(r =>
+      '<div class="rv"><span class="k">' + r.item.disp + '</span>' +
+      '<span class="m"><b>' + r.item.r + '</b><span>' + r.n +
+      (r.n === 1 ? " miss" : " misses") + '</span></span></div>').join("");
+  }
+}
+
+function keikoStart(){
+  ac();
+  buildPool();
+  if(G.pool.length < 4) return;
+  K.deck = kShuffle(G.pool);
+  K.size = K.deck.length;
+  K.stage = 0; K.idx = 0; K.done = false;
+  K.miss = new Map(); K.score = [0, 0];
+  $("kPlay").hidden = false;
+  $("kDone").hidden = true;
+  kStageHead();
+  show("s-keiko");
+  kAsk();
+}
+function keikoQuit(){
+  K.done = true;
+  if("speechSynthesis" in window) speechSynthesis.cancel();
+  show("s-dojo");
+  refreshDojo();
+}
+
+$("kChoices").addEventListener("click", e => {
+  const b = e.target.closest(".kopt");
+  if(!b || K.locked) return;
+  kJudge(b.dataset.r === K.item.r, b.dataset.r);
+});
+$("kHear").addEventListener("click", () => { if(K.item) speakKana(K.item); });
+$("kType").addEventListener("input", () => {
+  if(K.locked) return;
+  const f = $("kType");
+  const raw = f.value;
+  let v = raw.toLowerCase().replace(/[^a-z]/g, "");
+  if(v.length > 6) v = v.slice(0, 6);
+  f.value = v;
+  /* A Japanese input source turns "ka" into か before it reaches us; say so
+     rather than letting the round look like a wrong answer. */
+  if(raw && /[^a-zA-Z]/.test(raw)){
+    $("kVerdict").innerHTML =
+      '<span class="call no">Input mode</span>' +
+      '<span class="was">Your keyboard is composing kana. Switch it to English (ABC) to type romaji.</span>';
+  }
+  if(v && K.answers.indexOf(v) >= 0) kJudge(true, v);
+});
+$("kType").addEventListener("keydown", e => {
+  if(e.key !== "Enter" || K.locked) return;
+  e.preventDefault();
+  const v = $("kType").value;
+  if(!v) return;
+  kJudge(K.answers.indexOf(v) >= 0, v);
+});
+$("btn-keiko").addEventListener("click", keikoStart);
+$("k-quit").addEventListener("click", keikoQuit);
+$("k-done-back").addEventListener("click", keikoQuit);
+$("k-again").addEventListener("click", keikoStart);
 
 /* ==========================================================
    8. SCREENS
@@ -2554,6 +2904,7 @@ replayBtn.addEventListener("click", e => {
   setTimeout(focusInput, 0);
 });
 window.addEventListener("keydown", e => {
+  if(e.key === "Escape" && kOn()) return keikoQuit();
   if(e.key === "Escape" && G.running){ G.withdrawn = true; endGame(false); }
   if(e.key === "Enter" && G.phase === "offense" && G.required){
     e.preventDefault();
