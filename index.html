@@ -2244,7 +2244,9 @@ function defenseHit(){
   return parry();
 }
 
-const DANCE_SECONDS = 30;
+/* Long enough to read as a genuine rest and to lull the hands off the
+   keys, short enough that it never reads as the game having hung. */
+const DANCE_SECONDS = 10;
 function danceInterlude(){
   G.phase = "perform";
   fanEl.hidden = true;
@@ -2574,6 +2576,12 @@ function endGame(won){
   const attempts = s.correct + s.errors;
   const acc = attempts ? Math.round((s.correct / attempts) * 100) : 0;
   const avg = s.correct ? (s.time / s.correct) : 0;
+  /* The ladder shown in the dojo and on the tier cards never counts the
+     dancer — naming her in advance is the whole trick. Once she has actually
+     been met there is nothing left to spoil, so she joins the tally here. A
+     player who fell before her still sees the ladder they were promised. */
+  const reached = Math.min(G.tier + (won ? 0 : 1), TIERS.length);
+  const hiddenMet = TIERS.slice(0, reached).filter(t => t.hidden).length;
 
   $("verdictJp").textContent = won ? "勝" : "敗";
   $("verdictJp").classList.toggle("loss", !won);
@@ -2596,7 +2604,7 @@ function endGame(won){
     ["Accuracy", acc, "%"],
     ["Avg. per character", avg.toFixed(2), "s"],
     ["Characters cleared", s.correct, ""],
-    ["Opponents reached", Math.min(G.tier + (won ? 0 : 1), TIERS.length), " / " + TIERS.length]
+    ["Opponents reached", reached, " / " + (LADDER_COUNT + hiddenMet)]
   ].map(t =>
     '<div class="tile"><span class="k">' + t[0] + '</span>' +
     '<span class="v">' + t[1] + (t[2] ? '<em>' + t[2] + '</em>' : '') + '</span></div>'
