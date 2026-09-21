@@ -12,10 +12,24 @@ A single-file browser game for learning to read hiragana and katakana.
 
 ## Modes
 
-Kana are drawn either in 五十音図 table order or shuffled, in hiragana,
-katakana, or both. You answer by reading left-to-right, in gojūon order, or by
-listening. Glyphs render as brush (筆), handwriting (手書き), or Mincho print
-(明朝), so a kana learned in one hand doesn't become unrecognizable in another.
+The dojo is the grid. Kana are drawn either in 五十音図 table order or
+shuffled, in hiragana, katakana, or both, and a card speaks when you turn it.
+Glyphs render as brush (筆), handwriting (手書き), or Mincho print (明朝), so a
+kana learned in one hand doesn't become unrecognizable in another.
+
+稽古 Drill is the same pool with the stakes taken out. Twenty characters by
+multiple choice, then the same twenty typed from memory, then an account of
+what you missed — no clock, no hit points, and a way out on every screen.
+Turning a card only ever asks you to agree with it; this is the part that asks
+you to produce the answer from nothing, which is the one thing the duel
+demands. The wrong answers offered are near-misses rather than filler: the
+game already knows which mora the eye and ear run together, and draws the
+decoys from exactly those. Half of each draw leans on the characters you have
+got wrong before, and a character leaves that list by being typed correctly
+with no choices in front of it.
+
+The duel is where it is tested. You answer by reading left-to-right, in gojūon
+order, or by listening, against a ladder of opponents who do not wait.
 
 ## Audio
 
