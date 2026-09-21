@@ -2066,7 +2066,7 @@ const K_STAGES = [
    note:"The same characters, with no choices offered. Type the romaji — the duel's own verb."}
 ];
 const K = {stage:0, deck:[], idx:0, item:null, answers:[], locked:false, done:false,
-           miss:new Map(), score:[0,0], size:0};
+           miss:new Map(), score:[0,0], size:0, from:0};
 
 function kOn(){ return $("s-keiko").classList.contains("on"); }
 function kShuffle(a){
@@ -2094,11 +2094,49 @@ function kDecoys(it, n){
   return out;
 }
 
+/* A pass is capped so that a sitting ends. Everything (both scripts) is 208
+   characters — 416 questions across two passes, which is a homework set, not
+   a drill. */
+const K_CAP = 20;
+
+/* What this browser has got wrong before, so that drilling twice is not the
+   same drill twice. Kept beside the other saved settings; a character earns
+   its way back out by being typed correctly in the second pass. */
+function kLoadMisses(){
+  try{ return new Map(Object.entries(JSON.parse(load("drillmiss") || "{}"))); }
+  catch(e){ return new Map(); }
+}
+function kSaveMisses(m){
+  try{ save("drillmiss", JSON.stringify(Object.fromEntries(m))); }catch(e){}
+}
+function kNoteMiss(key, d){
+  const log = kLoadMisses();
+  const n = (log.get(key) || 0) + d;
+  if(n > 0) log.set(key, n); else log.delete(key);
+  kSaveMisses(log);
+}
+
+/* Half the slots go to the weakest characters, worst first; the rest are
+   drawn fresh so nothing quietly drops out of rotation. */
+function kDraw(){
+  if(G.pool.length <= K_CAP) return kShuffle(G.pool);
+  const log = kLoadMisses();
+  const weak = G.pool.filter(i => log.get(i.key))
+                     .sort((a, b) => log.get(b.key) - log.get(a.key))
+                     .slice(0, Math.floor(K_CAP / 2));
+  const taken = new Set(weak.map(i => i.key));
+  const rest = kShuffle(G.pool.filter(i => !taken.has(i.key)));
+  return kShuffle(weak.concat(rest.slice(0, K_CAP - weak.length)));
+}
+
 function kStageHead(){
   const st = K_STAGES[K.stage];
   $("kStageJp").textContent = st.jp;
   $("kStageEn").textContent = st.en;
-  $("kStageNote").textContent = st.note;
+  $("kStageNote").textContent = st.note +
+    (K.from > K.size
+      ? "  " + K.size + " drawn from the " + K.from + " in your pool, leaning on what you have missed before."
+      : "");
 }
 function kProgress(){
   const p = K.size ? K.idx / K.size : 0;
@@ -2136,9 +2174,13 @@ function kJudge(ok, chosen){
   const it = K.item;
   if(ok){
     K.score[K.stage]++;
+    /* Typed correctly without the choices in front of you: that is the pass
+       that earns a character its way back off the list. */
+    if(K.stage === 1) kNoteMiss(it.key, -1);
   }else{
     const rec = K.miss.get(it.key) || {item: it, n: 0};
     rec.n++; K.miss.set(it.key, rec);
+    kNoteMiss(it.key, 1);
   }
   speakKana(it);
 
@@ -2222,8 +2264,9 @@ function keikoStart(){
   ac();
   buildPool();
   if(G.pool.length < 4) return;
-  K.deck = kShuffle(G.pool);
+  K.deck = kDraw();
   K.size = K.deck.length;
+  K.from = G.pool.length;
   K.stage = 0; K.idx = 0; K.done = false;
   K.miss = new Map(); K.score = [0, 0];
   $("kPlay").hidden = false;
