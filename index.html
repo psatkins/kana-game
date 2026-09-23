@@ -423,7 +423,9 @@ body.showtags .face.front .grp{display:block}
 /* the shogun's volley: three characters abreast */
 #volley{
   position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);
-  display:flex;gap:clamp(18px,4vw,54px);pointer-events:none;
+  /* row-reverse so volley[0] — the one cleared first — sits on the RIGHT,
+     matching the right-to-left order everything else is now read in. */
+  display:flex;flex-direction:row-reverse;gap:clamp(18px,4vw,54px);pointer-events:none;
 }
 #volley[hidden]{display:none}
 
@@ -822,7 +824,7 @@ body.showtags .face.front .grp{display:block}
           <button data-s="kata" aria-pressed="false">カタカナ</button>
           <button data-s="both" aria-pressed="false">Both</button>
         </span>
-        <button class="chip" id="preset-basic"><span class="jp">五十音</span> Kana 48</button>
+        <button class="chip" id="preset-basic"><span class="jp">五十音</span> Kana 46</button>
         <button class="chip" id="preset-all"><span class="jp">全</span> Everything</button>
         <button class="btn dark tiny" id="btn-settings" aria-expanded="false" aria-controls="settings">設定 Settings ▾</button>
       </div>
@@ -831,11 +833,11 @@ body.showtags .face.front .grp{display:block}
         <div class="chipset">
           <span class="lbl">Strike phase</span>
           <span class="seg" id="segOffense">
-            <button data-o="ltr" aria-pressed="true">左→右 Read in order</button>
+            <button data-o="ltr" aria-pressed="true">右→左 Read in order</button>
             <button data-o="gojuon" aria-pressed="false">五十音順 Gojūon</button>
             <button data-o="listen" aria-pressed="false">聞き取り Listen</button>
           </span>
-          <label class="switch"><input type="checkbox" id="hitSpeakToggle" checked> Speak each character after you hit it</label>
+          <label class="switch"><input type="checkbox" id="hitSpeakToggle" checked> Speak each character once it is answered</label>
           <label class="switch"><input type="checkbox" id="altToggle" checked> Accept Kunrei-shiki as well as Hepburn (si · ti · tu · hu · zi · sya…)</label>
         </div>
         <div class="chipset">
@@ -1037,7 +1039,12 @@ const ROWS = [
   {g:"m",  jp:"ま", label:"m-",  items:[["ま","マ","ma"],["み","ミ","mi"],["む","ム","mu"],["め","メ","me"],["も","モ","mo"]]},
   {g:"y",  jp:"や", label:"y-",  items:[["や","ヤ","ya"],["ゆ","ユ","yu"],["よ","ヨ","yo"]]},
   {g:"r",  jp:"ら", label:"r-",  items:[["ら","ラ","ra"],["り","リ","ri"],["る","ル","ru"],["れ","レ","re"],["ろ","ロ","ro"]]},
-  {g:"w",  jp:"わ", label:"わ行 w-", items:[["わ","ワ","wa"],["ゐ","ヰ","wi"],["ゑ","ヱ","we"],["を","ヲ","wo"]]},
+  {g:"w",  jp:"わ", label:"わ行 w-", items:[["わ","ワ","wa"],["を","ヲ","wo"]]},
+  /* ゐ and ゑ are not taught in a first-year course and have not been in
+     ordinary use since 1946, but they are exactly what a reader of premodern
+     texts needs — so they come out of the default set without leaving the
+     game. Dropping them is what makes the basic set 46 rather than 48. */
+  {g:"old", jp:"ゐゑ", label:"歴史的仮名 historical", items:[["ゐ","ヰ","wi"],["ゑ","ヱ","we"]]},
   {g:"nn", jp:"ん", label:"n",   items:[["ん","ン","n"]]},
   {g:"daku",jp:"濁音", label:"g z d b p", items:[
     ["が","ガ","ga"],["ぎ","ギ","gi"],["ぐ","グ","gu"],["げ","ゲ","ge"],["ご","ゴ","go"],
@@ -1973,7 +1980,7 @@ function syncChips(){
   [...$("chips").children].forEach((b, i) => b.setAttribute("aria-pressed", G.groups.has(ROWS[i].g)));
 }
 
-const GROUP_TAG = {a:"A", k:"K", s:"S", t:"T", n:"N", h:"H", m:"M",
+const GROUP_TAG = {a:"A", k:"K", s:"S", t:"T", n:"N", h:"H", m:"M", old:"OLD",
                    y:"Y", r:"R", w:"W", nn:"N", daku:"DAKUTEN", yoon:"YOON"};
 function makeCard(it){
   const card = document.createElement("button");
@@ -2401,7 +2408,7 @@ function updateTargetHint(){
   const num = Math.min(G.nodeIdx + 1, G.order.length || 3);
   const pre = "Target " + num + " of 3 — ";
   hintLine.textContent =
-    G.offenseMode === "ltr"    ? pre + "read and strike left to right" :
+    G.offenseMode === "ltr"    ? pre + "read and strike right to left" :
     G.offenseMode === "gojuon" ? pre + "strike in gojūon order — read all three first" :
     targetAidOn()              ? pre + "strike the ringed character" :
                                  pre + "type the one you hear · Enter to replay";
@@ -2599,7 +2606,7 @@ function nextDefense(){
     promptWrap.style.opacity = 0;
     volleyEl.hidden = false;
     renderVolley();
-    hintLine.textContent = "Three at once — clear them left to right";
+    hintLine.textContent = "Three at once — clear them right to left";
   }else{
     G.volley = []; volleyEl.hidden = true;
     const it = pickItem();
@@ -2629,7 +2636,7 @@ function defenseHit(){
     setPrompt(G.volley[G.volleyIdx]);
     sfxParry();
     const r = volleyEl.getBoundingClientRect();
-    addSparks(r.left + r.width * (0.2 + 0.3 * G.volleyIdx), r.top + r.height / 2, 14,
+    addSparks(r.left + r.width * (0.8 - 0.3 * G.volleyIdx), r.top + r.height / 2, 14,
               {color:"#C9A227", speed:260, g:200, max:0.5, r:2});
     return;
   }
@@ -2723,6 +2730,10 @@ function parry(){
   G.offTime = TIERS[G.tier].off * (1 - STRIKE_URGENCY * prog);
   setZ(G.enemyZ, G.stunZ, 0.45, "out");
   G.phase = "stun";
+  /* The strike phase has always spoken each character once it was hit; the
+     parry never spoke at all, so half of every round passed in silence.
+     Same rule as the strike: after the answer is committed, never before. */
+  if(G.speakOnHit) speakKana(G.required, false);
   hintLine.textContent = "Parried — press the advantage";
   setTimeout(() => { bufferBox.classList.remove("good"); if(G.running) startOffense(); }, 520);
 }
@@ -2752,6 +2763,7 @@ function failDefense(){
   addSparks(CW/2, CH*0.45, 22, {color:"#8E2A20", speed:300, g:520});
   hintLine.textContent = (styleOf() === "tea" ? "The poison spreads — it was 「" : "Struck — it was 「") +
     G.required.disp + "」= " + G.required.r;
+  if(G.speakOnHit) speakKana(G.required, false);
   if(G.hp <= 0){ G.phase = "over"; setTimeout(() => endGame(false), 1100); return; }
   G.phase = "recover";
   setZ(G.enemyZ, -980, 0.55, "out");
@@ -2782,7 +2794,8 @@ function startOffense(){
   if(G.offenseMode === "gojuon"){
     G.order = [0,1,2].sort((x, y) => G.nodes[x].it.ord - G.nodes[y].it.ord);
   }else if(G.offenseMode === "ltr"){
-    G.order = [0,1,2].sort((x, y) => NODE_POS[x][0] - NODE_POS[y][0]);
+    /* Right to left, the way 縦書き columns are read. */
+    G.order = [0,1,2].sort((x, y) => NODE_POS[y][0] - NODE_POS[x][0]);
   }else{
     G.order = [0,1,2].sort(() => Math.random() - 0.5);
   }
@@ -2854,6 +2867,7 @@ function missTarget(){
   markError(G.required);
   breakCombo();
   hintLine.textContent = "He recovers — 「" + G.required.disp + "」was " + G.required.r;
+  if(G.speakOnHit) speakKana(G.required, false);
   sfxBad();
   G.phase = "recover";
   clearNodes();
