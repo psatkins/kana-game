@@ -1182,6 +1182,12 @@ const TIERS = [
    style:"cannon", accent:"#C9A227",
    line:"He did not become shōgun by fighting fair. The guns are already loaded."}
 ];
+/* ======== TEMPORARY — DELETE THIS LINE TO RESTORE THE LADDER ========
+   Promotes 分福茶釜 to the first encounter so it can be looked at without
+   playing through four others. Nothing else depends on the array's order. */
+TIERS.unshift(TIERS.splice(TIERS.findIndex(t => t.key === "chagama"), 1)[0]);
+/* ==================================================================== */
+
 /* the ladder the player is shown — the hidden one is not counted */
 const LADDER_COUNT = TIERS.filter(t => !t.hidden).length;
 const MAX_HP = 5;
@@ -2844,7 +2850,7 @@ function failDefense(){
    yokai whose eye you cannot see is just a shadow. */
 const NODE_POS = [[10, 22], [50, 22], [90, 22]];
 function startOffense(){
-  G.phase = "offense";
+  G.phase = "between";
   setPhaseTag("strike");
   promptWrap.style.opacity = 0;
   fadeStrokes();          // clear the parry sweep before anything must be read
@@ -2874,12 +2880,15 @@ function startOffense(){
     G.order = [0,1,2].sort(() => Math.random() - 0.5);
   }
   G.nodeIdx = 0;
-  setTimeout(() => { if(G.running && G.phase === "offense") nextTarget(); }, 340);
+  setTimeout(() => { if(G.running && G.phase === "between") nextTarget(); }, 340);
 }
 
 function nextTarget(){
   if(!G.running) return;
   if(G.nodeIdx >= G.order.length) return finishOffense();
+  /* Whatever was typed while the last one burned off, rescued before
+     setPrompt() clears the field to make room for this target. */
+  const ahead = bufferInput.value;
   G.phase = "offense";
   fadeStrokes();
   const n = G.nodes[G.order[G.nodeIdx]];
@@ -2893,6 +2902,7 @@ function nextTarget(){
   syncTargetAid();
   startTimer(G.offTime || TIERS[G.tier].off);
   focusInput();
+  if(ahead){ bufferInput.value = ahead; onInput(); }
 }
 
 function strike(){
@@ -2995,7 +3005,8 @@ function clearIME(){
   if(w && !w.hidden) w.hidden = true;
 }
 function onInput(){
-  if(G.phase !== "defense" && G.phase !== "offense"){ bufferInput.value = ""; return; }
+  if(G.phase !== "defense" && G.phase !== "offense" &&
+     G.phase !== "between" && G.phase !== "stun"){ bufferInput.value = ""; return; }
   const raw = bufferInput.value;
   if(raw && /[^a-zA-Z]/.test(raw)) flagIME();
   let v = raw.toLowerCase().replace(/[^a-z]/g, "");
@@ -3003,6 +3014,10 @@ function onInput(){
   bufferInput.value = v;
   G.buffer = v;
   renderTiles(v);
+  /* Someone reading well is already typing the next one while the last is
+     still burning off. Those keystrokes used to be wiped on the way in;
+     hold them instead and judge them the moment the next target is live. */
+  if(G.phase === "between" || G.phase === "stun") return;
   if(!v) return;
   if(G.answers.indexOf(v) >= 0){
     bufferInput.value = ""; G.buffer = "";
