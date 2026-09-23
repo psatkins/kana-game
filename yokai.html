@@ -1174,9 +1174,9 @@ const TIERS = [
    style:"dance", hidden:true, accent:"#C9A227",
    line:"An interlude. A dancer is brought in to ease the evening. Rest your hands."},
 
-  {key:"daimyo", jp:"大名", en:"Daimyō", hp:11, def:4.8, off:2.9,
+  {key:"chagama", jp:"分福茶釜", en:"Bunbuku Chagama", hp:11, def:4.8, off:2.9,
    style:"tea", scene:"tearoom", accent:"#6E8F7D",
-   line:"No blades in the tearoom. He asks only that you read the scroll in the tokonoma."},
+   line:"Set on the fire it grew a head, four feet and a tail, and would not be a kettle again. It has agreed to sit still while the water heats, and asks only that you read the scroll while it does."},
 
   {key:"shogun", jp:"将軍", en:"Shōgun", hp:14, def:4.2, off:2.2,
    style:"cannon", accent:"#C9A227",
@@ -1324,6 +1324,41 @@ function silhouette(kind){
       <path d="M72 164 q-14 -22 -4 -34 q12 10 14 30 z"/>
     </g>
     ${eyes}<path d="M200 212 l26 -5 l0 9 l-26 3 z"/><path d="M240 207 l24 5 l0 8 l-24 -3 z"/></g>
+  </svg>`;
+
+  /* A kettle that stopped being one. The silhouette has to read as crockery
+     first and animal second — round body, lid, handle — so the tail and the
+     four feet do the telling. It keeps the blinking pale eyes the one-eyed
+     boy established: this is a creature that got caught, not a threat. */
+  if(kind === "chagama") return `
+  <svg viewBox="0 0 440 560" role="img" aria-label="Tanuki tea kettle, lid askew">
+    <g fill="${body}">
+      <path d="M322 424 q82 -10 100 -76 q10 -42 -18 -60 q-2 46 -32 72 q-26 20 -54 22 z"/>
+      <path d="M104 398 q0 -88 116 -88 q116 0 116 88 q0 76 -116 76 q-116 0 -116 -76 z"/>
+      <path d="M134 460 q16 32 -6 42 q-26 4 -24 -20 z"/>
+      <path d="M306 460 q-16 32 6 42 q26 4 24 -20 z"/>
+      <path d="M186 478 h26 v36 h-26 z"/><path d="M228 478 h26 v36 h-26 z"/>
+    </g>
+    <path d="M124 302 q96 -202 192 0" fill="none" stroke="#584C3D" stroke-width="13" stroke-linecap="round"/>
+    <ellipse cx="220" cy="310" rx="95" ry="21" fill="#584C3D"/>
+    <ellipse cx="220" cy="314" rx="78" ry="15" fill="#100D0A"/>
+    <g transform="rotate(-26 120 296)">
+      <ellipse cx="120" cy="296" rx="50" ry="15" fill="#6A5B48"/>
+      <ellipse cx="120" cy="288" rx="12" ry="9" fill="#6A5B48"/>
+    </g>
+    <path d="M132 374 q-14 -36 16 -62" fill="none" stroke="#6A5B48" stroke-width="7"
+          stroke-linecap="round" opacity=".5"/>
+    <g fill="${body}">
+      <circle cx="220" cy="266" r="52"/>
+      <ellipse cx="182" cy="228" rx="19" ry="22" transform="rotate(-20 182 228)"/>
+      <ellipse cx="258" cy="228" rx="19" ry="22" transform="rotate(20 258 228)"/>
+      <path d="M207 288 q13 22 26 0 q-13 10 -26 0 z"/>
+    </g>
+    <ellipse class="yeye" cx="201" cy="261" rx="15" ry="15" fill="#F2EADA"/>
+    <ellipse class="yeye" cx="239" cy="261" rx="15" ry="15" fill="#F2EADA"/>
+    <circle cx="202" cy="263" r="6.5" fill="#0A0C10"/>
+    <circle cx="240" cy="263" r="6.5" fill="#0A0C10"/>
+    <path d="M256 202 q30 -24 50 -6 q-18 26 -50 6 z" fill="#7E9468"/>
   </svg>`;
 
   if(kind === "daimyo") return `
@@ -2641,7 +2676,7 @@ function nextDefense(){
     hintLine.textContent =
       st === "arrow" ? "It is small when it leaves the bow — read it early" :
       st === "ride"  ? "He crosses fast — read it as it passes" :
-      st === "tea"   ? "Read the scroll in the tokonoma" :
+      st === "tea"   ? "It sits still. Read the scroll in the alcove" :
       st === "dance" && !G.revealed ? "An interlude. Read at your leisure." :
                        "Say its name before it reaches you";
   }
@@ -2795,7 +2830,7 @@ function failDefense(){
   addStroke(-40, CH * 0.18, CW + 40, CH * 0.78,
             {w:26, color:"#C0392B", glow:"rgba(192,57,43,.95)", max:1.3});
   addSparks(CW/2, CH*0.45, 22, {color:"#8E2A20", speed:300, g:520});
-  hintLine.textContent = (styleOf() === "tea" ? "The lamp gutters — it was 「" : "It slips past you — it was 「") +
+  hintLine.textContent = (styleOf() === "tea" ? "The kettle sings on — it was 「" : "It slips past you — it was 「") +
     G.required.disp + "」= " + G.required.r;
   if(G.speakOnHit) speakKana(G.required, false);
   if(G.hp <= 0){ G.phase = "over"; setTimeout(() => endGame(false), 1100); return; }
