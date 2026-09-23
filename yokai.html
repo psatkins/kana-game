@@ -1182,12 +1182,6 @@ const TIERS = [
    style:"cannon", accent:"#C9A227",
    line:"He did not become shōgun by fighting fair. The guns are already loaded."}
 ];
-/* ======== TEMPORARY — DELETE THIS LINE TO RESTORE THE LADDER ========
-   Promotes 分福茶釜 to the first encounter so it can be looked at without
-   playing through four others. Nothing else depends on the array's order. */
-TIERS.unshift(TIERS.splice(TIERS.findIndex(t => t.key === "chagama"), 1)[0]);
-/* ==================================================================== */
-
 /* the ladder the player is shown — the hidden one is not counted */
 const LADDER_COUNT = TIERS.filter(t => !t.hidden).length;
 const MAX_HP = 5;
