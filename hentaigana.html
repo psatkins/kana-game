@@ -100,10 +100,15 @@ button{font:inherit;color:inherit}
   mix-blend-mode:multiply;opacity:.35;
 }
 .title-stack{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:26px;padding:24px}
+/* Seven characters do not fit down one column, and shrinking them to make
+   them fit makes a title that looks apologetic. Broken over two columns
+   instead, which is how the spine of a book carries a long title — and in
+   vertical-rl the second column falls to the LEFT of the first, as it
+   should. */
 .vtitle{
   writing-mode:vertical-rl;font-family:var(--brush);
-  font-size:clamp(56px,11vmin,116px);line-height:1.04;letter-spacing:.1em;
-  margin:0;color:#F4ECD9;
+  font-size:clamp(46px,9vmin,92px);line-height:1.5;letter-spacing:.1em;
+  margin:0;color:#F4ECD9;text-align:start;
   text-shadow:0 0 26px rgba(0,0,0,.85), 0 2px 0 rgba(0,0,0,.6);
 }
 .romline{
@@ -1018,25 +1023,6 @@ body.showtags .face.front .grp{display:block}
 .fuda.missed{border-color:var(--vermilion);box-shadow:0 0 0 3px rgba(192,57,43,.35),0 5px 14px rgba(60,46,26,.26)}
 
 /* ==========================================================
-   FURIGANA
-   The class is three weeks into hiragana and none of the way into kanji,
-   so every kanji in the interface carries its reading. This is the one
-   gloss they can actually use — and it makes the chrome practice rather
-   than an obstacle. Sized small and dimmed so it never competes with the
-   character being taught.
-   ========================================================== */
-ruby{ruby-position:over;-webkit-ruby-position:before}
-rt{
-  font-family:var(--kana);font-size:.42em;font-weight:400;line-height:1.1;
-  letter-spacing:.02em;opacity:.62;user-select:none;text-align:center;
-}
-/* the vertical rail and title set their ruby alongside, not above */
-.vtitle rt,.rail h2 rt{font-size:.3em;letter-spacing:.06em;opacity:.55}
-.btn rt,.chip rt{font-size:.5em;opacity:.6}
-.tc .jp rt{font-size:.3em;opacity:.65}
-.who b rt{font-size:.44em;opacity:.6}
-
-/* ==========================================================
    responsive + motion
    ========================================================== */
 @media (max-width:760px){
@@ -1085,10 +1071,10 @@ rt{
   <section class="screen on" id="s-title">
     <div class="disc" aria-hidden="true"></div>
     <div class="title-stack">
-      <h1 class="vtitle">変体仮名</h1>
+      <h1 class="vtitle">変体仮名<br>歌留多</h1>
       <p class="romline">Hentaigana Karuta</p>
       <p class="tag">The reader calls a syllable. Find the hand that writes it, before the hand opposite does.</p>
-      <button class="btn big" id="btn-enter"><span class="jpx"><ruby>道<rt>どう</rt></ruby><ruby>場<rt>じょう</rt></ruby>へ<ruby>入<rt>はい</rt></ruby>る　</span>Enter the Dojo</button>
+      <button class="btn big" id="btn-enter"><span class="jpx">稽古場へ　</span>Enter the Practice Floor</button>
       <p class="fine">Sound on · 285 forms, from the NINJAL standard set</p>
     </div>
   </section>
@@ -1096,7 +1082,7 @@ rt{
   <!-- ============ DOJO ============ -->
   <section class="screen paper" id="s-dojo">
     <aside class="rail">
-      <h2><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby><ruby>場<rt>ば</rt></ruby></h2>
+      <h2>稽古場</h2>
       <p class="rail-en">Practice Floor</p>
       <div class="seal" aria-hidden="true">臨</div>
     </aside>
@@ -1108,10 +1094,10 @@ rt{
         </div>
         <div class="acts">
           <button class="btn dark tiny" id="btn-revealall">Reveal all</button>
-          <button class="btn dark tiny" id="btn-record"><span class="jpx"><ruby>記<rt>き</rt></ruby><ruby>録<rt>ろく</rt></ruby>　</span>Record</button>
-          <button class="btn dark" id="btn-keiko"><span class="jpx"><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby>　</span>Drill</button>
-          <button class="btn solid" id="btn-duel"><span class="jpx"><ruby>並<rt>なら</rt></ruby>び　</span>Side by Side</button>
-          <button class="btn solid" id="btn-facing"><span class="jpx"><ruby>対<rt>たい</rt></ruby><ruby>面<rt>めん</rt></ruby>　</span>Facing</button>
+          <button class="btn dark tiny" id="btn-record"><span class="jpx">記録　</span>Record</button>
+          <button class="btn dark" id="btn-keiko"><span class="jpx">稽古　</span>Drill</button>
+          <button class="btn solid" id="btn-duel"><span class="jpx">並び　</span>Side by Side</button>
+          <button class="btn solid" id="btn-facing"><span class="jpx">対面　</span>Facing</button>
           <button class="btn solid queen" id="btn-queen"><span class="jpx">クイーン　</span>The Queen</button>
         </div>
       </div>
@@ -1122,22 +1108,22 @@ rt{
       </div>
       <div class="chipset">
         <span class="seg" id="segDojo">
-          <button data-d="ordered" aria-pressed="true"><ruby>音<rt>おん</rt></ruby><ruby>順<rt>じゅん</rt></ruby> By mora</button>
+          <button data-d="ordered" aria-pressed="true">音順 By mora</button>
           <button data-d="shuffle" aria-pressed="false">シャッフル Shuffle</button>
         </span>
-        <button class="chip" id="preset-basic"><span class="jp"><ruby>手<rt>て</rt></ruby><ruby>始<rt>はじ</rt></ruby>め</span> A start</button>
-        <button class="chip" id="preset-all"><span class="jp"><ruby>全<rt>ぜん</rt></ruby></span> Everything</button>
-        <button class="btn dark tiny" id="btn-settings" aria-expanded="false" aria-controls="settings"><ruby>設<rt>せっ</rt></ruby><ruby>定<rt>てい</rt></ruby> Settings ▾</button>
+        <button class="chip" id="preset-basic"><span class="jp">手始め</span> A start</button>
+        <button class="chip" id="preset-all"><span class="jp">全</span> Everything</button>
+        <button class="btn dark tiny" id="btn-settings" aria-expanded="false" aria-controls="settings">設定 Settings ▾</button>
       </div>
 
       <div id="settings" hidden>
         <div class="chipset">
           <span class="lbl">Sealing phase</span>
           <span class="seg" id="segOffense">
-            <button data-o="choose" aria-pressed="true"><ruby>選<rt>えら</rt></ruby>ぶ Hear &amp; click</button>
-            <button data-o="ltr" aria-pressed="false"><ruby>右<rt>みぎ</rt></ruby>→<ruby>左<rt>ひだり</rt></ruby> Read in order</button>
-            <button data-o="gojuon" aria-pressed="false"><ruby>五<rt>ご</rt></ruby><ruby>十<rt>じゅう</rt></ruby><ruby>音<rt>おん</rt></ruby><ruby>順<rt>じゅん</rt></ruby> Gojūon</button>
-            <button data-o="listen" aria-pressed="false"><ruby>聞<rt>き</rt></ruby>き<ruby>取<rt>と</rt></ruby>り Listen</button>
+            <button data-o="choose" aria-pressed="true">選ぶ Hear &amp; click</button>
+            <button data-o="ltr" aria-pressed="false">右→左 Read in order</button>
+            <button data-o="gojuon" aria-pressed="false">五十音順 Gojūon</button>
+            <button data-o="listen" aria-pressed="false">聞き取り Listen</button>
           </span>
           <label class="switch"><input type="checkbox" id="hitSpeakToggle" checked> Speak each character once it is answered</label>
           <label class="switch"><input type="checkbox" id="altToggle" checked> Accept Kunrei-shiki as well as Hepburn (si · ti · tu · hu · zi · sya…)</label>
@@ -1145,9 +1131,9 @@ rt{
         <div class="chipset">
           <span class="lbl">Glyph</span>
           <span class="seg" id="segGlyph">
-            <button data-g="brush" aria-pressed="true"><ruby>筆<rt>ふで</rt></ruby> Brush</button>
-            <button data-g="hand" aria-pressed="false"><ruby>手<rt>て</rt></ruby><ruby>書<rt>が</rt></ruby>き Hand</button>
-            <button data-g="print" aria-pressed="false"><ruby>明<rt>みん</rt></ruby><ruby>朝<rt>ちょう</rt></ruby> Print</button>
+            <button data-g="brush" aria-pressed="true">筆 Brush</button>
+            <button data-g="hand" aria-pressed="false">手書き Hand</button>
+            <button data-g="print" aria-pressed="false">明朝 Print</button>
           </span>
           <label class="switch"><input type="checkbox" id="tagToggle"> Show 行 label on card fronts</label>
           <label class="switch"><input type="checkbox" id="aidToggle"> Show the call as text (for rooms without audio)</label>
@@ -1188,16 +1174,16 @@ rt{
     <div class="keiko">
       <div class="keiko-head">
         <div class="kh-title">
-          <span class="big"><ruby>記<rt>き</rt></ruby><ruby>録<rt>ろく</rt></ruby></span>
+          <span class="big">記録</span>
           <span class="sub"><b>Record</b><span id="recNote"></span></span>
         </div>
-        <button class="btn dark tiny" id="rec-back"><span class="jpx"><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby><ruby>場<rt>ば</rt></ruby>へ　</span>Practice Floor</button>
+        <button class="btn dark tiny" id="rec-back"><span class="jpx">稽古場へ　</span>Practice Floor</button>
       </div>
       <div class="tiles" id="recTiles"></div>
-      <h3><span class="jp"><ruby>五<rt>ご</rt></ruby><ruby>十<rt>じゅう</rt></ruby><ruby>音<rt>おん</rt></ruby><ruby>図<rt>ず</rt></ruby></span><span class="en">What You Hold</span></h3>
+      <h3><span class="jp">音順</span><span class="en">What You Hold</span></h3>
       <p>Each square fills as you answer it and empties when you miss it. Nothing here leaves this browser.</p>
       <div id="recMap"></div>
-      <h3><span class="jp"><ruby>印<rt>しるし</rt></ruby></span><span class="en">Marks</span></h3>
+      <h3><span class="jp">印</span><span class="en">Marks</span></h3>
       <p id="recBadgeNote"></p>
       <div class="review" id="recBadges"></div>
     </div>
@@ -1211,7 +1197,7 @@ rt{
           <span class="big" id="kStageJp">選</span>
           <span class="sub"><b id="kStageEn">Choose</b><span id="kStageNote"></span></span>
         </div>
-        <button class="btn dark tiny" id="k-quit"><span class="jpx"><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby><ruby>場<rt>ば</rt></ruby>へ　</span>Practice Floor</button>
+        <button class="btn dark tiny" id="k-quit"><span class="jpx">稽古場へ　</span>Practice Floor</button>
       </div>
 
       <div class="kprog"><span class="track"><i id="kProgBar"></i></span><span class="ct" id="kProgText"></span></div>
@@ -1231,12 +1217,12 @@ rt{
 
       <div id="kDone" hidden>
         <div class="tiles" id="kTiles"></div>
-        <h3><span class="jp"><ruby>要<rt>よう</rt></ruby><ruby>復<rt>ふく</rt></ruby><ruby>習<rt>しゅう</rt></ruby></span><span class="en">Needs Review</span></h3>
+        <h3><span class="jp">要復習</span><span class="en">Needs Review</span></h3>
         <p id="kReviewNote"></p>
         <div class="review" id="kReview"></div>
         <div class="rep-acts">
-          <button class="btn dark" id="k-again"><span class="jpx">もう<ruby>一<rt>いち</rt></ruby><ruby>度<rt>ど</rt></ruby>　</span>Drill Again</button>
-          <button class="btn dark" id="k-done-back"><span class="jpx"><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby><ruby>場<rt>ば</rt></ruby>へ　</span>Practice Floor</button>
+          <button class="btn dark" id="k-again"><span class="jpx">もう一度　</span>Drill Again</button>
+          <button class="btn dark" id="k-done-back"><span class="jpx">稽古場へ　</span>Practice Floor</button>
         </div>
       </div>
     </div>
@@ -1256,18 +1242,18 @@ rt{
         <span class="st queen" id="stQueen" hidden><i id="mHers">0</i><small>クイーン hers</small></span>
       </div>
       <div class="mat-acts">
-        <button class="btn dark tiny" id="m-pause"><span class="jpx"><ruby>休<rt>やす</rt></ruby>み　</span>Pause</button>
-        <button class="btn dark tiny" id="m-leave"><span class="jpx"><ruby>帰<rt>かえ</rt></ruby>る　</span>Leave</button>
+        <button class="btn dark tiny" id="m-pause"><span class="jpx">休み　</span>Pause</button>
+        <button class="btn dark tiny" id="m-leave"><span class="jpx">帰る　</span>Leave</button>
       </div>
     </div>
     <div id="matTimer"><i id="matTimerBar"></i></div>
     <div id="ankiBar" hidden>
-      <b><ruby>暗<rt>あん</rt></ruby><ruby>記<rt>き</rt></ruby><ruby>時<rt>じ</rt></ruby><ruby>間<rt>かん</rt></ruby></b>
+      <b>暗記時間</b>
       <span>Learn the mat before the reader starts — <i id="ankiLeft"></i></span>
-      <button class="btn dark tiny" id="ankiGo"><span class="jpx"><ruby>始<rt>はじ</rt></ruby>める　</span>Begin</button>
+      <button class="btn dark tiny" id="ankiGo"><span class="jpx">始める　</span>Begin</button>
     </div>
-    <div id="matPause" hidden><b><ruby>休<rt>やす</rt></ruby>み</b><span>Paused</span>
-      <button class="btn dark tiny" id="m-resume"><span class="jpx"><ruby>続<rt>つづ</rt></ruby>ける　</span>Resume</button></div>
+    <div id="matPause" hidden><b>休み</b><span>Paused</span>
+      <button class="btn dark tiny" id="m-resume"><span class="jpx">続ける　</span>Resume</button></div>
     <canvas id="fx"></canvas>
     <div id="flash" aria-hidden="true"></div>
     <!-- She sits across the mat. Not a silhouette: the yokai game's flat
@@ -1342,13 +1328,13 @@ rt{
 
       <div class="tiles" id="statTiles"></div>
 
-      <h3><span class="jp"><ruby>要<rt>よう</rt></ruby><ruby>復<rt>ふく</rt></ruby><ruby>習<rt>しゅう</rt></ruby></span><span class="en">Needs Review</span></h3>
+      <h3><span class="jp">要復習</span><span class="en">Needs Review</span></h3>
       <p id="reviewNote">The hands that cost you. Turn these on the practice floor before the next match.</p>
       <div class="review" id="review"></div>
 
       <div class="rep-acts">
-        <button class="btn solid" id="btn-rematch"><span class="jpx">もう<ruby>一<rt>いち</rt></ruby><ruby>度<rt>ど</rt></ruby>　</span>Walk It Again</button>
-        <button class="btn dark" id="btn-back"><span class="jpx"><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby><ruby>場<rt>ば</rt></ruby>へ　</span>Practice Floor</button>
+        <button class="btn solid" id="btn-rematch"><span class="jpx">もう一度　</span>Walk It Again</button>
+        <button class="btn dark" id="btn-back"><span class="jpx">稽古場へ　</span>Practice Floor</button>
       </div>
     </div>
   </section>
@@ -1445,7 +1431,7 @@ const ROWS = [
   {g:"m",  jp:"ま", label:"m-",  items:[]},
   {g:"y",  jp:"や", label:"y-",  items:[]},
   {g:"r",  jp:"ら", label:"r-",  items:[]},
-  {g:"w",  jp:"わ", rb:"わ|ぎょう", label:"わ行 w-", items:[]},
+  {g:"w",  jp:"わ", label:"わ行 w-", items:[]},
   {g:"nn", jp:"ん", label:"n",   items:[]}
 ];
 const BY_G = {}; ROWS.forEach(r => BY_G[r.g] = r);
@@ -2116,7 +2102,7 @@ function renderChips(){
     const b = document.createElement("button");
     b.className = "chip";
     b.setAttribute("aria-pressed", G.groups.has(row.g));
-    b.innerHTML = '<span class="jp">' + ruby(row.rb || row.jp) + '</span>' + row.label +
+    b.innerHTML = '<span class="jp">' + row.jp + '</span>' + row.label +
                   '<span class="ct">' + row.items.length + '</span>';
     b.addEventListener("click", () => {
       if(G.groups.has(row.g)) G.groups.delete(row.g); else G.groups.add(row.g);
@@ -2423,7 +2409,7 @@ function renderRecord(){
     ["Night streak", days.streak || 0, (days.streak === 1 ? " day" : " days")],
     ["Nights in all", days.total || 0, ""],
     ["Marks earned", Object.keys(got).length, " / " + BADGES.length],
-    ["Kana in memory", Object.keys(p).length, ""]
+    ["Forms in memory", Object.keys(p).length, ""]
   ].map(t => '<div class="tile"><span class="k">' + t[0] + '</span><span class="v">' +
              t[1] + (t[2] ? '<em>' + t[2] + '</em>' : '') + '</span></div>').join("");
 
@@ -2446,7 +2432,7 @@ function renderRecord(){
     : "None yet. They are given for finishing something, not for starting it.";
   $("recBadges").innerHTML = BADGES.map(b =>
     '<div class="rv ' + (got[b.id] ? "got" : "locked") + '">' +
-    '<span class="bj">' + ruby(b.rb || b.jp) + '</span>' +
+    '<span class="bj">' + b.jp + '</span>' +
     '<span class="m"><b>' + b.en + '</b><span>' +
     (got[b.id] ? got[b.id] : "not yet") + '</span></span></div>').join("");
 }
@@ -2509,18 +2495,6 @@ $("k-quit").addEventListener("click", keikoQuit);
 $("k-done-back").addEventListener("click", keikoQuit);
 $("k-again").addEventListener("click", keikoStart);
 
-/* "分|ぶん 福|ぶく 茶|ちゃ 釜|がま" — a reading over each kanji rather than one
-   reading spread over the whole word, so a beginner can see which sound
-   belongs to which character. Segments with no pipe are kana and pass
-   through bare. */
-function ruby(spec){
-  if(!spec) return "";
-  return spec.split(" ").map(seg => {
-    const i = seg.indexOf("|");
-    return i < 0 ? seg
-      : '<ruby>' + seg.slice(0, i) + '<rt>' + seg.slice(i + 1) + '</rt></ruby>';
-  }).join("");
-}
 /* ==========================================================
    PROGRESS — held in this browser and nowhere else
    No account, no server, no row anywhere with a student's name on it.
@@ -2574,17 +2548,17 @@ function noteDay(){
 
 /* Badges are for things that are actually hard, not for turning up. */
 const BADGES = [
-  {id:"first",  jp:"初夜", rb:"初|しょ 夜|や",   en:"First Night",
+  {id:"first",  jp:"初夜",   en:"First Night",
    note:"One match played to the last card."},
-  {id:"muzu",   jp:"無傷", rb:"無|む 傷|きず",   en:"Unscathed",
+  {id:"muzu",   jp:"無傷",   en:"Unscathed",
    note:"A mat cleared without one お手つき."},
-  {id:"gojuon", jp:"五十音", rb:"五|ご 十|じゅう 音|おん", en:"Gojūon",
+  {id:"gojuon", jp:"五十音", en:"Gojūon",
    note:"Every mora met — at least one form of each taken."},
-  {id:"nanoya", jp:"七夜", rb:"七|なな 夜|や",   en:"Seven Nights",
+  {id:"nanoya", jp:"七夜",   en:"Seven Nights",
    note:"Came back on seven different days."},
-  {id:"kaiden", jp:"皆伝", rb:"皆|かい 伝|でん", en:"Full Transmission",
+  {id:"kaiden", jp:"皆伝", en:"Full Transmission",
    note:"Every one of the 285 forms held at full strength."},
-  {id:"yoake",  jp:"夜明", rb:"夜|よ 明|あけ",   en:"Daybreak",
+  {id:"yoake",  jp:"夜明",   en:"Daybreak",
    note:"Every form of か taken — all thirty-seven of them."}
 ];
 function loadBadges(){
@@ -2627,7 +2601,7 @@ function toastBadge(b){
   }
   const el = document.createElement("div");
   el.className = "badge-toast";
-  el.innerHTML = '<span class="bj">' + ruby(b.rb || b.jp) + '</span>' +
+  el.innerHTML = '<span class="bj">' + b.jp + '</span>' +
                  '<span class="bm"><b>' + b.en + '</b><i>' + b.note + '</i></span>';
   stack.appendChild(el);
   setTimeout(() => el.remove(), 5200);
