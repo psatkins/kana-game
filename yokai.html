@@ -513,6 +513,8 @@ body.showtags .face.front .grp{display:block}
   background:#D9C9A2;border:1px solid rgba(90,72,44,.45);border-radius:1px;
 }
 @keyframes nodeIn{from{opacity:0;transform:translateZ(140px) scale(.4)}to{opacity:1;transform:translateZ(140px) scale(1)}}
+#s-duel.choosing .node{cursor:pointer}
+#s-duel.choosing .node:hover{border-color:var(--gold);transform:translateZ(150px) scale(1.04)}
 .node.live{border-color:var(--gold);box-shadow:0 0 42px rgba(201,162,39,.65), 0 10px 24px rgba(0,0,0,.5)}
 /* a sealed charm burns off rather than being cut in half */
 .node.cut{opacity:0;transform:translateZ(140px) translateY(-80px) scale(1.25) rotate(9deg);transition:all .42s ease-out}
@@ -528,7 +530,7 @@ body.showtags .face.front .grp{display:block}
 
 /* ---------- HUD ---------- */
 #hud{position:absolute;inset:0;z-index:3;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between}
-.hud-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:clamp(12px,2vw,22px)}
+.hud-top{position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:clamp(12px,2vw,22px)}
 .side{display:flex;flex-direction:column;gap:7px;min-width:190px}
 .side.right{align-items:flex-end;text-align:right}
 .who{display:flex;align-items:baseline;gap:9px}
@@ -773,6 +775,19 @@ body.showtags .face.front .grp{display:block}
 .rv.locked{opacity:.4;border-left-color:var(--washi-3)}
 .rv .bj{font-family:var(--brush);font-size:27px;line-height:1.5;color:var(--sumi)}
 
+/* Escape has always worked, but only someone who read the footer knew that,
+   and there is no Escape key on a phone. */
+#btn-leave{
+  position:absolute;top:0;right:0;display:flex;flex-direction:column;align-items:center;gap:1px;
+  padding:7px 12px;border:1px solid rgba(159,182,208,.22);border-radius:2px;
+  background:rgba(10,14,20,.5);color:var(--slate);cursor:pointer;
+  transition:color .16s ease,border-color .16s ease;
+}
+#btn-leave:hover{color:var(--washi);border-color:rgba(159,182,208,.55)}
+#btn-leave b{font-family:var(--brush);font-size:17px;line-height:1.35;font-weight:400}
+#btn-leave span{font-family:var(--mono);font-size:8.5px;letter-spacing:.18em;text-transform:uppercase}
+@media (max-width:760px){#btn-leave span{display:none}}
+
 /* a badge, announced once and then left alone */
 /* two can be earned by the same answer, so they stack rather than pile up */
 #badgeStack{
@@ -866,7 +881,7 @@ rt{
       <h1 class="vtitle">仮名夜行</h1>
       <p class="romline">Kana Yakō</p>
       <p class="tag">Something is standing in the road. Read its name aloud and it must let you pass.</p>
-      <button class="btn big" id="btn-enter"><span class="jpx"><ruby>道場<rt>どうじょう</rt></ruby>へ<ruby>入<rt>はい</rt></ruby>る　</span>Enter the Dojo</button>
+      <button class="btn big" id="btn-enter"><span class="jpx"><ruby>道<rt>どう</rt></ruby><ruby>場<rt>じょう</rt></ruby>へ<ruby>入<rt>はい</rt></ruby>る　</span>Enter the Dojo</button>
       <p class="fine">Hardware keyboard recommended · Sound on · Best in a dark room</p>
     </div>
   </section>
@@ -874,7 +889,7 @@ rt{
   <!-- ============ DOJO ============ -->
   <section class="screen paper" id="s-dojo">
     <aside class="rail">
-      <h2><ruby>練習道場<rt>れんしゅうどうじょう</rt></ruby></h2>
+      <h2><ruby>練<rt>れん</rt></ruby><ruby>習<rt>しゅう</rt></ruby><ruby>道<rt>どう</rt></ruby><ruby>場<rt>じょう</rt></ruby></h2>
       <p class="rail-en">Practice Dojo</p>
       <div class="seal" aria-hidden="true">臨</div>
     </aside>
@@ -886,9 +901,9 @@ rt{
         </div>
         <div class="acts">
           <button class="btn dark tiny" id="btn-revealall">Reveal all</button>
-          <button class="btn dark tiny" id="btn-record"><span class="jpx"><ruby>記録<rt>きろく</rt></ruby>　</span>Record</button>
-          <button class="btn dark" id="btn-keiko"><span class="jpx"><ruby>稽古<rt>けいこ</rt></ruby>　</span>Drill</button>
-          <button class="btn solid" id="btn-duel"><span class="jpx"><ruby>夜道<rt>よみち</rt></ruby>へ　</span>Take the Night Road</button>
+          <button class="btn dark tiny" id="btn-record"><span class="jpx"><ruby>記<rt>き</rt></ruby><ruby>録<rt>ろく</rt></ruby>　</span>Record</button>
+          <button class="btn dark" id="btn-keiko"><span class="jpx"><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby>　</span>Drill</button>
+          <button class="btn solid" id="btn-duel"><span class="jpx"><ruby>夜<rt>よ</rt></ruby><ruby>道<rt>みち</rt></ruby>へ　</span>Take the Night Road</button>
         </div>
       </div>
 
@@ -898,7 +913,7 @@ rt{
       </div>
       <div class="chipset">
         <span class="seg" id="segDojo">
-          <button data-d="ordered" aria-pressed="true"><ruby>五十音図<rt>ごじゅうおんず</rt></ruby> Table</button>
+          <button data-d="ordered" aria-pressed="true"><ruby>五<rt>ご</rt></ruby><ruby>十<rt>じゅう</rt></ruby><ruby>音<rt>おん</rt></ruby><ruby>図<rt>ず</rt></ruby> Table</button>
           <button data-d="shuffle" aria-pressed="false">シャッフル Shuffle</button>
         </span>
         <span class="seg" id="segScript">
@@ -906,17 +921,18 @@ rt{
           <button data-s="kata" aria-pressed="false">カタカナ</button>
           <button data-s="both" aria-pressed="false">Both</button>
         </span>
-        <button class="chip" id="preset-basic"><span class="jp"><ruby>五十音<rt>ごじゅうおん</rt></ruby></span> Kana 46</button>
+        <button class="chip" id="preset-basic"><span class="jp"><ruby>五<rt>ご</rt></ruby><ruby>十<rt>じゅう</rt></ruby><ruby>音<rt>おん</rt></ruby></span> Kana 46</button>
         <button class="chip" id="preset-all"><span class="jp"><ruby>全<rt>ぜん</rt></ruby></span> Everything</button>
-        <button class="btn dark tiny" id="btn-settings" aria-expanded="false" aria-controls="settings"><ruby>設定<rt>せってい</rt></ruby> Settings ▾</button>
+        <button class="btn dark tiny" id="btn-settings" aria-expanded="false" aria-controls="settings"><ruby>設<rt>せっ</rt></ruby><ruby>定<rt>てい</rt></ruby> Settings ▾</button>
       </div>
 
       <div id="settings" hidden>
         <div class="chipset">
           <span class="lbl">Sealing phase</span>
           <span class="seg" id="segOffense">
-            <button data-o="ltr" aria-pressed="true"><ruby>右<rt>みぎ</rt></ruby>→<ruby>左<rt>ひだり</rt></ruby> Read in order</button>
-            <button data-o="gojuon" aria-pressed="false"><ruby>五十音順<rt>ごじゅうおんじゅん</rt></ruby> Gojūon</button>
+            <button data-o="choose" aria-pressed="true"><ruby>選<rt>えら</rt></ruby>ぶ Hear &amp; click</button>
+            <button data-o="ltr" aria-pressed="false"><ruby>右<rt>みぎ</rt></ruby>→<ruby>左<rt>ひだり</rt></ruby> Read in order</button>
+            <button data-o="gojuon" aria-pressed="false"><ruby>五<rt>ご</rt></ruby><ruby>十<rt>じゅう</rt></ruby><ruby>音<rt>おん</rt></ruby><ruby>順<rt>じゅん</rt></ruby> Gojūon</button>
             <button data-o="listen" aria-pressed="false"><ruby>聞<rt>き</rt></ruby>き<ruby>取<rt>と</rt></ruby>り Listen</button>
           </span>
           <label class="switch"><input type="checkbox" id="hitSpeakToggle" checked> Speak each character once it is answered</label>
@@ -926,8 +942,8 @@ rt{
           <span class="lbl">Glyph</span>
           <span class="seg" id="segGlyph">
             <button data-g="brush" aria-pressed="true"><ruby>筆<rt>ふで</rt></ruby> Brush</button>
-            <button data-g="hand" aria-pressed="false"><ruby>手書<rt>てが</rt></ruby>き Hand</button>
-            <button data-g="print" aria-pressed="false"><ruby>明朝<rt>みんちょう</rt></ruby> Print</button>
+            <button data-g="hand" aria-pressed="false"><ruby>手<rt>て</rt></ruby><ruby>書<rt>が</rt></ruby>き Hand</button>
+            <button data-g="print" aria-pressed="false"><ruby>明<rt>みん</rt></ruby><ruby>朝<rt>ちょう</rt></ruby> Print</button>
           </span>
           <label class="switch"><input type="checkbox" id="tagToggle"> Show 行 label on card fronts</label>
           <label class="switch"><input type="checkbox" id="aidToggle"> Ring the spoken target (for rooms without audio)</label>
@@ -966,13 +982,13 @@ rt{
     <div class="keiko">
       <div class="keiko-head">
         <div class="kh-title">
-          <span class="big"><ruby>記録<rt>きろく</rt></ruby></span>
+          <span class="big"><ruby>記<rt>き</rt></ruby><ruby>録<rt>ろく</rt></ruby></span>
           <span class="sub"><b>Record</b><span id="recNote"></span></span>
         </div>
-        <button class="btn dark tiny" id="rec-back"><span class="jpx"><ruby>道場<rt>どうじょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
+        <button class="btn dark tiny" id="rec-back"><span class="jpx"><ruby>道<rt>どう</rt></ruby><ruby>場<rt>じょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
       </div>
       <div class="tiles" id="recTiles"></div>
-      <h3><span class="jp"><ruby>五十音図<rt>ごじゅうおんず</rt></ruby></span><span class="en">What You Hold</span></h3>
+      <h3><span class="jp"><ruby>五<rt>ご</rt></ruby><ruby>十<rt>じゅう</rt></ruby><ruby>音<rt>おん</rt></ruby><ruby>図<rt>ず</rt></ruby></span><span class="en">What You Hold</span></h3>
       <p>Each square fills as you answer it and empties when you miss it. Nothing here leaves this browser.</p>
       <div id="recMap"></div>
       <h3><span class="jp"><ruby>印<rt>しるし</rt></ruby></span><span class="en">Marks</span></h3>
@@ -989,7 +1005,7 @@ rt{
           <span class="big" id="kStageJp">選</span>
           <span class="sub"><b id="kStageEn">Choose</b><span id="kStageNote"></span></span>
         </div>
-        <button class="btn dark tiny" id="k-quit"><span class="jpx"><ruby>道場<rt>どうじょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
+        <button class="btn dark tiny" id="k-quit"><span class="jpx"><ruby>道<rt>どう</rt></ruby><ruby>場<rt>じょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
       </div>
 
       <div class="kprog"><span class="track"><i id="kProgBar"></i></span><span class="ct" id="kProgText"></span></div>
@@ -1009,12 +1025,12 @@ rt{
 
       <div id="kDone" hidden>
         <div class="tiles" id="kTiles"></div>
-        <h3><span class="jp"><ruby>要復習<rt>ようふくしゅう</rt></ruby></span><span class="en">Needs Review</span></h3>
+        <h3><span class="jp"><ruby>要<rt>よう</rt></ruby><ruby>復<rt>ふく</rt></ruby><ruby>習<rt>しゅう</rt></ruby></span><span class="en">Needs Review</span></h3>
         <p id="kReviewNote"></p>
         <div class="review" id="kReview"></div>
         <div class="rep-acts">
-          <button class="btn dark" id="k-again"><span class="jpx">もう<ruby>一度<rt>いちど</rt></ruby>　</span>Drill Again</button>
-          <button class="btn dark" id="k-done-back"><span class="jpx"><ruby>道場<rt>どうじょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
+          <button class="btn dark" id="k-again"><span class="jpx">もう<ruby>一<rt>いち</rt></ruby><ruby>度<rt>ど</rt></ruby>　</span>Drill Again</button>
+          <button class="btn dark" id="k-done-back"><span class="jpx"><ruby>道<rt>どう</rt></ruby><ruby>場<rt>じょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
         </div>
       </div>
     </div>
@@ -1054,6 +1070,9 @@ rt{
           <div class="bar foe"><i id="foeHp"></i></div>
         </div>
         <div class="phase-tag parry" id="phaseTag"><b>名</b><span>Name It</span></div>
+        <button id="btn-leave" title="Leave the road (esc)" aria-label="Leave the road">
+          <b><ruby>帰<rt>かえ</rt></ruby></b><span>Leave</span>
+        </button>
         <div class="side right">
           <div class="metrics">
             <span class="cb" id="combo">連撃 ×0</span>
@@ -1094,13 +1113,13 @@ rt{
 
       <div class="tiles" id="statTiles"></div>
 
-      <h3><span class="jp"><ruby>要復習<rt>ようふくしゅう</rt></ruby></span><span class="en">Needs Review</span></h3>
+      <h3><span class="jp"><ruby>要<rt>よう</rt></ruby><ruby>復<rt>ふく</rt></ruby><ruby>習<rt>しゅう</rt></ruby></span><span class="en">Needs Review</span></h3>
       <p id="reviewNote">The characters that cost you the most keystrokes. Take these back to the dojo first.</p>
       <div class="review" id="review"></div>
 
       <div class="rep-acts">
-        <button class="btn solid" id="btn-rematch"><span class="jpx">もう<ruby>一度<rt>いちど</rt></ruby>　</span>Walk It Again</button>
-        <button class="btn dark" id="btn-back"><span class="jpx"><ruby>道場<rt>どうじょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
+        <button class="btn solid" id="btn-rematch"><span class="jpx">もう<ruby>一<rt>いち</rt></ruby><ruby>度<rt>ど</rt></ruby>　</span>Walk It Again</button>
+        <button class="btn dark" id="btn-back"><span class="jpx"><ruby>道<rt>どう</rt></ruby><ruby>場<rt>じょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
       </div>
     </div>
   </section>
@@ -1124,20 +1143,20 @@ const ROWS = [
   {g:"m",  jp:"ま", label:"m-",  items:[["ま","マ","ma"],["み","ミ","mi"],["む","ム","mu"],["め","メ","me"],["も","モ","mo"]]},
   {g:"y",  jp:"や", label:"y-",  items:[["や","ヤ","ya"],["ゆ","ユ","yu"],["よ","ヨ","yo"]]},
   {g:"r",  jp:"ら", label:"r-",  items:[["ら","ラ","ra"],["り","リ","ri"],["る","ル","ru"],["れ","レ","re"],["ろ","ロ","ro"]]},
-  {g:"w",  jp:"わ", label:"<ruby>わ行<rt>ぎょう</rt></ruby> w-", items:[["わ","ワ","wa"],["を","ヲ","wo"]]},
+  {g:"w",  jp:"わ", label:"わ<ruby>行<rt>ぎょう</rt></ruby> w-", items:[["わ","ワ","wa"],["を","ヲ","wo"]]},
   /* ゐ and ゑ are not taught in a first-year course and have not been in
      ordinary use since 1946, but they are exactly what a reader of premodern
      texts needs — so they come out of the default set without leaving the
      game. Dropping them is what makes the basic set 46 rather than 48. */
-  {g:"old", jp:"ゐゑ", label:"<ruby>歴史的仮名<rt>れきしてきかな</rt></ruby> historical", items:[["ゐ","ヰ","wi"],["ゑ","ヱ","we"]]},
+  {g:"old", jp:"ゐゑ", label:"<ruby>歴<rt>れき</rt></ruby><ruby>史<rt>し</rt></ruby><ruby>的<rt>てき</rt></ruby><ruby>仮<rt>か</rt></ruby><ruby>名<rt>な</rt></ruby> historical", items:[["ゐ","ヰ","wi"],["ゑ","ヱ","we"]]},
   {g:"nn", jp:"ん", label:"n",   items:[["ん","ン","n"]]},
-  {g:"daku",jp:"濁音", yomi:"だくおん", label:"g z d b p", items:[
+  {g:"daku",jp:"濁音", rb:"濁|だく 音|おん", label:"g z d b p", items:[
     ["が","ガ","ga"],["ぎ","ギ","gi"],["ぐ","グ","gu"],["げ","ゲ","ge"],["ご","ゴ","go"],
     ["ざ","ザ","za"],["じ","ジ","ji",["zi"]],["ず","ズ","zu"],["ぜ","ゼ","ze"],["ぞ","ゾ","zo"],
     ["だ","ダ","da"],["で","デ","de"],["ど","ド","do"],
     ["ば","バ","ba"],["び","ビ","bi"],["ぶ","ブ","bu"],["べ","ベ","be"],["ぼ","ボ","bo"],
     ["ぱ","パ","pa"],["ぴ","ピ","pi"],["ぷ","プ","pu"],["ぺ","ペ","pe"],["ぽ","ポ","po"]]},
-  {g:"yoon",jp:"拗音", yomi:"ようおん", label:"kya · sha · cho …", items:[
+  {g:"yoon",jp:"拗音", rb:"拗|よう 音|おん", label:"kya · sha · cho …", items:[
     ["きゃ","キャ","kya"],["きゅ","キュ","kyu"],["きょ","キョ","kyo"],
     ["しゃ","シャ","sha",["sya"]],["しゅ","シュ","shu",["syu"]],["しょ","ショ","sho",["syo"]],
     ["ちゃ","チャ","cha",["tya"]],["ちゅ","チュ","chu",["tyu"]],["ちょ","チョ","cho",["tyo"]],
@@ -1238,15 +1257,15 @@ ALL.forEach(it => { it.ord = gojuonRank(it.r); });
    comes at you differs, so reading pressure arrives a different way each time.
    `hidden` keeps an encounter off the ladder count until it reveals itself. */
 const TIERS = [
-  {key:"hitotsume", jp:"一つ目小僧", yomi:"ひとつめこぞう", en:"One-Eyed Boy", hp:6, def:5.4, off:3.6,
+  {key:"hitotsume", jp:"一つ目小僧", rb:"一|ひと つ 目|め 小|こ 僧|ぞう", en:"One-Eyed Boy", hp:6, def:5.4, off:3.6,
    style:"thrust", accent:"#C6D3B8",
    line:"He steps out of the hedge at dusk to be gasped at, and sulks when he is not. Name him and he will stand aside — it is only politeness he is after."},
 
-  {key:"tengu", jp:"天狗", yomi:"てんぐ", en:"Tengu", hp:8, def:5.0, off:3.2,
+  {key:"tengu", jp:"天狗", rb:"天|てん 狗|ぐ", en:"Tengu", hp:8, def:5.0, off:3.2,
    style:"arrow", accent:"#8FA9C4",
    line:"He will not come down off the cedar. One beat of the feather fan and the name arrives from the top of the mountain, small and a long way off."},
 
-  {key:"kamaitachi", jp:"鎌鼬", yomi:"かまいたち", en:"Kamaitachi", hp:10, def:5.0, off:2.9,
+  {key:"kamaitachi", jp:"鎌鼬", rb:"鎌|かま 鼬|いたち", en:"Kamaitachi", hp:10, def:5.0, off:2.9,
    style:"ride", accent:"#B4726A",
    line:"It travels inside the gust and does not stop. You feel the cold on your shin long before you find the cut, and by then it is three fields away."},
 
@@ -1254,11 +1273,11 @@ const TIERS = [
    style:"dance", hidden:true, accent:"#C9A227",
    line:"An interlude. Someone else is on the road, walking your way at your pace, a little ahead. Rest your hands. Nothing is asked of you while a back is turned."},
 
-  {key:"chagama", jp:"分福茶釜", yomi:"ぶんぶくちゃがま", en:"Bunbuku Chagama", hp:11, def:4.8, off:2.9,
+  {key:"chagama", jp:"分福茶釜", rb:"分|ぶん 福|ぶく 茶|ちゃ 釜|がま", en:"Bunbuku Chagama", hp:11, def:4.8, off:2.9,
    style:"tea", scene:"tearoom", accent:"#6E8F7D",
    line:"Set on the fire it grew a head, four feet and a tail, and would not be a kettle again. It has agreed to sit still while the water heats, and asks only that you read the scroll while it does."},
 
-  {key:"hyakki", jp:"百鬼夜行", yomi:"ひゃっきやぎょう", en:"The Night Parade", hp:14, def:4.2, off:2.2,
+  {key:"hyakki", jp:"百鬼夜行", rb:"百|ひゃっ 鬼|き 夜|や 行|ぎょう", en:"The Night Parade", hp:14, def:4.2, off:2.2,
    style:"cannon", accent:"#C9A227",
    line:"Every broken umbrella, every discarded pot, every thing that was used for a hundred years and then thrown away. They come down the road together, and they do not go around you."}
 ];
@@ -1292,8 +1311,17 @@ const STYLE = {
    because 分福茶釜 is read as a unit and a beginner does not yet need to
    know which syllable belongs to which character. Kana names pass through
    untouched. */
-function ruby(text, yomi){
-  return yomi ? '<ruby>' + text + '<rt>' + yomi + '</rt></ruby>' : text;
+/* "分|ぶん 福|ぶく 茶|ちゃ 釜|がま" — a reading over each kanji rather than one
+   reading spread over the whole word, so a beginner can see which sound
+   belongs to which character. Segments with no pipe are kana and pass
+   through bare. */
+function ruby(spec){
+  if(!spec) return "";
+  return spec.split(" ").map(seg => {
+    const i = seg.indexOf("|");
+    return i < 0 ? seg
+      : '<ruby>' + seg.slice(0, i) + '<rt>' + seg.slice(i + 1) + '</rt></ruby>';
+  }).join("");
 }
 /* ==========================================================
    PROGRESS — held in this browser and nowhere else
@@ -1348,21 +1376,21 @@ function noteDay(){
 
 /* Badges are for things that are actually hard, not for turning up. */
 const BADGES = [
-  {id:"first",  jp:"初夜", yomi:"しょや",   en:"First Night",
+  {id:"first",  jp:"初夜", rb:"初|しょ 夜|や",   en:"First Night",
    note:"One yōkai named and sealed."},
-  {id:"muzu",   jp:"無傷", yomi:"むきず",   en:"Unscathed",
+  {id:"muzu",   jp:"無傷", rb:"無|む 傷|きず",   en:"Unscathed",
    note:"An encounter cleared without a single miss."},
-  {id:"gojuon", jp:"五十音", yomi:"ごじゅうおん", en:"Gojūon",
+  {id:"gojuon", jp:"五十音", rb:"五|ご 十|じゅう 音|おん", en:"Gojūon",
    note:"All 46 basic kana answered correctly at least once."},
-  {id:"daku",   jp:"濁点", yomi:"だくてん", en:"Dakuten",
+  {id:"daku",   jp:"濁点", rb:"濁|だく 点|てん", en:"Dakuten",
    note:"All 23 voiced kana answered correctly at least once."},
-  {id:"yoon",   jp:"拗音", yomi:"ようおん", en:"Yōon",
+  {id:"yoon",   jp:"拗音", rb:"拗|よう 音|おん", en:"Yōon",
    note:"All 33 small-ya kana answered correctly at least once."},
-  {id:"nanoya", jp:"七夜", yomi:"ななや",   en:"Seven Nights",
+  {id:"nanoya", jp:"七夜", rb:"七|なな 夜|や",   en:"Seven Nights",
    note:"Came back on seven different days."},
-  {id:"kaiden", jp:"皆伝", yomi:"かいでん", en:"Full Transmission",
+  {id:"kaiden", jp:"皆伝", rb:"皆|かい 伝|でん", en:"Full Transmission",
    note:"All 46 basic kana held at full strength at once."},
-  {id:"yoake",  jp:"夜明", yomi:"よあけ",   en:"Daybreak",
+  {id:"yoake",  jp:"夜明", rb:"夜|よ 明|あけ",   en:"Daybreak",
    note:"Walked the whole road and came out the other side."}
 ];
 function loadBadges(){
@@ -1406,7 +1434,7 @@ function toastBadge(b){
   }
   const el = document.createElement("div");
   el.className = "badge-toast";
-  el.innerHTML = '<span class="bj">' + ruby(b.jp, b.yomi) + '</span>' +
+  el.innerHTML = '<span class="bj">' + ruby(b.rb || b.jp) + '</span>' +
                  '<span class="bm"><b>' + b.en + '</b><i>' + b.note + '</i></span>';
   stack.appendChild(el);
   setTimeout(() => el.remove(), 5200);
@@ -2174,7 +2202,7 @@ const G = {
   tier: 0, foeHp: 0, foeMax: 0, hp: MAX_HP,
   required: null, answers: [], buffer: "", lastKey: null, promptAt: 0,
   tStart: 0, tDur: 0, tActive: false, replayed: false,
-  nodes: [], order: [], nodeIdx: 0, decoys: [], aid: false, offenseMode: "ltr",
+  nodes: [], order: [], nodeIdx: 0, decoys: [], aid: false, offenseMode: "choose",
   stunZ: STUN_FAR, offTime: 0, volley: [], volleyIdx: 0, revealed: false, lateral: 0,
   enemyZ: -1400, zFrom: -1400, zTo: -1400, zT: 1, zDur: 1, zEase: "out",
   bob: 0, shake: 0, shakeDirty: false, scale: 1, rate: 0.9, twice: false, speakOnHit: true,
@@ -2215,7 +2243,7 @@ function renderChips(){
     const b = document.createElement("button");
     b.className = "chip";
     b.setAttribute("aria-pressed", G.groups.has(row.g));
-    b.innerHTML = '<span class="jp">' + ruby(row.jp, row.yomi) + '</span>' + row.label +
+    b.innerHTML = '<span class="jp">' + ruby(row.rb || row.jp) + '</span>' + row.label +
                   '<span class="ct">' + row.items.length + '</span>';
     b.addEventListener("click", () => {
       if(G.groups.has(row.g)) G.groups.delete(row.g); else G.groups.add(row.g);
@@ -2557,10 +2585,23 @@ function renderRecord(){
     : "None yet. They are given for finishing something, not for starting it.";
   $("recBadges").innerHTML = BADGES.map(b =>
     '<div class="rv ' + (got[b.id] ? "got" : "locked") + '">' +
-    '<span class="bj">' + ruby(b.jp, b.yomi) + '</span>' +
+    '<span class="bj">' + ruby(b.rb || b.jp) + '</span>' +
     '<span class="m"><b>' + b.en + '</b><span>' +
     (got[b.id] ? got[b.id] : "not yet") + '</span></span></div>').join("");
 }
+/* Clicking a charm is the point of "choose"; typing it still works, so a
+   keyboard player is never stranded and a phone player never has to type. */
+enemyEl.addEventListener("click", e => {
+  if(G.phase !== "offense" || G.offenseMode !== "choose" || !G.running) return;
+  const el = e.target.closest(".node");
+  if(!el || el.classList.contains("cut")) return;
+  const n = G.nodes.find(x => x.el === el);
+  if(!n) return;
+  if(n.it === G.required) return strike();
+  const d = G.decoys.find(x => x.el === el);
+  if(d) wrongTarget(d);
+});
+$("btn-leave").addEventListener("click", () => { if(G.running){ G.withdrawn = true; endGame(false); } });
 $("btn-record").addEventListener("click", () => { renderRecord(); show("s-record"); });
 $("rec-back").addEventListener("click", () => { show("s-dojo"); refreshDojo(); });
 
@@ -2695,8 +2736,16 @@ function award(){
 /* The listening challenge only works if the student can actually hear.
    Fall back to ringing the live target when speech is unavailable, or
    whenever the teacher has switched the aid on. */
+/* both modes where the mora is spoken before the answer */
+function listenMode(){ return G.offenseMode === "listen" || G.offenseMode === "choose"; }
 function targetAidOn(){
   if(G.offenseMode === "ltr") return true;        // next target is obvious anyway
+  /* Choosing is impossible with no sound, so the ring has to stand in. */
+  if(G.offenseMode === "choose"){
+    if(G.aid) return true;
+    if(G.required && clips.has(G.required.r)) return false;
+    return speechOK === false;
+  }
   if(G.offenseMode === "gojuon") return false;    // deducing the order IS the task
   if(G.aid) return true;
   if(G.required && clips.has(G.required.r)) return false;   // recording covers this one
@@ -2709,7 +2758,8 @@ function updateTargetHint(){
   hintLine.textContent =
     G.offenseMode === "ltr"    ? pre + "read them right to left" :
     G.offenseMode === "gojuon" ? pre + "read in gojūon order — look at all three first" :
-    targetAidOn()              ? pre + "read the ringed charm" :
+    targetAidOn()              ? pre + "take the ringed charm" :
+    G.offenseMode === "choose" ? pre + "click the one you hear · or type it · Enter to replay" :
                                  pre + "type the one you hear · Enter to replay";
 }
 function syncTargetAid(){
@@ -2797,7 +2847,7 @@ function confusable(a, b){
 const EAR_UNSUITABLE = new Set(["wo", "wi", "we"]);
 function pickDistinct(n, preferErrors){
   const out = [], seen = new Set();
-  const listening = G.offenseMode === "listen";
+  const listening = G.offenseMode === "listen" || G.offenseMode === "choose";
   if(preferErrors && G.stats){
     [...G.stats.perChar.values()]
       .sort((a, b) => b.n - a.n)
@@ -2855,7 +2905,7 @@ function startTier(){
   G.tierErrors = G.stats ? G.stats.errors : 0;
   G.foeMax = T.hp; G.foeHp = T.hp;
   enemyEl.innerHTML = silhouette(T.key);
-  $("foeJp").innerHTML = ruby(T.jp, T.yomi);
+  $("foeJp").innerHTML = ruby(T.rb || T.jp);
   $("foeEn").textContent = T.en;
   updateBars();
   setZ(-1600, -1000, 1.4, "out");
@@ -2866,7 +2916,7 @@ function startTier(){
     (T.hidden ? '<p class="rank">Interlude</p>'
               : '<p class="rank">Encounter ' + (TIERS.slice(0, G.tier + 1).filter(x => !x.hidden).length) +
                 ' of ' + LADDER_COUNT + '</p>') +
-    '<p class="jp">' + ruby(T.jp, T.yomi) + '</p>' +
+    '<p class="jp">' + ruby(T.rb || T.jp) + '</p>' +
     '<p class="en">' + T.en + '</p>' +
     '<p class="line">' + T.line + '</p>';
   tierCard.classList.add("on");
@@ -3109,9 +3159,14 @@ function startOffense(){
     enemyEl.appendChild(el);
     return {it, el};
   });
-  /* The order is the puzzle now. Left-to-right and gojuon order both force
-     the student to READ each glyph to produce its romaji; a spoken cue does
-     not, because hearing the mora hands over the romaji directly. */
+  /* Left-to-right and gojuon order force the student to READ each glyph in
+     order to produce its romaji. Hearing the mora and TYPING it does not,
+     because the sound hands over the romaji directly — which is why that
+     mode was never the default.
+     Hearing it and CLICKING is a different thing, and the objection does
+     not apply: you are told the sound, but finding which of the three
+     charms carries it means reading all three. So it tests reading, gives
+     the hands something other than typing to do, and is the default. */
   if(G.offenseMode === "gojuon"){
     G.order = [0,1,2].sort((x, y) => G.nodes[x].it.ord - G.nodes[y].it.ord);
   }else if(G.offenseMode === "ltr"){
@@ -3139,10 +3194,11 @@ function nextTarget(){
   G.decoys = G.nodes
     .filter(x => x !== n && !x.el.classList.contains("cut"))
     .map(x => ({item: x.it, el: x.el, answers: answersFor(x.it)}));
-  const listening = G.offenseMode === "listen";
+  const listening = G.offenseMode === "listen" || G.offenseMode === "choose";
   replayBtn.disabled = !listening;
   if(listening) speakKana(n.it, G.twice);
   syncTargetAid();
+  $("s-duel").classList.toggle("choosing", G.offenseMode === "choose");
   startTimer(G.offTime || TIERS[G.tier].off);
   focusInput();
   if(ahead){ bufferInput.value = ahead; onInput(); }
@@ -3166,7 +3222,7 @@ function strike(){
   n.el.classList.add("cut");
   /* Speak it AFTER the strike: reinforcement once they have committed,
      never a hint beforehand. */
-  if(G.offenseMode !== "listen" && G.speakOnHit) speakKana(n.it, false);
+  if(!listenMode() && G.speakOnHit) speakKana(n.it, false);
   sfxSlash();
   shake(0.72);
   enemyEl.classList.remove("hurt"); void enemyEl.offsetWidth; enemyEl.classList.add("hurt");
@@ -3183,7 +3239,7 @@ function wrongTarget(d){
   sfxBad();
   d.el.classList.remove("wrong"); void d.el.offsetWidth; d.el.classList.add("wrong");
   setTimeout(() => d.el.classList.remove("wrong"), 480);
-  hintLine.textContent = G.offenseMode === "listen"
+  hintLine.textContent = listenMode()
     ? "「" + d.item.disp + "」= " + d.item.r + " is not the one you heard — Enter to replay"
     : "「" + d.item.disp + "」= " + d.item.r + " comes later — wrong order";
   bufferInput.value = ""; G.buffer = ""; renderTiles("");
@@ -3295,7 +3351,7 @@ bufferInput.addEventListener("blur", () => { if(G.running) setTimeout(focusInput
 $("s-duel").addEventListener("pointerdown", () => { if(G.running) setTimeout(focusInput, 0); });
 replayBtn.addEventListener("click", e => {
   e.preventDefault();
-  if(G.phase === "offense" && G.required && G.offenseMode === "listen") speakKana(G.required, G.twice);
+  if(G.phase === "offense" && G.required && listenMode()) speakKana(G.required, G.twice);
   setTimeout(focusInput, 0);
 });
 window.addEventListener("keydown", e => {
@@ -3303,7 +3359,7 @@ window.addEventListener("keydown", e => {
   if(e.key === "Escape" && G.running){ G.withdrawn = true; endGame(false); }
   if(e.key === "Enter" && G.phase === "offense" && G.required){
     e.preventDefault();
-    if(G.offenseMode === "listen") speakKana(G.required, G.twice);
+    if(listenMode()) speakKana(G.required, G.twice);
   }
 });
 
@@ -3390,7 +3446,7 @@ function frame(ts){
       timerBar.classList.toggle("urgent", p < 0.3);
       if(G.phase === "offense" && !G.replayed && p < 0.5 && !G.buffer){
         G.replayed = true;
-        if(G.offenseMode === "listen") speakKana(G.required, G.twice);
+        if(listenMode()) speakKana(G.required, G.twice);
       }
       if(el >= G.tDur){
         G.tActive = false;
