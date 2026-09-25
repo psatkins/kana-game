@@ -2939,7 +2939,9 @@ function onInput(){
   if(G.phase === "between" || G.phase === "stun") return;
   if(!v) return;
   if(G.answers.indexOf(v) >= 0){
-    bufferInput.value = ""; G.buffer = "";
+    /* clear the tiles too: an encounter that ends here (the interlude) never
+       calls setPrompt again, so the last answer used to sit there. */
+    bufferInput.value = ""; G.buffer = ""; renderTiles("");
     return G.phase === "defense" ? defenseHit() : strike();
   }
   /* During offense all three kana are legal things to type. Judge only on a
