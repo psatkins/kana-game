@@ -236,7 +236,9 @@ button{font:inherit;color:inherit}
   color:var(--sumi-2);margin:26px 0 10px;padding-top:14px;border-top:1px solid var(--washi-3);
 }
 .gojuon-head:first-child{margin-top:0;padding-top:0;border-top:0}
-.card{perspective:700px;cursor:pointer;background:none;border:0;padding:0;aspect-ratio:1/1.1}
+/* Taller than the kana game's: the back carries three things now — romaji,
+   the hand, and its 字母 — and at 1/1.1 the 字母 fell off the bottom. */
+.card{perspective:700px;cursor:pointer;background:none;border:0;padding:0;aspect-ratio:1/1.34}
 .card-inner{
   display:block;position:relative;width:100%;height:100%;transform-style:preserve-3d;
   transition:transform .48s cubic-bezier(.2,.8,.2,1);
@@ -256,7 +258,7 @@ button{font:inherit;color:inherit}
     var(--jade) 0 calc(var(--m,0) * 100%), rgba(34,30,25,.11) calc(var(--m,0) * 100%) 100%);
 }
 .card:hover .face.front{background:rgba(255,255,255,.7);border-color:var(--sumi-2)}
-.face.front .k{font-family:var(--kana);font-size:clamp(30px,4.6vw,44px);color:var(--sumi);line-height:1}
+.face.front .k{font-family:var(--kana);font-size:clamp(38px,5.6vw,56px);color:var(--sumi);line-height:1.15}
 .face.front .grp{
   display:none;                 /* it gives away the romaji onset — opt in only */
   font-family:var(--mono);font-size:9px;letter-spacing:.14em;
@@ -266,9 +268,11 @@ body.showtags .face.front .grp{display:block}
 .face.back{
   transform:rotateY(180deg);background:var(--sumi);border-color:var(--sumi);color:var(--washi);
 }
+.face{overflow:hidden;padding:6px}
+.face.back{gap:3px}
 .face.back .r{
-  font-family:var(--mono);font-size:clamp(15px,2.4vw,20px);letter-spacing:.06em;
-  display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.15;
+  font-family:var(--mono);font-size:13px;letter-spacing:.1em;line-height:1.1;
+  color:var(--washi-3);
 }
 .face.back .r em{font-style:normal;font-size:11px;color:var(--washi-3);letter-spacing:.08em}
 .face.back .k2{font-family:var(--kana);font-size:clamp(30px,4.6vw,44px);color:var(--washi-3);line-height:1}
@@ -693,7 +697,7 @@ body.showtags .face.front .grp{display:block}
    KEIKO — the drill floor
    The dojo grid teaches recognition: you turn a card and agree with it.
    Nothing there ever asks you to produce an answer from nothing, which is
-   the one thing the duel demands. This is that practice with the stakes
+   the one thing the mat demands. This is that practice with the stakes
    taken out — no clock, no hit points, no death, and a way out on every
    screen. Same washi, same ink; only the asking is new.
    ========================================================== */
@@ -839,12 +843,12 @@ body.showtags .face.front .grp{display:block}
 .mora-head b{font-family:var(--body);font-weight:400;font-size:27px;color:var(--sumi);line-height:1}
 .mora-head span{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--sumi-2);text-transform:uppercase}
 .mora-head i{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--sumi-2);opacity:.65}
-.mora-band{display:grid;gap:9px;grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
+.mora-band{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(118px,1fr))}
 .grid.asTable{max-width:none}
-.face.back .hg{font-family:var(--kana);font-size:34px;color:var(--washi);line-height:1.15}
+.face.back .hg{font-family:var(--kana);font-size:clamp(26px,4vw,34px);color:var(--washi);line-height:1.2}
 .face.back .zb{
-  font-family:var(--body);font-size:21px;color:var(--washi);line-height:1;
-  border-top:1px solid rgba(228,217,190,.25);padding-top:5px;margin-top:3px;
+  font-family:var(--body);font-size:clamp(17px,2.6vw,21px);color:var(--washi);line-height:1.25;
+  border-top:1px solid rgba(228,217,190,.25);padding-top:4px;margin-top:1px;width:70%;text-align:center;
 }
 #recMap{display:block;max-width:none}
 #recMap .mrow{display:flex;align-items:center;gap:11px;margin-bottom:7px}
@@ -988,6 +992,43 @@ body.showtags .face.front .grp{display:block}
   text-transform:uppercase;min-height:16px;
 }
 
+.mat-acts{display:flex;gap:8px}
+#ankiBar,#matPause{
+  max-width:1000px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:12px clamp(16px,3vw,28px);
+}
+#ankiBar[hidden],#matPause[hidden],#missBox[hidden]{display:none}
+#ankiBar{border-bottom:1px solid rgba(34,30,25,.18);background:rgba(255,255,255,.3)}
+#ankiBar b{font-family:var(--brush);font-size:24px;line-height:1.6;color:var(--sumi)}
+#ankiBar span{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--sumi-2)}
+#ankiBar i{font-style:normal;color:var(--sumi);font-variant-numeric:tabular-nums}
+#matPause{justify-content:center;background:rgba(34,30,25,.08);border-bottom:1px solid rgba(34,30,25,.18)}
+#matPause b{font-family:var(--brush);font-size:26px;line-height:1.6;color:var(--sumi)}
+#matPause span{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--sumi-2)}
+#s-match.paused #mat{opacity:.12;pointer-events:none;filter:blur(2px)}
+
+/* 暗記時間: every card wears its reading until the reader starts */
+.fuda .hint{
+  position:absolute;left:0;right:0;bottom:5px;text-align:center;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:rgba(36,31,25,.6);
+}
+.fuda .zb{
+  position:absolute;left:0;right:0;top:5px;text-align:center;
+  font-family:var(--body);font-size:14px;color:rgba(36,31,25,.42);
+}
+.fuda{position:relative}
+
+/* a card that got past you stays put until you have looked at it */
+#missBox{
+  max-width:1000px;margin:0 auto;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  padding:14px clamp(16px,3vw,28px) 34px;
+}
+#missBox .g{font-family:var(--kana);font-size:62px;line-height:1.1;color:var(--sumi)}
+#missBox .m{display:flex;flex-direction:column;gap:2px}
+#missBox .m b{font-family:var(--mono);font-size:17px;letter-spacing:.1em;color:var(--sumi)}
+#missBox .m i{font-style:normal;font-family:var(--body);font-size:26px;color:var(--sumi-2)}
+.fuda.missed{border-color:var(--vermilion);box-shadow:0 0 0 3px rgba(192,57,43,.35),0 5px 14px rgba(60,46,26,.26)}
+
 /* ==========================================================
    FURIGANA
    The class is three weeks into hiragana and none of the way into kanji,
@@ -1120,7 +1161,8 @@ rt{
             <button data-g="print" aria-pressed="false"><ruby>明<rt>みん</rt></ruby><ruby>朝<rt>ちょう</rt></ruby> Print</button>
           </span>
           <label class="switch"><input type="checkbox" id="tagToggle"> Show 行 label on card fronts</label>
-          <label class="switch"><input type="checkbox" id="aidToggle"> Ring the spoken target (for rooms without audio)</label>
+          <label class="switch"><input type="checkbox" id="aidToggle"> Show the call as text (for rooms without audio)</label>
+          <label class="switch"><input type="checkbox" id="easyToggle"> やさしく Easy — print each card's 字母 on it</label>
           <label class="switch"><input type="checkbox" id="twiceToggle"> Say each target twice</label>
         </div>
         <div class="chipset">
@@ -1248,13 +1290,28 @@ rt{
         <span class="st"><i id="mFaults">0</i><small>お手つき</small></span>
         <span class="st"><i id="mLeft">0</i><small>on the mat</small></span>
       </div>
-      <button class="btn dark tiny" id="m-leave"><span class="jpx"><ruby>帰<rt>かえ</rt></ruby>る　</span>Leave</button>
+      <div class="mat-acts">
+        <button class="btn dark tiny" id="m-pause"><span class="jpx"><ruby>休<rt>やす</rt></ruby>み　</span>Pause</button>
+        <button class="btn dark tiny" id="m-leave"><span class="jpx"><ruby>帰<rt>かえ</rt></ruby>る　</span>Leave</button>
+      </div>
     </div>
     <div id="matTimer"><i id="matTimerBar"></i></div>
+    <div id="ankiBar" hidden>
+      <b><ruby>暗<rt>あん</rt></ruby><ruby>記<rt>き</rt></ruby><ruby>時<rt>じ</rt></ruby><ruby>間<rt>かん</rt></ruby></b>
+      <span>Learn the mat before the reader starts — <i id="ankiLeft"></i></span>
+      <button class="btn dark tiny" id="ankiGo"><span class="jpx"><ruby>始<rt>はじ</rt></ruby>める　</span>Begin</button>
+    </div>
+    <div id="matPause" hidden><b><ruby>休<rt>やす</rt></ruby>み</b><span>Paused</span>
+      <button class="btn dark tiny" id="m-resume"><span class="jpx"><ruby>続<rt>つづ</rt></ruby>ける　</span>Resume</button></div>
     <canvas id="fx"></canvas>
     <div id="flash" aria-hidden="true"></div>
     <div id="mat"></div>
     <p id="matHint"></p>
+    <div id="missBox" hidden>
+      <span class="g" id="missGlyph"></span>
+      <span class="m"><b id="missRomaji"></b><i id="missZibo"></i></span>
+      <button class="btn dark tiny" id="missGo">Continue <kbd>enter</kbd></button>
+    </div>
   </section>
 
   <!-- ============ REPORT ============ -->
@@ -1488,7 +1545,7 @@ function audioReport(html, ok){
   w.innerHTML = html;
 }
 /* The browser accepted speak() but never started. Say so plainly, and switch
-   the duel to the visual target so the game stays playable. */
+   the reader to the written call so the game stays playable. */
 function reportSilence(){
   const framed = inFrame();
   audioReport(
@@ -1496,7 +1553,7 @@ function reportSilence(){
     (framed
       ? ", which is what happens when the page runs inside an embedded frame \u2014 browsers block speech synthesis there. For audio, open <code>index.html</code> directly in Chrome or Safari."
       : ". Check your output device and volume.") +
-    " The duel stays fully playable either way: <b>Ring the spoken target</b> has been switched on, so the character to strike is circled."
+    " The match stays fully playable either way: <b>Show the call as text</b> has been switched on, so the reader's call is written out instead of spoken."
   );
   const t = document.getElementById("aidToggle");
   if(t && !t.checked){ t.checked = true; G.aid = true; syncTargetAid(); }
@@ -1556,15 +1613,15 @@ function verdict(heard){
       (framed
         ? ", which is the normal behaviour inside an embedded frame. Open <code>index.html</code> directly in Chrome or Safari and pronunciation should work."
         : ". On macOS check System Settings \u203A Accessibility \u203A Spoken Content, and that a Japanese voice is downloaded.") +
-      " <b>Ring the spoken target</b> is now on, so the duel plays as a reading drill.");
+      " <b>Show the call as text</b> is now on, so the match plays as a reading exercise.");
   }
   return audioReport(
-    "<b>No audio at all is reaching this page.</b> Not even the plain chime got through, so this is not a speech problem. Check the output device, the system volume, and whether this browser tab is muted (right-click the tab \u203A Unmute). <b>Ring the spoken target</b> is now on so you can keep playing meanwhile.");
+    "<b>No audio at all is reaching this page.</b> Not even the plain chime got through, so this is not a speech problem. Check the output device, the system volume, and whether this browser tab is muted (right-click the tab \u203A Unmute). <b>Show the call as text</b> is now on so you can keep playing meanwhile.");
 }
 
 function testAudio(){
   if(!("speechSynthesis" in window)){
-    return audioReport("<b>This browser has no speech support.</b> Turn on <b>Ring the spoken target</b> and the duel plays as a reading drill.");
+    return audioReport("<b>This browser has no speech support.</b> Turn on <b>Show the call as text</b> and the match plays as a reading exercise.");
   }
   const state = chime();
   const vs = speechSynthesis.getVoices();
@@ -2003,7 +2060,7 @@ const G = {
   deck: [], order: [], call: null, callIdx: 0, taken: 0, faults: 0, locked: false,
   promptAt: 0, tStart: 0, tDur: 0, tActive: false,
   /* the practice floor and the settings it carries */
-  dojoMode: "ordered", aid: false,
+  dojoMode: "ordered", aid: false, easy: false, paused: false, anki: false,
   shake: 0, shakeDirty: false, scale: 1,
   rate: 0.9, twice: false, speakOnHit: true,
   stats: null
@@ -2026,7 +2083,7 @@ function buildPool(){
   });
   G.pool = out;
   $("poolCount").textContent = out.length + " form" + (out.length === 1 ? "" : "s") + " selected";
-  /* Both the duel and the drill need enough characters to offer a choice
+  /* Both the match and the drill need enough forms to offer a choice
      that is not the answer by elimination. */
   const thin = out.length < 4;
   ["btn-duel", "btn-keiko"].forEach(id => {
@@ -2137,7 +2194,7 @@ const K_STAGES = [
   {jp:"選", en:"Choose",
    note:"Read the character, then choose its romaji. Nothing is timed and nothing is lost."},
   {jp:"書", en:"Write",
-   note:"The same characters, with no choices offered. Type the romaji — the duel's own verb."}
+   note:"The same forms, with no choices offered. Type the romaji from the hand alone."}
 ];
 const K = {stage:0, deck:[], idx:0, item:null, answers:[], locked:false, done:false,
            miss:new Map(), score:[0,0], size:0, from:0};
@@ -2324,7 +2381,7 @@ function kFinish(){
 
   const bad = [...K.miss.values()].sort((a, b) => b.n - a.n).slice(0, 24);
   if(!bad.length){
-    $("kReviewNote").textContent = "Nothing missed in either pass. Widen the lesson pool, or take these into the duel.";
+    $("kReviewNote").textContent = "Nothing missed in either pass. Widen the lesson pool, or take these onto the mat.";
     $("kReview").innerHTML = '<p class="clean">CLEAN SHEET — every character, both passes.</p>';
   }else{
     $("kReviewNote").textContent = "Missed at least once. Turn these in the grid, then drill again.";
@@ -2712,6 +2769,11 @@ $("bz-leave").addEventListener("click", () => { B.over = true; B.gen++; show("s-
    ========================================================== */
 const MAT_SIZE = 12;
 const CALL_SECONDS = 7;
+/* 暗記時間. A real match gives fifteen minutes to learn the layout before a
+   word is read, and it is half of what makes karuta karuta: you are not
+   sight-reading, you are recalling a mat you have already studied. Forty-five
+   seconds is the right scale for twelve cards, and Begin cuts it short. */
+const ANKI_SECONDS = 45;
 
 /* A silent reader makes the match unplayable, so when there is no working
    audio — or the player has asked for it — the call is shown as text and the
@@ -2760,7 +2822,37 @@ function startMatch(){
   G.stats = {correct:0, errors:0, time:0, combo:0, best:0, points:0, perChar:new Map()};
   renderMat();
   show("s-match");
-  setTimeout(nextCall, 700);
+  startAnki();
+}
+
+function setHints(on){
+  matEl.querySelectorAll(".hint").forEach(h => h.style.display = on ? "" : "none");
+}
+function startAnki(){
+  G.anki = true;
+  setHints(true);
+  $("ankiBar").hidden = false;
+  $("missBox").hidden = true;
+  hintLine.textContent = "Learn the mat. The reader waits.";
+  $("calledKana").textContent = "—";
+  $("calledNote").textContent = "not begun";
+  let left = ANKI_SECONDS;
+  $("ankiLeft").textContent = left + "s";
+  clearInterval(G.ankiTimer);
+  G.ankiTimer = setInterval(() => {
+    if(G.paused) return;
+    left--;
+    $("ankiLeft").textContent = left + "s";
+    if(left <= 0) endAnki();
+  }, 1000);
+}
+function endAnki(){
+  clearInterval(G.ankiTimer);
+  if(!G.anki) return;
+  G.anki = false;
+  setHints(false);
+  $("ankiBar").hidden = true;
+  setTimeout(() => { if(G.running) nextCall(); }, 500);
 }
 
 function renderMat(){
@@ -2770,7 +2862,9 @@ function renderMat(){
     el.className = "fuda";
     el.type = "button";
     el.dataset.i = i;
-    el.innerHTML = '<span class="g">' + it.disp + '</span>';
+    el.innerHTML = '<span class="g">' + it.disp + '</span>' +
+      (G.easy ? '<span class="zb">' + it.z + '</span>' : '') +
+      '<span class="hint">' + it.r + '</span>';
     el.setAttribute("aria-label", "card " + (i + 1));
     matEl.appendChild(el);
   });
@@ -2797,6 +2891,28 @@ function nextCall(){
 
 function cardAt(i){ return matEl.querySelector('.fuda[data-i="' + i + '"]'); }
 
+/* Pause holds the clock where it is rather than restarting the call: the
+   remaining time is banked and handed back on resume. */
+function pauseMatch(){
+  if(!G.running || G.paused) return;
+  G.paused = true;
+  if(G.tActive){ G.tLeft = Math.max(0, G.tDur - (performance.now() - G.tStart)); G.tActive = false; }
+  $("s-match").classList.add("paused");
+  $("matPause").hidden = false;
+  if("speechSynthesis" in window) speechSynthesis.cancel();
+}
+function resumeMatch(){
+  if(!G.paused) return;
+  G.paused = false;
+  $("s-match").classList.remove("paused");
+  $("matPause").hidden = true;
+  if(G.tLeft != null && !G.locked && !G.anki && G.call){
+    G.tStart = performance.now() - (G.tDur - G.tLeft);
+    G.tActive = true;
+    G.tLeft = null;
+  }
+}
+
 /* One reading each, so a card is the right take when it writes the mora that
    was called. Note it is the mora, not the card: if two cards on the mat ever
    wrote the same one, either would be correct — which is why the mat deals
@@ -2804,7 +2920,7 @@ function cardAt(i){ return matEl.querySelector('.fuda[data-i="' + i + '"]'); }
 function matchesCall(it){ return it.r === G.call.r; }
 
 function takeCard(i){
-  if(!G.running || G.locked) return;
+  if(!G.running || G.locked || G.paused || G.anki) return;
   const it = G.deck[i], el = cardAt(i);
   if(!el || el.classList.contains("gone")) return;
   if(!matchesCall(it)) return otetsuki(el, it);
@@ -2846,24 +2962,43 @@ function otetsuki(el, it){
   hintLine.textContent = "お手つき — that one is " + it.r + ", from " + it.z;
 }
 
+/* A card that got past you is the one worth looking at, so it stays on the
+   mat, ringed, until you say you have looked. Whisking it away after a second
+   and a half threw away the only moment you were going to pay attention. */
 function missCall(){
   if(!G.running || G.locked) return;
-  G.locked = true;
+  G.locked = true; G.tActive = false;
   G.stats.errors++; G.stats.combo = 0;
   noteAnswer(G.call, false);
-  const i = G.order[G.callIdx], el = cardAt(i);
-  if(el){ el.classList.add("shown"); setTimeout(() => el.classList.add("gone"), 900); }
-  hintLine.textContent = "Not taken — it was " + G.call.r + ", from " + G.call.z;
+  const el = cardAt(G.order[G.callIdx]);
+  if(el) el.classList.add("missed");
+  hintLine.textContent = "Not taken. Look at it, then continue.";
   $("calledKana").textContent = G.call.disp;
   $("calledNote").innerHTML = G.call.r + " &nbsp;·&nbsp; from <b>" + G.call.z + "</b>";
+  $("missGlyph").textContent = G.call.disp;
+  $("missRomaji").textContent = G.call.r;
+  $("missZibo").textContent = G.call.z;
+  $("missBox").hidden = false;
+  setTimeout(() => $("missGo").focus(), 0);
+}
+function missContinue(){
+  if($("missBox").hidden) return;
+  $("missBox").hidden = true;
+  const el = cardAt(G.order[G.callIdx]);
+  if(el){ el.classList.remove("missed"); el.classList.add("gone"); }
   G.taken++; updateMatStats();
   G.callIdx++;
-  setTimeout(() => { if(G.running) nextCall(); }, 1500);
+  if(G.running) nextCall();
 }
 
 function endMatch(){
   if(!G.running) return;
-  G.running = false; G.tActive = false;
+  G.running = false; G.tActive = false; G.paused = false; G.anki = false;
+  clearInterval(G.ankiTimer);
+  $("s-match").classList.remove("paused");
+  $("matPause").hidden = true;
+  $("ankiBar").hidden = true;
+  $("missBox").hidden = true;
   if("speechSynthesis" in window) speechSynthesis.cancel();
   const s = G.stats, attempts = s.correct + s.errors;
   const acc = attempts ? Math.round((s.correct / attempts) * 100) : 0;
@@ -2906,8 +3041,25 @@ matEl.addEventListener("click", e => {
   const el = e.target.closest(".fuda");
   if(el) takeCard(+el.dataset.i);
 });
-$("callAgain").addEventListener("click", () => { if(G.call && !G.locked) speakKana(G.call, G.twice, true); });
-$("m-leave").addEventListener("click", () => { if(G.running){ G.withdrawn = true; endMatch(); } });
+$("callAgain").addEventListener("click", () => { if(G.call && !G.locked && !G.anki) speakKana(G.call, G.twice, true); });
+$("m-pause").addEventListener("click", pauseMatch);
+window.addEventListener("keydown", e => {
+  if(kOn()) return;                                     // the drill owns its keys
+  if(e.key === "Enter" && !$("missBox").hidden){ e.preventDefault(); return missContinue(); }
+  if(e.key === "Enter" && G.anki){ e.preventDefault(); return endAnki(); }
+  if(e.key === "Enter" && G.running && G.call && !G.locked && !G.paused){
+    e.preventDefault(); return speakKana(G.call, G.twice, true);
+  }
+  if(e.key === "Escape" && G.running) return G.paused ? resumeMatch() : pauseMatch();
+});
+$("m-resume").addEventListener("click", resumeMatch);
+$("ankiGo").addEventListener("click", endAnki);
+$("missGo").addEventListener("click", missContinue);
+$("easyToggle").addEventListener("change", e => {
+  G.easy = e.target.checked; save("easy", e.target.checked ? "1" : "0");
+  if(G.running) renderMat();
+});
+$("m-leave").addEventListener("click", () => { if(G.running){ clearInterval(G.ankiTimer); G.withdrawn = true; endMatch(); } });
 /* ==========================================================
    10. FRAME LOOP
    ========================================================== */
@@ -2923,7 +3075,7 @@ function frame(ts){
     matEl.style.transform = "translate3d(" + ((Math.random()*2-1)*9*k).toFixed(1) + "px," +
                             ((Math.random()*2-1)*7*k).toFixed(1) + "px,0)";
   }else if(G.shakeDirty){ matEl.style.transform = "none"; G.shakeDirty = false; }
-  if(G.running && G.tActive){
+  if(G.running && G.tActive && !G.paused && !G.anki){
     const el = performance.now() - G.tStart;
     const p = Math.max(0, 1 - el / G.tDur);
     timerBar.style.transform = "scaleX(" + p + ")";
@@ -3071,6 +3223,8 @@ function previewVoice(){
     G.offenseMode = om;
     [...$("segOffense").children].forEach(x => x.setAttribute("aria-pressed", x.dataset.o === om));
   }
+  const ez = load("easy");
+  if(ez !== null){ G.easy = ez === "1"; $("easyToggle").checked = G.easy; }
   const hs = load("hitspeak");
   if(hs !== null){ G.speakOnHit = hs === "1"; $("hitSpeakToggle").checked = G.speakOnHit; }
   const cr = load("credit");
