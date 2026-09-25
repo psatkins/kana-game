@@ -244,6 +244,13 @@ button{font:inherit;color:inherit}
   border:1px solid var(--washi-3);border-radius:2px;
 }
 .face.front{background:rgba(255,255,255,.42);box-shadow:0 1px 0 rgba(0,0,0,.06)}
+/* how firmly this character is held: fills as it is answered, empties when
+   it is missed. Under the glyph so it never competes with it. */
+.face.front::after{
+  content:"";position:absolute;left:22%;right:22%;bottom:8px;height:3px;border-radius:2px;
+  background:linear-gradient(90deg,
+    var(--jade) 0 calc(var(--m,0) * 100%), rgba(34,30,25,.11) calc(var(--m,0) * 100%) 100%);
+}
 .card:hover .face.front{background:rgba(255,255,255,.7);border-color:var(--sumi-2)}
 .face.front .k{font-family:var(--kana);font-size:clamp(30px,4.6vw,44px);color:var(--sumi);line-height:1}
 .face.front .grp{
@@ -747,6 +754,47 @@ body.showtags .face.front .grp{display:block}
 .keiko h3 + p{margin:0 0 16px;font-size:13.5px;color:var(--sumi-2);max-width:60ch;line-height:1.7}
 #kDone[hidden],#kPlay[hidden]{display:none}
 
+#s-record{overflow-y:auto;display:none}
+#s-record.on{display:block}
+#recMap{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;max-width:420px}
+#recMap .sq{
+  aspect-ratio:1/1.08;border:1px solid var(--washi-3);border-radius:2px;position:relative;
+  display:grid;place-items:center;font-family:var(--kana);font-size:clamp(17px,3vw,25px);
+  color:var(--sumi);background:rgba(255,255,255,.34);overflow:hidden;
+}
+#recMap .sq i{
+  position:absolute;left:0;right:0;bottom:0;display:block;
+  background:rgba(110,143,125,.30);transition:height .3s ease;
+}
+#recMap .sq.full{border-color:var(--jade)}
+#recMap .sq.none{opacity:.34}
+#recMap .gap{aspect-ratio:1/1.08;border:1px dashed var(--washi-3);opacity:.3;border-radius:2px}
+.rv.got{border-left-color:var(--gold)}
+.rv.locked{opacity:.4;border-left-color:var(--washi-3)}
+.rv .bj{font-family:var(--brush);font-size:27px;line-height:1.5;color:var(--sumi)}
+
+/* a badge, announced once and then left alone */
+/* two can be earned by the same answer, so they stack rather than pile up */
+#badgeStack{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:60;
+  display:flex;flex-direction:column-reverse;align-items:center;gap:9px;
+  pointer-events:none;
+}
+.badge-toast{
+  display:flex;align-items:center;gap:14px;max-width:min(460px,88vw);
+  padding:13px 20px;border-radius:2px;
+  background:linear-gradient(#F1E7CD,#DFD0AC);color:var(--sumi);
+  border:1px solid var(--washi-3);border-left:4px solid var(--gold);
+  box-shadow:0 14px 40px rgba(0,0,0,.6);
+  animation:badgeIn .5s cubic-bezier(.2,1.2,.3,1), badgeOut .5s ease-in 4.6s forwards;
+}
+.badge-toast .bj{font-family:var(--brush);font-size:30px;line-height:1.5;white-space:nowrap}
+.badge-toast .bm{display:flex;flex-direction:column;gap:2px;min-width:0}
+.badge-toast .bm b{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase}
+.badge-toast .bm i{font-style:normal;font-size:12.5px;color:var(--sumi-2);line-height:1.5}
+@keyframes badgeIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes badgeOut{to{opacity:0;transform:translateY(-10px)}}
+
 /* ==========================================================
    FURIGANA
    The class is three weeks into hiragana and none of the way into kanji,
@@ -838,6 +886,7 @@ rt{
         </div>
         <div class="acts">
           <button class="btn dark tiny" id="btn-revealall">Reveal all</button>
+          <button class="btn dark tiny" id="btn-record"><span class="jpx"><ruby>記録<rt>きろく</rt></ruby>　</span>Record</button>
           <button class="btn dark" id="btn-keiko"><span class="jpx"><ruby>稽古<rt>けいこ</rt></ruby>　</span>Drill</button>
           <button class="btn solid" id="btn-duel"><span class="jpx"><ruby>夜道<rt>よみち</rt></ruby>へ　</span>Take the Night Road</button>
         </div>
@@ -909,6 +958,26 @@ rt{
         <span id="poolCount">0 characters selected</span><span id="creditFoot"></span>
         <span id="dojoHint"></span><span>Night road: type romaji · <kbd>enter</kbd> replays the name · <kbd>esc</kbd> to turn back</span>
       </footer>
+    </div>
+  </section>
+
+  <!-- ============ RECORD ============ -->
+  <section class="screen paper" id="s-record">
+    <div class="keiko">
+      <div class="keiko-head">
+        <div class="kh-title">
+          <span class="big"><ruby>記録<rt>きろく</rt></ruby></span>
+          <span class="sub"><b>Record</b><span id="recNote"></span></span>
+        </div>
+        <button class="btn dark tiny" id="rec-back"><span class="jpx"><ruby>道場<rt>どうじょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
+      </div>
+      <div class="tiles" id="recTiles"></div>
+      <h3><span class="jp"><ruby>五十音図<rt>ごじゅうおんず</rt></ruby></span><span class="en">What You Hold</span></h3>
+      <p>Each square fills as you answer it and empties when you miss it. Nothing here leaves this browser.</p>
+      <div id="recMap"></div>
+      <h3><span class="jp"><ruby>印<rt>しるし</rt></ruby></span><span class="en">Marks</span></h3>
+      <p id="recBadgeNote"></p>
+      <div class="review" id="recBadges"></div>
     </div>
   </section>
 
@@ -1226,6 +1295,123 @@ const STYLE = {
 function ruby(text, yomi){
   return yomi ? '<ruby>' + text + '<rt>' + yomi + '</rt></ruby>' : text;
 }
+/* ==========================================================
+   PROGRESS — held in this browser and nowhere else
+   No account, no server, no row anywhere with a student's name on it.
+   A character gains a point every time it is answered correctly and loses
+   two when it is missed, so strength is something held rather than
+   something reached once and banked. Everything here is best-effort: a
+   browser with storage blocked simply plays the game without a record,
+   which is why every read is guarded and every write can fail silently.
+   ========================================================== */
+const MASTERY_MAX = 4;
+let PROG = null;
+function progress(){
+  if(!PROG){ try{ PROG = JSON.parse(load("progress") || "{}"); }catch(e){ PROG = {}; } }
+  return PROG;
+}
+function saveProgress(){ try{ save("progress", JSON.stringify(progress())); }catch(e){} }
+function noteAnswer(it, ok){
+  if(!it || !it.key) return;
+  const p = progress(), cur = p[it.key] || 0;
+  p[it.key] = ok ? Math.min(MASTERY_MAX, cur + 1) : Math.max(0, cur - 2);
+  saveProgress();
+  noteDay();
+  awardBadges();
+}
+function masteredKeys(){
+  const p = progress();
+  return Object.keys(p).filter(k => p[k] >= MASTERY_MAX);
+}
+function touchedKeys(){
+  const p = progress();
+  return Object.keys(p).filter(k => p[k] > 0);
+}
+
+/* days, for the streak. Dates only — no times, nothing identifying. */
+function dayStamp(d){
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") +
+         "-" + String(d.getDate()).padStart(2, "0");
+}
+function loadDays(){
+  try{ return JSON.parse(load("days") || '{"last":"","streak":0,"total":0}'); }
+  catch(e){ return {last:"", streak:0, total:0}; }
+}
+function noteDay(){
+  const d = loadDays(), t = dayStamp(new Date());
+  if(d.last === t) return;
+  const yesterday = dayStamp(new Date(Date.now() - 864e5));
+  d.streak = (d.last === yesterday) ? (d.streak || 0) + 1 : 1;
+  d.last = t; d.total = (d.total || 0) + 1;
+  try{ save("days", JSON.stringify(d)); }catch(e){}
+}
+
+/* Badges are for things that are actually hard, not for turning up. */
+const BADGES = [
+  {id:"first",  jp:"初夜", yomi:"しょや",   en:"First Night",
+   note:"One yōkai named and sealed."},
+  {id:"muzu",   jp:"無傷", yomi:"むきず",   en:"Unscathed",
+   note:"An encounter cleared without a single miss."},
+  {id:"gojuon", jp:"五十音", yomi:"ごじゅうおん", en:"Gojūon",
+   note:"All 46 basic kana answered correctly at least once."},
+  {id:"daku",   jp:"濁点", yomi:"だくてん", en:"Dakuten",
+   note:"All 23 voiced kana answered correctly at least once."},
+  {id:"yoon",   jp:"拗音", yomi:"ようおん", en:"Yōon",
+   note:"All 33 small-ya kana answered correctly at least once."},
+  {id:"nanoya", jp:"七夜", yomi:"ななや",   en:"Seven Nights",
+   note:"Came back on seven different days."},
+  {id:"kaiden", jp:"皆伝", yomi:"かいでん", en:"Full Transmission",
+   note:"All 46 basic kana held at full strength at once."},
+  {id:"yoake",  jp:"夜明", yomi:"よあけ",   en:"Daybreak",
+   note:"Walked the whole road and came out the other side."}
+];
+function loadBadges(){
+  try{ return JSON.parse(load("badges") || "{}"); }catch(e){ return {}; }
+}
+function grant(id){
+  const b = loadBadges();
+  if(b[id]) return false;
+  b[id] = dayStamp(new Date());
+  try{ save("badges", JSON.stringify(b)); }catch(e){}
+  return true;
+}
+function groupKeys(g){
+  const out = [];
+  ALL.filter(i => i.g === g).forEach(i => { out.push("h|" + i.id); out.push("k|" + i.id); });
+  return out;
+}
+/* a mora counts as known once either script of it has been read */
+function groupKnown(groups, atLeast){
+  return groups.every(g => ALL.filter(i => i.g === g).every(i =>
+    (progress()["h|" + i.id] || 0) >= atLeast || (progress()["k|" + i.id] || 0) >= atLeast));
+}
+function awardBadges(){
+  const got = [];
+  const days = loadDays();
+  if(groupKnown(BASIC_GROUPS, 1) && grant("gojuon")) got.push("gojuon");
+  if(groupKnown(BASIC_GROUPS, MASTERY_MAX) && grant("kaiden")) got.push("kaiden");
+  if(groupKnown(["daku"], 1) && grant("daku")) got.push("daku");
+  if(groupKnown(["yoon"], 1) && grant("yoon")) got.push("yoon");
+  if((days.total || 0) >= 7 && grant("nanoya")) got.push("nanoya");
+  got.forEach(id => toastBadge(BADGES.find(b => b.id === id)));
+  return got;
+}
+function toastBadge(b){
+  if(!b) return;
+  let stack = document.getElementById("badgeStack");
+  if(!stack){
+    stack = document.createElement("div");
+    stack.id = "badgeStack";
+    document.body.appendChild(stack);
+  }
+  const el = document.createElement("div");
+  el.className = "badge-toast";
+  el.innerHTML = '<span class="bj">' + ruby(b.jp, b.yomi) + '</span>' +
+                 '<span class="bm"><b>' + b.en + '</b><i>' + b.note + '</i></span>';
+  stack.appendChild(el);
+  setTimeout(() => el.remove(), 5200);
+}
+
 function styleOf(){ return (TIERS[G.tier] && TIERS[G.tier].style) || "thrust"; }
 function envelope(){ return STYLE[styleOf()] || STYLE.thrust; }
 function approachProgress(){
@@ -2050,6 +2236,8 @@ function makeCard(it){
   const card = document.createElement("button");
   card.className = "card";
   card.type = "button";
+  /* how well this one is held, as a bar under the glyph */
+  card.style.setProperty("--m", ((progress()[it.key] || 0) / MASTERY_MAX));
   card.setAttribute("aria-label", it.disp + " — " + it.r);
   card.innerHTML =
     '<span class="card-inner">' +
@@ -2243,6 +2431,7 @@ function kJudge(ok, chosen){
   if(K.locked) return;
   K.locked = true;
   const it = K.item;
+  noteAnswer(it, ok);
   if(ok){
     K.score[K.stage]++;
     /* Typed correctly without the choices in front of you: that is the pass
@@ -2330,6 +2519,50 @@ function kFinish(){
       (r.n === 1 ? " miss" : " misses") + '</span></span></div>').join("");
   }
 }
+
+function renderRecord(){
+  const p = progress(), days = loadDays(), got = loadBadges();
+  const basic = [];
+  ALL.filter(i => BASIC_GROUPS.indexOf(i.g) >= 0).forEach(i => basic.push(i));
+  const strength = i => Math.max(p["h|" + i.id] || 0, p["k|" + i.id] || 0);
+  const held = basic.filter(i => strength(i) >= MASTERY_MAX).length;
+  const met  = basic.filter(i => strength(i) > 0).length;
+
+  $("recNote").textContent =
+    "Everything below is kept in this browser only. Clearing your site data clears it, " +
+    "and it does not follow you to another computer.";
+  $("recTiles").innerHTML = [
+    ["Held firmly", held, " / " + basic.length],
+    ["Met at all", met, " / " + basic.length],
+    ["Night streak", days.streak || 0, (days.streak === 1 ? " day" : " days")],
+    ["Nights in all", days.total || 0, ""],
+    ["Marks earned", Object.keys(got).length, " / " + BADGES.length],
+    ["Kana in memory", Object.keys(p).length, ""]
+  ].map(t => '<div class="tile"><span class="k">' + t[0] + '</span><span class="v">' +
+             t[1] + (t[2] ? '<em>' + t[2] + '</em>' : '') + '</span></div>').join("");
+
+  const byRomaji = new Map(basic.map(i => [i.r, i]));
+  /* skip the dakuten and yoon rows of the table entirely — with only the
+     basic set mapped they were rendering as dozens of empty squares. */
+  $("recMap").innerHTML = GOJUON_TABLE.filter(row => row.some(r => r && byRomaji.has(r)))
+    .map(row => row.map(r => {
+    if(!r || !byRomaji.has(r)) return '<span class="gap"></span>';
+    const it = byRomaji.get(r), v = strength(it), pct = (v / MASTERY_MAX) * 100;
+    return '<span class="sq ' + (v >= MASTERY_MAX ? "full" : v ? "" : "none") +
+           '" title="' + it.r + '"><i style="height:' + pct + '%"></i>' + it.h + '</span>';
+  }).join("")).join("");
+
+  $("recBadgeNote").textContent = Object.keys(got).length
+    ? "Earned by doing the thing, not by turning up."
+    : "None yet. They are given for finishing something, not for starting it.";
+  $("recBadges").innerHTML = BADGES.map(b =>
+    '<div class="rv ' + (got[b.id] ? "got" : "locked") + '">' +
+    '<span class="bj">' + ruby(b.jp, b.yomi) + '</span>' +
+    '<span class="m"><b>' + b.en + '</b><span>' +
+    (got[b.id] ? got[b.id] : "not yet") + '</span></span></div>').join("");
+}
+$("btn-record").addEventListener("click", () => { renderRecord(); show("s-record"); });
+$("rec-back").addEventListener("click", () => { show("s-dojo"); refreshDojo(); });
 
 function keikoStart(){
   ac();
@@ -2438,6 +2671,7 @@ function setPrompt(it){
 }
 function markError(it){
   if(!it) return;
+  noteAnswer(it, false);
   const m = G.stats.perChar;
   const rec = m.get(it.key) || {item: it, n: 0};
   rec.n++; m.set(it.key, rec);
@@ -2446,6 +2680,7 @@ function markError(it){
 function breakCombo(){ G.stats.combo = 0; updateHud(); }
 function award(){
   clearIME();
+  noteAnswer(G.required, true);
   G.stats.correct++;
   const el = (performance.now() - G.promptAt) / 1000;
   G.stats.time += el;
@@ -2617,6 +2852,7 @@ function startTier(){
   document.querySelectorAll(".mote").forEach(m => m.remove());
   G.volley = []; volleyEl.hidden = true;
   document.getElementById("scene").classList.toggle("tearoom", T.scene === "tearoom");
+  G.tierErrors = G.stats ? G.stats.errors : 0;
   G.foeMax = T.hp; G.foeHp = T.hp;
   enemyEl.innerHTML = silhouette(T.key);
   $("foeJp").innerHTML = ruby(T.jp, T.yomi);
@@ -2976,6 +3212,9 @@ function finishOffense(){
 }
 
 function tierClear(){
+  if(grant("first")) toastBadge(BADGES.find(b => b.id === "first"));
+  if(G.stats && G.stats.errors === G.tierErrors && grant("muzu"))
+    toastBadge(BADGES.find(b => b.id === "muzu"));
   clearNodes();
   stopTimer();
   const cx = CW/2, cy = CH*0.42;
@@ -3089,6 +3328,7 @@ function endGame(won){
   const reached = Math.min(G.tier + (won ? 0 : 1), TIERS.length);
   const hiddenMet = TIERS.slice(0, reached).filter(t => t.hidden).length;
 
+  if(won && grant("yoake")) toastBadge(BADGES.find(b => b.id === "yoake"));
   $("verdictJp").textContent = won ? "勝" : "敗";
   $("verdictJp").classList.toggle("loss", !won);
   $("verdictEn").textContent = won ? "Victory" : (G.withdrawn ? "Withdrawn" : "Defeat");
