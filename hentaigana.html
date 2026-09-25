@@ -841,7 +841,7 @@ body.showtags .face.front .grp{display:block}
 .mora-head i{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--sumi-2);opacity:.65}
 .mora-band{display:grid;gap:9px;grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
 .grid.asTable{max-width:none}
-.face.back .mk{font-family:var(--body);font-size:15px;color:var(--washi-3);line-height:1}
+.face.back .hg{font-family:var(--kana);font-size:34px;color:var(--washi);line-height:1.15}
 .face.back .zb{
   font-family:var(--body);font-size:21px;color:var(--washi);line-height:1;
   border-top:1px solid rgba(228,217,190,.25);padding-top:5px;margin-top:3px;
@@ -1017,10 +1017,10 @@ rt{
       </div>
       <div class="chipset">
         <span class="seg" id="segDojo">
-          <button data-d="ordered" aria-pressed="true"><ruby>五<rt>ご</rt></ruby><ruby>十<rt>じゅう</rt></ruby><ruby>音<rt>おん</rt></ruby><ruby>図<rt>ず</rt></ruby> Table</button>
+          <button data-d="ordered" aria-pressed="true"><ruby>音<rt>おん</rt></ruby><ruby>順<rt>じゅん</rt></ruby> By mora</button>
           <button data-d="shuffle" aria-pressed="false">シャッフル Shuffle</button>
         </span>
-        <button class="chip" id="preset-basic"><span class="jp"><ruby>五<rt>ご</rt></ruby><ruby>十<rt>じゅう</rt></ruby><ruby>音<rt>おん</rt></ruby></span> Kana 46</button>
+        <button class="chip" id="preset-basic"><span class="jp"><ruby>手<rt>て</rt></ruby><ruby>始<rt>はじ</rt></ruby>め</span> A start</button>
         <button class="chip" id="preset-all"><span class="jp"><ruby>全<rt>ぜん</rt></ruby></span> Everything</button>
         <button class="btn dark tiny" id="btn-settings" aria-expanded="false" aria-controls="settings"><ruby>設<rt>せっ</rt></ruby><ruby>定<rt>てい</rt></ruby> Settings ▾</button>
       </div>
@@ -1284,9 +1284,14 @@ const ALL = [];
 HG_DATA.trim().split(/\s+/).forEach(rec => {
   const p = rec.split("|");
   if(p.length !== 3) return;
-  const reads = p[1].split(",");
-  const alt = reads.slice(1).concat(KUNREI[reads[0]] || []);
-  const it = {h:p[0], k:p[0], r:reads[0], reads, alt, z:p[2],
+  const all = p[1].split(",");
+  /* Eleven forms read more than one way — 家 is か or け, 无 is ん, む or も.
+     Unicode lists the commonest first, and that is the only one the game
+     teaches: offering both was more confusing than it was informative. The
+     full list stays on the item so nothing is lost. */
+  const reads = [all[0]];
+  const alt = KUNREI[all[0]] || [];
+  const it = {h:p[0], k:p[0], r:all[0], reads, allReads:all, alt, z:p[2],
               mk:MODERN[reads[0]], g:ROW_OF[reads[0]],
               id:ROW_OF[reads[0]] + ":" + reads[0] + ":" + p[0]};
   ALL.push(it);
@@ -1625,8 +1630,13 @@ function playClip(r, repeat){
    feeding it ハ / ヘ / ヲ forces the syllabic reading. The character on
    screen is unchanged — this only affects what is sent to the synthesiser. */
 const SPEAK_AS = {"\u306F":"\u30CF", "\u3078":"\u30D8", "\u3092":"\u30F2", "\u3090":"\u30A4", "\u3091":"\u30A8"};
+/* What a card SAYS is its mora, not its shape. Handing 𛀂 to a speech engine
+   gets you silence — no voice has a reading for a hentaigana codepoint — so
+   the modern kana is what goes to the synthesiser while the old hand stays
+   on screen. The katakana substitutions below still apply: a lone は is read
+   as the particle "wa" unless it is sent as ハ. */
 function spokenForm(item){
-  const base = item.h || item.k;
+  const base = item.mk || item.h;
   return SPEAK_AS[base] || base;
 }
 /* `slow` is for the phases where the answer depends on hearing it. A single
@@ -1955,14 +1965,14 @@ function makeCard(it){
   card.type = "button";
   /* how well this one is held, as a bar under the glyph */
   card.style.setProperty("--m", ((progress()[it.key] || 0) / MASTERY_MAX));
-  card.setAttribute("aria-label", it.disp + " — " + it.reads.join(" or ") + ", from " + it.z);
+  card.setAttribute("aria-label", it.disp + " — " + it.r + ", from " + it.z);
   card.innerHTML =
     '<span class="card-inner">' +
       '<span class="face front"><span class="k">' + it.disp + '</span>' +
         '<span class="grp">' + (GROUP_TAG[it.g] || it.g.toUpperCase()) + '</span></span>' +
       '<span class="face back">' +
-        '<span class="r">' + it.reads.join(" · ") + '</span>' +
-        '<span class="mk">' + it.reads.map(x => MODERN[x]).join("") + '</span>' +
+        '<span class="r">' + it.r + '</span>' +
+        '<span class="hg">' + it.h + '</span>' +
         '<span class="zb">' + it.z + '</span>' +
       '</span>' +
     '</span>';
@@ -2556,11 +2566,11 @@ function nextCall(){
 
 function cardAt(i){ return matEl.querySelector('.fuda[data-i="' + i + '"]'); }
 
-/* A form with more than one reading is a correct take for any of them, so a
-   card matches when its readings and the called card's readings overlap. */
-function matchesCall(it){
-  return it === G.call || it.reads.some(r => G.call.reads.indexOf(r) >= 0);
-}
+/* One reading each, so a card is the right take when it writes the mora that
+   was called. Note it is the mora, not the card: if two cards on the mat ever
+   wrote the same one, either would be correct — which is why the mat deals
+   one form per mora. */
+function matchesCall(it){ return it.r === G.call.r; }
 
 function takeCard(i){
   if(!G.running || G.locked) return;
@@ -2589,7 +2599,7 @@ function takeCard(i){
   G.taken++; updateMatStats();
 
   $("calledKana").textContent = it.disp;
-  $("calledNote").innerHTML = it.reads.join(" · ") + " &nbsp;·&nbsp; from <b>" + it.z + "</b>";
+  $("calledNote").innerHTML = it.r + " &nbsp;·&nbsp; from <b>" + it.z + "</b>";
   hintLine.textContent = "Taken";
   G.callIdx++;
   setTimeout(() => { if(G.running) nextCall(); }, 1100);
@@ -2602,7 +2612,7 @@ function otetsuki(el, it){
   sfxBad(); shake(0.5);
   el.classList.remove("fault"); void el.offsetWidth; el.classList.add("fault");
   setTimeout(() => el.classList.remove("fault"), 460);
-  hintLine.textContent = "お手つき — that one is " + it.reads.join(" · ") + ", from " + it.z;
+  hintLine.textContent = "お手つき — that one is " + it.r + ", from " + it.z;
 }
 
 function missCall(){
@@ -2612,9 +2622,9 @@ function missCall(){
   noteAnswer(G.call, false);
   const i = G.order[G.callIdx], el = cardAt(i);
   if(el){ el.classList.add("shown"); setTimeout(() => el.classList.add("gone"), 900); }
-  hintLine.textContent = "Not taken — it was " + G.call.reads.join(" · ") + ", from " + G.call.z;
+  hintLine.textContent = "Not taken — it was " + G.call.r + ", from " + G.call.z;
   $("calledKana").textContent = G.call.disp;
-  $("calledNote").innerHTML = G.call.reads.join(" · ") + " &nbsp;·&nbsp; from <b>" + G.call.z + "</b>";
+  $("calledNote").innerHTML = G.call.r + " &nbsp;·&nbsp; from <b>" + G.call.z + "</b>";
   G.taken++; updateMatStats();
   G.callIdx++;
   setTimeout(() => { if(G.running) nextCall(); }, 1500);
@@ -2655,7 +2665,7 @@ function endMatch(){
     : "Nothing missed.";
   $("review").innerHTML = bad.length
     ? bad.map(r => '<div class="rv"><span class="k">' + r.item.disp + '</span>' +
-        '<span class="m"><b>' + r.item.reads.join(" · ") + '</b><span>' + r.item.z + '</span></span></div>').join("")
+        '<span class="m"><b>' + r.item.r + '</b><span>' + r.item.z + '</span></span></div>').join("")
     : '<p class="clean">CLEAN SHEET — every card taken first time.</p>';
   $("s-report").scrollTop = 0;
   show("s-report");
@@ -2770,7 +2780,9 @@ $("tagToggle").addEventListener("change", e => {
 $("aidToggle").addEventListener("change", e => { G.aid = e.target.checked; syncTargetAid(); });
 $("twiceToggle").addEventListener("change", e => { G.twice = e.target.checked; save("twice", e.target.checked ? "1" : "0"); });
 $("preset-basic").addEventListener("click", () => {
-  G.groups = new Set(BASIC_GROUPS); syncChips(); refreshDojo();
+  /* Somewhere to begin: あ and か alone are 58 forms, which is plenty for a
+     first sitting. "Everything" is all 285. */
+  G.groups = new Set(["a", "k"]); syncChips(); refreshDojo();
 });
 $("preset-all").addEventListener("click", () => {
   G.groups = new Set(ROWS.map(r => r.g)); syncChips(); refreshDojo();
