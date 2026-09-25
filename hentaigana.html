@@ -951,7 +951,8 @@ body.showtags .face.front .grp{display:block}
 .reader .called{display:flex;flex-direction:column;gap:2px;min-width:0}
 .reader .called b{font-family:var(--kana);font-size:40px;line-height:1.15;color:var(--sumi)}
 .reader .called b.call{
-  font-family:var(--mono);font-size:34px;letter-spacing:.1em;color:var(--vermilion);
+  font-family:var(--mono);font-size:clamp(38px,6vw,54px);font-weight:500;
+  letter-spacing:.08em;color:var(--vermilion);line-height:1.1;
 }
 .reader .called span{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--sumi-2);text-transform:uppercase}
 .reader .called span b{font-family:var(--body);font-size:15px;letter-spacing:0;text-transform:none}
@@ -996,6 +997,16 @@ body.showtags .face.front .grp{display:block}
 }
 
 .mat-acts{display:flex;gap:8px}
+.bz-rule{
+  flex:1 1 100%;order:3;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:6px 20px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--sumi-2);
+}
+.bz-rule .r{display:inline-flex;align-items:baseline;gap:5px}
+.bz-rule em{font-style:normal;font-family:var(--body);font-size:15px;color:var(--sumi)}
+.bz-rule b{font-family:var(--brush);font-size:17px;letter-spacing:0;color:var(--sumi);line-height:1.5}
+.bz-rule i{font-style:normal;font-size:9.5px;opacity:.6}
+#missBox.took .m b{color:var(--jade)}
+#missBox #missGo[hidden]{display:none}
 #ankiBar,#matPause{
   max-width:1000px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   padding:12px clamp(16px,3vw,28px);
@@ -1261,6 +1272,7 @@ rt{
   <section class="screen paper" id="s-bozu">
     <div class="bz-head">
       <h2><ruby>坊<rt>ぼう</rt></ruby><ruby>主<rt>ず</rt></ruby>めくり <span>Bōzu Mekuri</span></h2>
+      <p class="bz-rule"><span class="r"><em>は</em><i>ha hi fu he ho</i> → <b>坊主</b></span><span class="r"><em>あ・や・ら</em> → <b>姫</b></span><span class="r">everything else → <b>男</b></span></p>
       <button class="btn dark tiny" id="bz-leave"><span class="jpx"><ruby>帰<rt>かえ</rt></ruby>る　</span>Leave</button>
     </div>
     <div class="bz-table">
@@ -2658,13 +2670,21 @@ const BZ_DECK = 40;
    which is how a ten-card deck ended up holding eleven. */
 const B = {deck: [], you: 0, them: 0, pool: 0, turn: "you", over: false, busy: false, gen: 0};
 
+/* What a card does is decided by the mora it writes, not by a hash. This is
+   the whole reason to play it: you turn a hand, and to know what is about to
+   happen to you, you have to read it. The outcome is still pure luck — you
+   cannot choose the card — but the card is no longer wallpaper.
+
+   は行 are the monks, あ・や・ら the ladies, everything else men. Against the
+   285 forms that lands at 12.6 / 22.5 / 64.9, and the Hyakunin Isshu deck
+   this is borrowed from is 13 / 21 / 66. The rule fits the real proportions
+   almost exactly, which is luck of a different kind. */
+const BZ_HIME = ["a", "y", "r"];
 function cardRole(it){
-  let h = 0;
-  const key = it.h + it.z;
-  for(let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
-  const n = h % 100;
-  return n < 13 ? "bozu" : n < 34 ? "hime" : "otoko";
+  if(it.g === "h") return "bozu";
+  return BZ_HIME.indexOf(it.g) >= 0 ? "hime" : "otoko";
 }
+
 const BZ_ROLE = {
   otoko: {jp:"男",   rb:"男|おとこ",  en:"a nobleman", note:"keeps it"},
   bozu:  {jp:"坊主", rb:"坊|ぼう 主|ず", en:"a monk",    note:"puts everything back"},
@@ -2681,7 +2701,7 @@ function bzStart(){
   $("bzCard").hidden = true;
   $("bzEnd").hidden = true;
   bzPaint();
-  $("bzHint").textContent = "Turn the top card. Nothing here can be got wrong.";
+  $("bzHint").textContent = "Turn the top card. Read the hand and you will know what is coming.";
   show("s-bozu");
 }
 
@@ -2961,6 +2981,10 @@ function takeCard(i){
   $("calledKana").textContent = it.disp;
   $("calledKana").classList.remove("call");
   $("calledNote").innerHTML = it.r + " &nbsp;·&nbsp; from <b>" + it.z + "</b>";
+  /* A card you got right is worth the same look as one you did not: seeing
+     the hand, its mora and its 字母 together is the thing being learned, and
+     getting it right is no reason to be denied that. */
+  showResolved(it, true);
   hintLine.textContent = "Taken";
   G.callIdx++;
   setTimeout(() => { if(G.running) nextCall(); }, 1100);
@@ -2990,14 +3014,24 @@ function missCall(){
   $("calledKana").textContent = G.call.disp;
   $("calledKana").classList.remove("call");
   $("calledNote").innerHTML = G.call.r + " &nbsp;·&nbsp; from <b>" + G.call.z + "</b>";
-  $("missGlyph").textContent = G.call.disp;
-  $("missRomaji").textContent = G.call.r;
-  $("missZibo").textContent = G.call.z;
-  $("missBox").hidden = false;
+  showResolved(G.call, false);
   setTimeout(() => $("missGo").focus(), 0);
 }
+/* The panel under the mat. Shown for every card that resolves — it holds
+   itself open after a miss and clears itself after a take. */
+function showResolved(it, auto){
+  $("missGlyph").textContent = it.disp;
+  $("missRomaji").textContent = it.r;
+  $("missZibo").textContent = it.z;
+  $("missGo").hidden = !!auto;
+  $("missBox").classList.toggle("took", !!auto);
+  $("missBox").hidden = false;
+  clearTimeout(G.resolvedTimer);
+  if(auto) G.resolvedTimer = setTimeout(() => { $("missBox").hidden = true; }, 1050);
+}
+
 function missContinue(){
-  if($("missBox").hidden) return;
+  if($("missBox").hidden || $("missGo").hidden) return;
   $("missBox").hidden = true;
   const el = cardAt(G.order[G.callIdx]);
   if(el){ el.classList.remove("missed"); el.classList.add("gone"); }
