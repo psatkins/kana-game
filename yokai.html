@@ -514,9 +514,16 @@ body.showtags .face.front .grp{display:block}
 }
 @keyframes nodeIn{from{opacity:0;transform:translateZ(140px) scale(.4)}to{opacity:1;transform:translateZ(140px) scale(1)}}
 #s-duel.choosing .node{cursor:pointer}
+/* The hand is already on the keyboard from naming, so the number is a key
+   cap under each charm rather than a footnote on it: reaching for the mouse
+   between every round is the thing to avoid. */
 #s-duel.choosing .node::after{
-  content:attr(data-n);position:absolute;top:6px;left:50%;transform:translateX(-50%);
-  font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:rgba(36,31,25,.42);
+  content:attr(data-n);position:absolute;bottom:-13px;left:50%;
+  transform:translateX(-50%);width:24px;height:24px;border-radius:50%;
+  display:grid;place-items:center;
+  font-family:var(--mono);font-size:12.5px;
+  background:var(--gold);color:#1A1408;
+  box-shadow:0 3px 8px rgba(0,0,0,.55);
 }
 #s-duel.choosing .node:hover{border-color:var(--gold);transform:translateZ(150px) scale(1.04)}
 .node.live{border-color:var(--gold);box-shadow:0 0 42px rgba(201,162,39,.65), 0 10px 24px rgba(0,0,0,.5)}
@@ -2594,9 +2601,23 @@ function pickCharm(n){
   const d = G.decoys.find(x => x.el === n.el);
   if(d) wrongTarget(d);
 }
-enemyEl.addEventListener("click", e => {
-  const el = e.target.closest(".node");
-  if(el) pickCharm(G.nodes.find(x => x.el === el));
+/* The charms live inside #camera, which is a preserve-3d subtree — the
+   browser hands every click there to #camera itself rather than to the
+   transformed charm under the pointer, so .closest(".node") never matched
+   and nothing was clickable. Test the coordinates against each charm's own
+   rectangle instead and skip DOM hit-testing altogether. */
+$("s-duel").addEventListener("click", e => {
+  if(!G.running || G.phase !== "offense" || G.offenseMode !== "choose") return;
+  /* A little tolerance round each charm: they are being hit quickly, they
+     drift a few pixels as the figure breathes, and a click one pixel below
+     the paper should still count. */
+  const PAD = 12;
+  const hit = G.nodes.find(x => {
+    const r = x.el.getBoundingClientRect();
+    return e.clientX >= r.left - PAD && e.clientX <= r.right  + PAD &&
+           e.clientY >= r.top  - PAD && e.clientY <= r.bottom + PAD;
+  });
+  if(hit) pickCharm(hit);
 });
 $("btn-leave").addEventListener("click", () => { if(G.running){ G.withdrawn = true; endGame(false); } });
 $("btn-record").addEventListener("click", () => { renderRecord(); show("s-record"); });
@@ -2694,7 +2715,7 @@ function renderTiles(v){
   if(!v){
     const choosing = G.phase === "offense" && G.offenseMode === "choose";
     tilesEl.innerHTML = '<span class="ph">' +
-      (choosing ? "click a charm · or press 1 2 3" : "type romaji") + '</span>';
+      (choosing ? "press 1 2 3 · or click a charm" : "type romaji") + '</span>';
     return;
   }
   tilesEl.innerHTML = [...v].map(ch => '<span class="t">' + ch + '</span>').join("") + '<span class="caret"></span>';
@@ -2761,7 +2782,7 @@ function updateTargetHint(){
     G.offenseMode === "ltr"    ? pre + "read them right to left" :
     G.offenseMode === "gojuon" ? pre + "read in gojūon order — look at all three first" :
     targetAidOn()              ? pre + "take the ringed charm" :
-    G.offenseMode === "choose" ? pre + "click the one you hear · or press 1 2 3 · Enter to replay" :
+    G.offenseMode === "choose" ? pre + "press 1 2 3 for the one you hear · or click it · Enter to replay" :
                                  pre + "type the one you hear · Enter to replay";
 }
 function syncTargetAid(){
