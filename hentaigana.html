@@ -1073,9 +1073,9 @@ body.showtags .face.front .grp{display:block}
     <div class="title-stack">
       <h1 class="vtitle">変体仮名<br>歌留多</h1>
       <p class="romline">Hentaigana Karuta</p>
-      <p class="tag">The reader calls a syllable. Find the hand that writes it, before the hand opposite does.</p>
-      <button class="btn big" id="btn-enter"><span class="jpx">稽古場へ　</span>Enter the Practice Floor</button>
-      <p class="fine">Sound on · 285 forms, from the NINJAL standard set</p>
+      <p class="tag" data-t="tagline"></p>
+      <button class="btn big" id="btn-enter"><span data-t="enter"></span></button>
+      <p class="fine" data-t="fine"></p>
     </div>
   </section>
 
@@ -1083,77 +1083,78 @@ body.showtags .face.front .grp{display:block}
   <section class="screen paper" id="s-dojo">
     <aside class="rail">
       <h2>稽古場</h2>
-      <p class="rail-en">Practice Floor</p>
+      <p class="rail-en" data-t="railEn"></p>
       <div class="seal" aria-hidden="true">臨</div>
     </aside>
 
     <div class="dojo-main">
       <div class="dojo-bar">
         <div class="lede">
-          <p>Tap any form to hear it, and to see which mora it writes and which kanji it came from. Nothing is timed here.</p>
+          <p data-t="lede"></p>
         </div>
         <div class="acts">
-          <button class="btn dark tiny" id="btn-revealall">Reveal all</button>
-          <button class="btn dark tiny" id="btn-record"><span class="jpx">記録　</span>Record</button>
-          <button class="btn dark" id="btn-keiko"><span class="jpx">稽古　</span>Drill</button>
-          <button class="btn solid" id="btn-duel"><span class="jpx">並び　</span>Side by Side</button>
-          <button class="btn solid" id="btn-facing"><span class="jpx">対面　</span>Facing</button>
-          <button class="btn solid queen" id="btn-queen"><span class="jpx">クイーン　</span>The Queen</button>
+          <button class="btn dark tiny" id="btn-lang" title="日本語 / English"></button>
+          <button class="btn dark tiny" id="btn-revealall" data-t="revealAll"></button>
+          <button class="btn dark tiny" id="btn-record" data-t="record"></button>
+          <button class="btn dark" id="btn-keiko" data-t="drill"></button>
+          <button class="btn solid" id="btn-duel" data-t="sideBySide"></button>
+          <button class="btn solid" id="btn-facing" data-t="facing"></button>
+          <button class="btn solid queen" id="btn-queen" data-t="queen"></button>
         </div>
       </div>
 
       <div class="chipset">
-        <span class="lbl">Lesson pool</span>
+        <span class="lbl" data-t="lessonPool"></span>
         <span id="chips"></span>
       </div>
       <div class="chipset">
         <span class="seg" id="segDojo">
-          <button data-d="ordered" aria-pressed="true">音順 By mora</button>
-          <button data-d="shuffle" aria-pressed="false">シャッフル Shuffle</button>
+          <button data-d="ordered" aria-pressed="true" data-t="byMora"></button>
+          <button data-d="shuffle" aria-pressed="false" data-t="shuffle"></button>
         </span>
-        <button class="chip" id="preset-basic"><span class="jp">手始め</span> A start</button>
-        <button class="chip" id="preset-all"><span class="jp">全</span> Everything</button>
-        <button class="btn dark tiny" id="btn-settings" aria-expanded="false" aria-controls="settings">設定 Settings ▾</button>
+        <button class="chip" id="preset-basic" data-t="aStart"></button>
+        <button class="chip" id="preset-all" data-t="everything"></button>
+        <button class="btn dark tiny" id="btn-settings" aria-expanded="false" aria-controls="settings" data-t="settings"></button>
       </div>
 
       <div id="settings" hidden>
         <div class="chipset">
-          <span class="lbl">Sealing phase</span>
+          <span class="lbl" data-t="sealPhase"></span>
           <span class="seg" id="segOffense">
-            <button data-o="choose" aria-pressed="true">選ぶ Hear &amp; click</button>
-            <button data-o="ltr" aria-pressed="false">右→左 Read in order</button>
-            <button data-o="gojuon" aria-pressed="false">五十音順 Gojūon</button>
-            <button data-o="listen" aria-pressed="false">聞き取り Listen</button>
+            <button data-o="choose" aria-pressed="true" data-t="modeChoose"></button>
+            <button data-o="ltr" aria-pressed="false" data-t="modeOrder"></button>
+            <button data-o="gojuon" aria-pressed="false" data-t="modeGojuon"></button>
+            <button data-o="listen" aria-pressed="false" data-t="modeListen"></button>
           </span>
-          <label class="switch"><input type="checkbox" id="hitSpeakToggle" checked> Speak each character once it is answered</label>
-          <label class="switch"><input type="checkbox" id="altToggle" checked> Accept Kunrei-shiki as well as Hepburn (si · ti · tu · hu · zi · sya…)</label>
+          <label class="switch"><input type="checkbox" id="hitSpeakToggle" checked> <span data-t="optSpeak"></span></label>
+          <label class="switch"><input type="checkbox" id="altToggle" checked> <span data-t="optKunrei"></span></label>
         </div>
         <div class="chipset">
-          <span class="lbl">Glyph</span>
+          <span class="lbl" data-t="glyph"></span>
           <span class="seg" id="segGlyph">
-            <button data-g="brush" aria-pressed="true">筆 Brush</button>
-            <button data-g="hand" aria-pressed="false">手書き Hand</button>
-            <button data-g="print" aria-pressed="false">明朝 Print</button>
+            <button data-g="brush" aria-pressed="true" data-t="brush"></button>
+            <button data-g="hand" aria-pressed="false" data-t="hand"></button>
+            <button data-g="print" aria-pressed="false" data-t="print"></button>
           </span>
-          <label class="switch"><input type="checkbox" id="tagToggle"> Show 行 label on card fronts</label>
-          <label class="switch"><input type="checkbox" id="aidToggle"> Show the call as text (for rooms without audio)</label>
-          <label class="switch"><input type="checkbox" id="easyToggle"> やさしく Easy — print each card's 字母 on it</label>
-          <label class="switch"><input type="checkbox" id="timedToggle"> 時間制限 Put a clock on each call (7 seconds)</label>
-          <label class="switch"><input type="checkbox" id="twiceToggle"> Say each target twice</label>
+          <label class="switch"><input type="checkbox" id="tagToggle"> <span data-t="optRow"></span></label>
+          <label class="switch"><input type="checkbox" id="aidToggle"> <span data-t="optWritten"></span></label>
+          <label class="switch"><input type="checkbox" id="easyToggle"> <span data-t="optEasy"></span></label>
+          <label class="switch"><input type="checkbox" id="timedToggle"> <span data-t="optTimed"></span></label>
+          <label class="switch"><input type="checkbox" id="twiceToggle"> <span data-t="optTwice"></span></label>
         </div>
         <div class="chipset">
-          <span class="lbl">Voice</span>
+          <span class="lbl" data-t="voice"></span>
           <select id="voicePick" class="pick" aria-label="Japanese voice"></select>
-          <button class="btn dark tiny" id="voicePreview">Preview は・へ・ふ・く</button>
-          <button class="btn dark tiny" id="btn-audio">Test audio</button>
-          <span class="lbl" style="margin-left:10px">Speed</span>
+          <button class="btn dark tiny" id="voicePreview" data-t="preview"></button>
+          <button class="btn dark tiny" id="btn-audio" data-t="testAudio"></button>
+          <span class="lbl" style="margin-left:10px" data-t="speed"></span>
           <input type="range" id="rate" class="rate" min="0.6" max="1.1" step="0.05" value="0.9" aria-label="Speech speed">
         </div>
         <div class="chipset">
-          <span class="lbl">Audio pack</span>
-          <label class="btn dark tiny" for="packInput">Load recordings…</label>
+          <span class="lbl" data-t="audioPack"></span>
+          <label class="btn dark tiny" for="packInput" data-t="loadRec"></label>
           <input id="packInput" type="file" accept="audio/*" multiple hidden>
-          <button class="btn dark tiny" id="packClear">Clear</button>
+          <button class="btn dark tiny" id="packClear" data-t="clear"></button>
           <input id="packCredit" class="pick" style="max-width:270px" placeholder="Credit line for these recordings">
           <span class="lbl" id="packInfo"></span>
         </div>
@@ -1162,9 +1163,9 @@ body.showtags .face.front .grp{display:block}
       <div class="gridwrap"><div class="grid" id="grid"></div></div>
 
       <footer class="dojo-foot">
-        <span><kbd>click</kbd> flip &amp; speak</span>
+        <span data-t="footFlip"></span>
         <span id="poolCount">0 forms selected</span><span id="creditFoot"></span>
-        <span id="dojoHint"></span><span>Match: <kbd>click</kbd> the card you hear · <kbd>enter</kbd> replays the call · <kbd>esc</kbd> to leave</span>
+        <span id="dojoHint"></span><span data-t="footMatch"></span>
       </footer>
     </div>
   </section>
@@ -1175,15 +1176,15 @@ body.showtags .face.front .grp{display:block}
       <div class="keiko-head">
         <div class="kh-title">
           <span class="big">記録</span>
-          <span class="sub"><b>Record</b><span id="recNote"></span></span>
+          <span class="sub"><b data-t="recordEn"></b><span id="recNote"></span></span>
         </div>
-        <button class="btn dark tiny" id="rec-back"><span class="jpx">稽古場へ　</span>Practice Floor</button>
+        <button class="btn dark tiny" id="rec-back"><span data-t="toFloor"></span></button>
       </div>
       <div class="tiles" id="recTiles"></div>
-      <h3><span class="jp">音順</span><span class="en">What You Hold</span></h3>
-      <p>Each square fills as you answer it and empties when you miss it. Nothing here leaves this browser.</p>
+      <h3><span class="jp">音順</span><span class="en" data-t="whatYouHold"></span></h3>
+      <p data-t="recMapNote"></p>
       <div id="recMap"></div>
-      <h3><span class="jp">印</span><span class="en">Marks</span></h3>
+      <h3><span class="jp">印</span><span class="en" data-t="marks"></span></h3>
       <p id="recBadgeNote"></p>
       <div class="review" id="recBadges"></div>
     </div>
@@ -1197,7 +1198,7 @@ body.showtags .face.front .grp{display:block}
           <span class="big" id="kStageJp">選</span>
           <span class="sub"><b id="kStageEn">Choose</b><span id="kStageNote"></span></span>
         </div>
-        <button class="btn dark tiny" id="k-quit"><span class="jpx">稽古場へ　</span>Practice Floor</button>
+        <button class="btn dark tiny" id="k-quit"><span data-t="toFloor"></span></button>
       </div>
 
       <div class="kprog"><span class="track"><i id="kProgBar"></i></span><span class="ct" id="kProgText"></span></div>
@@ -1217,12 +1218,12 @@ body.showtags .face.front .grp{display:block}
 
       <div id="kDone" hidden>
         <div class="tiles" id="kTiles"></div>
-        <h3><span class="jp">要復習</span><span class="en">Needs Review</span></h3>
+        <h3><span class="jp">要復習</span><span class="en" data-t="needsReview"></span></h3>
         <p id="kReviewNote"></p>
         <div class="review" id="kReview"></div>
         <div class="rep-acts">
-          <button class="btn dark" id="k-again"><span class="jpx">もう一度　</span>Drill Again</button>
-          <button class="btn dark" id="k-done-back"><span class="jpx">稽古場へ　</span>Practice Floor</button>
+          <button class="btn dark" id="k-again"><span data-t="drillAgain"></span></button>
+          <button class="btn dark" id="k-done-back"><span data-t="toFloor"></span></button>
         </div>
       </div>
     </div>
@@ -1233,27 +1234,27 @@ body.showtags .face.front .grp{display:block}
     <div class="mat-head">
       <div class="reader">
         <button class="spk paper" id="callAgain" title="Read it again (enter)" aria-label="Read it again">&#128266;</button>
-        <div class="called"><b id="calledKana">—</b><span id="calledNote">the reader has not begun</span></div>
+        <div class="called"><b id="calledKana">—</b><span id="calledNote" data-t="notBegun"></span></div>
       </div>
       <div class="mat-stats">
-        <span class="st"><i id="mLeft">0</i><small>on the mat</small></span>
-        <span class="st miss"><i id="mFaults">0</i><small>お手つき misses</small></span>
-        <span class="st"><i id="mTaken">0</i><small>taken</small></span>
-        <span class="st queen" id="stQueen" hidden><i id="mHers">0</i><small>クイーン hers</small></span>
+        <span class="st"><i id="mLeft">0</i><small data-t="onMat"></small></span>
+        <span class="st miss"><i id="mFaults">0</i><small data-t="missesLbl"></small></span>
+        <span class="st"><i id="mTaken">0</i><small data-t="takenLbl"></small></span>
+        <span class="st queen" id="stQueen" hidden><i id="mHers">0</i><small data-t="hersLbl"></small></span>
       </div>
       <div class="mat-acts">
-        <button class="btn dark tiny" id="m-pause"><span class="jpx">休み　</span>Pause</button>
-        <button class="btn dark tiny" id="m-leave"><span class="jpx">帰る　</span>Leave</button>
+        <button class="btn dark tiny" id="m-pause"><span data-t="pause"></span></button>
+        <button class="btn dark tiny" id="m-leave"><span data-t="leave"></span></button>
       </div>
     </div>
     <div id="matTimer"><i id="matTimerBar"></i></div>
     <div id="ankiBar" hidden>
       <b>暗記時間</b>
-      <span>Learn the mat before the reader starts — <i id="ankiLeft"></i></span>
-      <button class="btn dark tiny" id="ankiGo"><span class="jpx">始める　</span>Begin</button>
+      <span><span data-t="ankiSay"></span> <i id="ankiLeft"></i></span>
+      <button class="btn dark tiny" id="ankiGo"><span data-t="begin"></span></button>
     </div>
-    <div id="matPause" hidden><b>休み</b><span>Paused</span>
-      <button class="btn dark tiny" id="m-resume"><span class="jpx">続ける　</span>Resume</button></div>
+    <div id="matPause" hidden><b>休み</b><span data-t="pausedLbl"></span>
+      <button class="btn dark tiny" id="m-resume"><span data-t="resume"></span></button></div>
     <canvas id="fx"></canvas>
     <div id="flash" aria-hidden="true"></div>
     <!-- She sits across the mat. Not a silhouette: the yokai game's flat
@@ -1301,17 +1302,17 @@ body.showtags .face.front .grp{display:block}
         <path d="M282 94 q9 -6 18 0" fill="none" stroke="#2A2028" stroke-width="2.6" stroke-linecap="round"/>
         <path d="M274 110 q6 4 12 0" fill="none" stroke="#9E6A63" stroke-width="2.4" stroke-linecap="round"/>
       </svg>
-      <span class="qname">クイーン<i>the Queen</i></span>
+      <span class="qname">クイーン<i data-t="queenName"></i></span>
     </div>
     <div id="mat">
       <div class="zone far" id="matFar"><span class="zlab" id="farLab"></span></div>
-      <div class="zone near" id="matNear"><span class="zlab">自陣 your side</span></div>
+      <div class="zone near" id="matNear"><span class="zlab" data-t="ownSide"></span></div>
     </div>
     <p id="matHint"></p>
     <div id="missBox" hidden>
       <span class="g" id="missGlyph"></span>
       <span class="m"><b id="missRomaji"></b><i id="missZibo"></i></span>
-      <button class="btn dark tiny" id="missGo">Continue <kbd>enter</kbd></button>
+      <button class="btn dark tiny" id="missGo"><span data-t="continue"></span> <kbd>enter</kbd></button>
     </div>
   </section>
 
@@ -1328,13 +1329,13 @@ body.showtags .face.front .grp{display:block}
 
       <div class="tiles" id="statTiles"></div>
 
-      <h3><span class="jp">要復習</span><span class="en">Needs Review</span></h3>
+      <h3><span class="jp">要復習</span><span class="en" data-t="needsReview"></span></h3>
       <p id="reviewNote">The hands that cost you. Turn these on the practice floor before the next match.</p>
       <div class="review" id="review"></div>
 
       <div class="rep-acts">
-        <button class="btn solid" id="btn-rematch"><span class="jpx">もう一度　</span>Walk It Again</button>
-        <button class="btn dark" id="btn-back"><span class="jpx">稽古場へ　</span>Practice Floor</button>
+        <button class="btn solid" id="btn-rematch"><span data-t="again"></span></button>
+        <button class="btn dark" id="btn-back"><span data-t="toFloor"></span></button>
       </div>
     </div>
   </section>
@@ -2084,7 +2085,8 @@ function buildPool(){
     out.push(Object.assign({}, i, {disp:i.h, key:"g|"+i.id}));
   });
   G.pool = out;
-  $("poolCount").textContent = out.length + " form" + (out.length === 1 ? "" : "s") + " selected";
+  $("poolCount").textContent = LANG ? (out.length + "字 選択中")
+    : (out.length + " form" + (out.length === 1 ? "" : "s") + " selected");
   /* Both the match and the drill need enough forms to offer a choice
      that is not the answer by elimination. */
   const thin = out.length < 4;
@@ -2154,7 +2156,7 @@ function renderOrdered(grid){
     const head = document.createElement("p");
     head.className = "mora-head";
     head.innerHTML = '<b>' + (MODERN[r] || "") + '</b><span>' + r + '</span>' +
-                     '<i>' + forms.length + (forms.length === 1 ? " form" : " forms") + '</i>';
+                     '<i>' + forms.length + (LANG ? "字" : (forms.length === 1 ? " form" : " forms")) + '</i>';
     grid.appendChild(head);
     const band = document.createElement("div");
     band.className = "mora-band";
@@ -2193,10 +2195,12 @@ function refreshDojo(){ buildPool(); renderGrid(); }
    works this way — a card speaks when it is turned, not before.
    ========================================================== */
 const K_STAGES = [
-  {jp:"選", en:"Choose",
-   note:"Read the hand, then choose the mora it writes. Nothing is timed and nothing is lost."},
-  {jp:"書", en:"Write",
-   note:"The same forms, with no choices offered. Type the romaji from the hand alone."}
+  {jp:"選", en:"Choose", jaEn:"えらぶ",
+   note:"Read the hand, then choose the mora it writes. Nothing is timed and nothing is lost.",
+   jaNote:"字を読んで、表す仮名を選んでください。時間制限も失うものもありません。"},
+  {jp:"書", en:"Write", jaEn:"かく",
+   note:"The same forms, with no choices offered. Type the romaji from the hand alone.",
+   jaNote:"同じ字を、選択肢なしで。字だけを見てローマ字で打ってください。"}
 ];
 const K = {stage:0, deck:[], idx:0, item:null, answers:[], locked:false, done:false,
            miss:new Map(), score:[0,0], size:0, from:0};
@@ -2263,10 +2267,11 @@ function kDraw(){
 function kStageHead(){
   const st = K_STAGES[K.stage];
   $("kStageJp").textContent = st.jp;
-  $("kStageEn").textContent = st.en;
-  $("kStageNote").textContent = st.note +
+  $("kStageEn").textContent = LANG ? (st.jaEn || st.en) : st.en;
+  $("kStageNote").textContent = (LANG ? st.jaNote : st.note) +
     (K.from > K.size
-      ? "  " + K.size + " drawn from the " + K.from + " in your pool, leaning on what you have missed before."
+      ? (LANG ? ("　出題範囲" + K.from + "字から" + K.size + "字。間違えた字を多めに出します。")
+              : "  " + K.size + " drawn from the " + K.from + " in your pool, leaning on what you have missed before.")
       : "");
 }
 function kProgress(){
@@ -2274,7 +2279,8 @@ function kProgress(){
   $("kProgBar").style.width = (p * 100).toFixed(1) + "%";
   $("kProgText").textContent =
     Math.min(K.idx + 1, K.size) + " / " + K.size +
-    "   ·   " + (K.stage === 0 ? "PASS 1 OF 2" : "PASS 2 OF 2");
+    "   ·   " + (LANG ? (K.stage === 0 ? "一巡目" : "二巡目")
+                      : (K.stage === 0 ? "PASS 1 OF 2" : "PASS 2 OF 2"));
 }
 
 function kAsk(){
@@ -2333,11 +2339,11 @@ function kJudge(ok, chosen){
   const v = $("kVerdict");
   const alts = G.alt && it.alt.length ? ' <em>· ' + it.alt.join(" · ") + '</em>' : "";
   if(ok){
-    v.innerHTML = '<span class="call ok">Correct</span>' +
+    v.innerHTML = '<span class="call ok">' + (LANG ? "正解" : "Correct") + '</span>' +
                   '<span class="was">' + it.disp + ' = <b>' + it.r + '</b>' + alts + '</span>';
     setTimeout(() => { if(kOn() && !K.done) kNext(); }, 800);
   }else{
-    v.innerHTML = '<span class="call no">Not quite</span>' +
+    v.innerHTML = '<span class="call no">' + (LANG ? "ちがう" : "Not quite") + '</span>' +
                   '<span class="was">' + it.disp + ' = <b>' + it.r + '</b>' + alts + '</span>' +
                   '<button class="btn dark tiny" id="kGo">Continue <kbd>enter</kbd></button>';
     $("kGo").addEventListener("click", kNext);
@@ -2363,9 +2369,10 @@ function kFinish(){
   $("kPlay").hidden = true;
   $("kDone").hidden = false;
   $("kStageJp").textContent = "終";
-  $("kStageEn").textContent = "Finished";
+  $("kStageEn").textContent = LANG ? "おわり" : "Finished";
   $("kStageNote").textContent =
-    "Both passes done. What is listed below is not failure — it is the shortlist.";
+    (LANG ? "二巡とも終わりました。下にあるのは失敗ではなく、次に覚える字です。"
+          : "Both passes done. What is listed below is not failure — it is the shortlist.");
   $("kProgBar").style.width = "100%";
   $("kProgText").textContent = K.size + " / " + K.size + "   ·   COMPLETE";
 
@@ -2381,10 +2388,13 @@ function kFinish(){
 
   const bad = [...K.miss.values()].sort((a, b) => b.n - a.n).slice(0, 24);
   if(!bad.length){
-    $("kReviewNote").textContent = "Nothing missed in either pass. Widen the lesson pool, or take these onto the mat.";
-    $("kReview").innerHTML = '<p class="clean">CLEAN SHEET — every character, both passes.</p>';
+    $("kReviewNote").textContent = LANG ? "二巡とも取り損ねなし。範囲を広げるか、場へ持っていってください。"
+      : "Nothing missed in either pass. Widen the lesson pool, or take these onto the mat.";
+    $("kReview").innerHTML = LANG ? '<p class="clean">むきず — 二巡ともすべて正解。</p>'
+      : '<p class="clean">CLEAN SHEET — every character, both passes.</p>';
   }else{
-    $("kReviewNote").textContent = "Missed at least once. Turn these in the grid, then drill again.";
+    $("kReviewNote").textContent = LANG ? "一度でも間違えた字です。稽古場で裏返してから、もう一度。"
+      : "Missed at least once. Turn these in the grid, then drill again.";
     $("kReview").innerHTML = bad.map(r =>
       '<div class="rv"><span class="k">' + r.item.disp + '</span>' +
       '<span class="m"><b>' + r.item.r + '</b><span>' + r.n +
@@ -2400,16 +2410,17 @@ function renderRecord(){
   const held = basic.filter(i => strength(i) >= MASTERY_MAX).length;
   const met  = basic.filter(i => strength(i) > 0).length;
 
-  $("recNote").textContent =
-    "Everything below is kept in this browser only. Clearing your site data clears it, " +
-    "and it does not follow you to another computer.";
+  $("recNote").textContent = LANG
+    ? "以下はこのブラウザにだけ残ります。サイトのデータを消すと消え、別の機械には付いていきません。"
+    : "Everything below is kept in this browser only. Clearing your site data clears it, " +
+      "and it does not follow you to another computer.";
   $("recTiles").innerHTML = [
-    ["Held firmly", held, " / " + basic.length],
-    ["Met at all", met, " / " + basic.length],
-    ["Night streak", days.streak || 0, (days.streak === 1 ? " day" : " days")],
-    ["Nights in all", days.total || 0, ""],
-    ["Marks earned", Object.keys(got).length, " / " + BADGES.length],
-    ["Forms in memory", Object.keys(p).length, ""]
+    [LANG ? "しっかり" : "Held firmly", held, " / " + basic.length],
+    [LANG ? "見たことがある" : "Met at all", met, " / " + basic.length],
+    [LANG ? "続けて" : "Night streak", days.streak || 0, LANG ? "日" : (days.streak === 1 ? " day" : " days")],
+    [LANG ? "のべ日数" : "Nights in all", days.total || 0, LANG ? "日" : ""],
+    [LANG ? "しるし" : "Marks earned", Object.keys(got).length, " / " + BADGES.length],
+    [LANG ? "覚えた字" : "Forms in memory", Object.keys(p).length, LANG ? "字" : ""]
   ].map(t => '<div class="tile"><span class="k">' + t[0] + '</span><span class="v">' +
              t[1] + (t[2] ? '<em>' + t[2] + '</em>' : '') + '</span></div>').join("");
 
@@ -2428,13 +2439,14 @@ function renderRecord(){
     }).join("") + '</span></div>').join("");
 
   $("recBadgeNote").textContent = Object.keys(got).length
-    ? "Earned by doing the thing, not by turning up."
-    : "None yet. They are given for finishing something, not for starting it.";
+    ? (LANG ? "出席ではなく、やり遂げたことに対して。" : "Earned by doing the thing, not by turning up.")
+    : (LANG ? "まだありません。始めたことではなく、終えたことに付きます。"
+            : "None yet. They are given for finishing something, not for starting it.");
   $("recBadges").innerHTML = BADGES.map(b =>
     '<div class="rv ' + (got[b.id] ? "got" : "locked") + '">' +
     '<span class="bj">' + b.jp + '</span>' +
-    '<span class="m"><b>' + b.en + '</b><span>' +
-    (got[b.id] ? got[b.id] : "not yet") + '</span></span></div>').join("");
+    '<span class="m"><b>' + (LANG ? b.jp : b.en) + '</b><span>' +
+    (got[b.id] ? got[b.id] : (LANG ? "まだ" : "not yet")) + '</span></span></div>').join("");
 }
 $("btn-record").addEventListener("click", () => { renderRecord(); show("s-record"); });
 $("rec-back").addEventListener("click", () => { show("s-dojo"); refreshDojo(); });
@@ -2496,6 +2508,103 @@ $("k-done-back").addEventListener("click", keikoQuit);
 $("k-again").addEventListener("click", keikoStart);
 
 /* ==========================================================
+   ことば — the interface in two languages
+   Many of the people who read hentaigana read Japanese first, so the English
+   here is not a gloss on the Japanese the way it is in the kana game: it is
+   one of two full versions and either can be switched off. Strings live in
+   one table rather than in the markup, so nothing can be translated in one
+   place and missed in another.
+   ========================================================== */
+const STR = {
+  lede:        ["Tap any form to hear it, and to see which mora it writes and which kanji it came from. Nothing is timed here.",
+                "字母を押すと発音が聞け、どの仮名を表すか、どの漢字から来たかが分かります。ここに時間制限はありません。"],
+  revealAll:   ["Reveal all", "すべて表示"],
+  record:      ['<span class="jpx">記録　</span>Record', "記録"],
+  drill:       ['<span class="jpx">稽古　</span>Drill', "稽古"],
+  sideBySide:  ['<span class="jpx">並び　</span>Side by Side', "並び"],
+  facing:      ['<span class="jpx">対面　</span>Facing', "対面"],
+  queen:       ['<span class="jpx">クイーン　</span>The Queen', "クイーン"],
+  lessonPool:  ["Lesson pool", "出題範囲"],
+  byMora:      ["音順 By mora", "音順"],
+  shuffle:     ["シャッフル Shuffle", "シャッフル"],
+  aStart:      ['<span class="jp">手始め</span> A start', "手始め"],
+  everything:  ['<span class="jp">全</span> Everything', "全部"],
+  settings:    ["設定 Settings ▾", "設定 ▾"],
+  sealPhase:   ["Sealing phase", "取り方"],
+  modeChoose:  ["選ぶ Hear &amp; click", "聞いて選ぶ"],
+  modeOrder:   ["右→左 Read in order", "右→左に読む"],
+  modeGojuon:  ["五十音順 Gojūon", "五十音順"],
+  modeListen:  ["聞き取り Listen", "聞き取り"],
+  optSpeak:    ["Speak each character once it is answered", "答えたあとに発音する"],
+  optKunrei:   ["Accept Kunrei-shiki as well as Hepburn (si · ti · tu · hu · zi · sya…)",
+                "ヘボン式に加えて訓令式も認める（si・ti・tu・hu・zi・sya…）"],
+  glyph:       ["Glyph", "字体"],
+  brush:       ["筆 Brush", "筆"],
+  hand:        ["手書き Hand", "手書き"],
+  print:       ["明朝 Print", "明朝"],
+  optRow:      ["Show 行 label on card fronts", "札の表に行を表示する"],
+  optWritten:  ["Show the call as text (for rooms without audio)", "読みを文字でも出す（音が出せない場所用）"],
+  optEasy:     ["やさしく Easy — print each card's 字母 on it", "やさしく — 札に字母を印刷する"],
+  optTimed:    ["時間制限 Put a clock on each call (7 seconds)", "時間制限 — 一枚につき七秒"],
+  optTwice:    ["Say each target twice", "二度読む"],
+  voice:       ["Voice", "音声"],
+  preview:     ["Preview は・へ・ふ・く", "は・へ・ふ・く を試す"],
+  testAudio:   ["Test audio", "音を試す"],
+  speed:       ["Speed", "速さ"],
+  audioPack:   ["Audio pack", "録音"],
+  loadRec:     ["Load recordings…", "録音を読み込む…"],
+  clear:       ["Clear", "消す"],
+  tagline:     ["The reader calls a syllable. Find the hand that writes it, before the hand opposite does.",
+                "読手が一音を読みます。それを書いた手を、向かいの手より先に見つけてください。"],
+  enter:       ['<span class="jpx">稽古場へ　</span>Enter the Practice Floor', "稽古場へ"],
+  fine:        ["Sound on · 285 forms, from the NINJAL standard set",
+                "音を出してください・国語研の学術情報交換用変体仮名 二八五字"],
+  railEn:      ["Practice Floor", "けいこば"],
+  onMat:       ["on the mat", "場に残り"],
+  missesLbl:   ["お手つき misses", "お手つき"],
+  takenLbl:    ["taken", "取った"],
+  hersLbl:     ["クイーン hers", "クイーン"],
+  pause:       ['<span class="jpx">休み　</span>Pause', "休み"],
+  leave:       ['<span class="jpx">帰る　</span>Leave', "帰る"],
+  ankiSay:     ["Learn the mat before the reader starts —", "読み始めるまでに札を覚えてください —"],
+  begin:       ['<span class="jpx">始める　</span>Begin', "始める"],
+  pausedLbl:   ["Paused", "休み中"],
+  resume:      ['<span class="jpx">続ける　</span>Resume', "続ける"],
+  "continue":  ["Continue", "続ける"],
+  ownSide:     ["自陣 your side", "自陣"],
+  needsReview: ["Needs Review", "ようふくしゅう"],
+  again:       ['<span class="jpx">もう一度　</span>Walk It Again', "もう一度"],
+  toFloor:     ['<span class="jpx">稽古場へ　</span>Practice Floor', "稽古場へ"],
+  recordEn:    ["Record", "きろく"],
+  whatYouHold: ["What You Hold", "おぼえたもの"],
+  recMapNote:  ["Each square fills as you answer it and empties when you miss it. Nothing here leaves this browser.",
+                "正解するとますが満ち、間違えると減ります。ここの記録はこのブラウザから出ません。"],
+  marks:       ["Marks", "しるし"],
+  footFlip:    ["<kbd>click</kbd> flip &amp; speak", "<kbd>click</kbd> 裏返して発音"],
+  footMatch:   ["Match: <kbd>click</kbd> the card you hear · <kbd>enter</kbd> replays the call · <kbd>esc</kbd> to leave",
+                "試合: <kbd>click</kbd> 聞こえた札を取る · <kbd>enter</kbd> もう一度読む · <kbd>esc</kbd> 帰る"],
+  queenName:   ["the Queen", "名人位"],
+  notBegun:    ["the reader has not begun", "まだ読まれていません"],
+  drillAgain:  ['<span class="jpx">もう一度　</span>Drill Again', "もう一度"],
+  langBtn:     ["日本語", "English"]
+};
+let LANG = 0;                                   // 0 English, 1 日本語
+function t(k){ const v = STR[k]; return v ? (v[LANG] != null ? v[LANG] : v[0]) : ""; }
+function applyLang(){
+  document.querySelectorAll("[data-t]").forEach(el => { el.innerHTML = t(el.dataset.t); });
+  document.body.classList.toggle("ja", LANG === 1);
+  const b = document.getElementById("btn-lang");
+  if(b) b.textContent = t("langBtn");
+}
+function setLang(i){
+  LANG = i;
+  try{ save("lang", String(i)); }catch(e){}
+  applyLang();
+  /* the chart and the counts were written in the other language */
+  if(typeof ROWS !== "undefined" && document.getElementById("chips")){ renderChips(); refreshDojo(); }
+}
+
+/* ==========================================================
    PROGRESS — held in this browser and nowhere else
    No account, no server, no row anywhere with a student's name on it.
    A character gains a point every time it is answered correctly and loses
@@ -2549,17 +2658,17 @@ function noteDay(){
 /* Badges are for things that are actually hard, not for turning up. */
 const BADGES = [
   {id:"first",  jp:"初夜",   en:"First Night",
-   note:"One match played to the last card."},
+   note:"One match played to the last card.", ja:"最後の一枚まで試合をした。"},
   {id:"muzu",   jp:"無傷",   en:"Unscathed",
-   note:"A mat cleared without one お手つき."},
+   note:"A mat cleared without one お手つき.", ja:"お手つきなしで場を空にした。"},
   {id:"gojuon", jp:"五十音", en:"Gojūon",
-   note:"Every mora met — at least one form of each taken."},
+   note:"Every mora met — at least one form of each taken.", ja:"すべての音に一度は当たった。"},
   {id:"nanoya", jp:"七夜",   en:"Seven Nights",
-   note:"Came back on seven different days."},
+   note:"Came back on seven different days.", ja:"七日、別の日に戻ってきた。"},
   {id:"kaiden", jp:"皆伝", en:"Full Transmission",
-   note:"Every one of the 285 forms held at full strength."},
+   note:"Every one of the 285 forms held at full strength.", ja:"二八五字すべてをしっかり覚えた。"},
   {id:"yoake",  jp:"夜明",   en:"Daybreak",
-   note:"Every form of か taken — all thirty-seven of them."}
+   note:"Every form of か taken — all thirty-seven of them.", ja:"かの三十七字すべてを取った。"}
 ];
 function loadBadges(){
   try{ return JSON.parse(load("badges") || "{}"); }catch(e){ return {}; }
@@ -2718,7 +2827,7 @@ function queenTakes(){
   rec.n++; G.stats.perChar.set(G.call.key, rec);
   updateMatStats();
   showResolved(G.call, false);
-  hintLine.textContent = "She had it. Look at the hand, then continue.";
+  hintLine.textContent = LANG ? "クイーンに取られました。字をよく見てから続けてください。" : "She had it. Look at the hand, then continue.";
   $("calledKana").textContent = G.call.disp;
   $("calledKana").classList.remove("call");
   $("calledNote").innerHTML = G.call.r + " &nbsp;·&nbsp; from <b>" + G.call.z + "</b>";
@@ -2754,10 +2863,10 @@ function startAnki(){
   setHints(true);
   $("ankiBar").hidden = false;
   $("missBox").hidden = true;
-  hintLine.textContent = "Learn the mat. The reader waits.";
+  hintLine.textContent = LANG ? "札を覚えてください。読手は待ちます。" : "Learn the mat. The reader waits.";
   $("calledKana").textContent = "—";
   $("calledKana").classList.remove("call");
-  $("calledNote").textContent = "not begun";
+  $("calledNote").textContent = LANG ? "まだ" : "not begun";
   let left = ANKI_SECONDS;
   $("ankiLeft").textContent = left + "s";
   clearInterval(G.ankiTimer);
@@ -2787,7 +2896,9 @@ function renderMat(){
   const far = $("matFar"), near = $("matNear");
   far.querySelectorAll(".fuda").forEach(n => n.remove());
   near.querySelectorAll(".fuda").forEach(n => n.remove());
-  $("farLab").textContent = G.facing ? "敵陣 across the mat — upside down" : "向こう側 the other side";
+  $("farLab").textContent = G.facing
+    ? (LANG ? "敵陣 — さかさま" : "敵陣 across the mat — upside down")
+    : (LANG ? "向こう側" : "向こう側 the other side");
   matEl.classList.toggle("facing", !!G.facing);
   const half = Math.ceil(G.deck.length / 2);
   G.deck.forEach((it, i) => {
@@ -2820,9 +2931,11 @@ function nextCall(){
   G.locked = false;
   G.call = G.deck[G.order[G.callIdx]];
   G.promptAt = performance.now();
-  $("calledNote").textContent = "the reader calls";
+  $("calledNote").textContent = LANG ? "読手" : "the reader calls";
   syncTargetAid();
-  hintLine.textContent = "Take the card the reader called · " + (G.deck.length - G.taken) + " left on the mat";
+  hintLine.textContent = LANG
+    ? ("読まれた札を取ってください・残り " + (G.deck.length - G.taken) + "枚")
+    : ("Take the card the reader called · " + (G.deck.length - G.taken) + " left on the mat");
   speakKana(G.call, G.twice, true);
   armQueen();
   /* No clock unless one is asked for. Take as long as you like over a hand
@@ -2901,7 +3014,7 @@ function takeCard(i){
      the hand, its mora and its 字母 together is the thing being learned, and
      getting it right is no reason to be denied that. */
   showResolved(it, true);
-  hintLine.textContent = "Taken";
+  hintLine.textContent = LANG ? "取り" : "Taken";
   G.callIdx++;
   setTimeout(() => { if(G.running) nextCall(); }, 1100);
 }
@@ -2918,7 +3031,9 @@ function otetsuki(el, it){
   sfxBad(); shake(0.5);
   el.classList.remove("fault"); void el.offsetWidth; el.classList.add("fault");
   setTimeout(() => el.classList.remove("fault"), 460);
-  hintLine.textContent = "お手つき — that one is " + it.r + ", from " + it.z;
+  hintLine.textContent = LANG
+    ? ("お手つき — それは " + it.r + "、字母は " + it.z)
+    : ("お手つき — that one is " + it.r + ", from " + it.z);
   /* Against the Queen a wrong hand costs you the card, which is what an
      お手つき costs in a real match. On the quieter rungs it only counts. */
   if(G.queen){ setTimeout(() => { if(G.running && !G.locked) queenTakes(); }, 420); }
@@ -2934,7 +3049,7 @@ function missCall(){
   noteAnswer(G.call, false);
   const el = cardAt(G.order[G.callIdx]);
   if(el) el.classList.add("missed");
-  hintLine.textContent = "Not taken. Look at it, then continue.";
+  hintLine.textContent = LANG ? "取れず。よく見てから続けてください。" : "Not taken. Look at it, then continue.";
   $("calledKana").textContent = G.call.disp;
   $("calledKana").classList.remove("call");
   $("calledNote").innerHTML = G.call.r + " &nbsp;·&nbsp; from <b>" + G.call.z + "</b>";
@@ -2984,39 +3099,48 @@ function endMatch(){
     : G.queen ? (beatHer ? "勝" : "敗")
     : clean ? "勝" : "了";
   $("verdictJp").classList.toggle("loss", G.withdrawn || (G.queen && !beatHer));
-  $("verdictEn").textContent = G.withdrawn ? "Left the Mat"
-    : G.queen ? (beatHer ? "You Took More" : "She Took More")
-    : clean ? "Clean Sweep" : "Mat Cleared";
+  $("verdictEn").textContent = G.withdrawn ? (LANG ? "とちゅうで帰る" : "Left the Mat")
+    : G.queen ? (beatHer ? (LANG ? "勝ち" : "You Took More") : (LANG ? "負け" : "She Took More"))
+    : clean ? (LANG ? "かんぜん" : "Clean Sweep") : (LANG ? "しまい" : "Mat Cleared");
   $("verdictSub").textContent = G.withdrawn
-    ? "You stood up with " + (G.deck.length - G.taken) + " still face up."
+    ? (LANG ? ((G.deck.length - G.taken) + "枚を場に残して立ちました。")
+            : "You stood up with " + (G.deck.length - G.taken) + " still face up.")
     : G.queen
-      ? (beatHer
-          ? "You took " + s.correct + " to her " + G.hers + ". She is quicker on her own half, so the ones you won across the mat are the ones that count."
-          : "She took " + G.hers + " to your " + s.correct + ". She reads her own half faster than anyone — the half in front of you is where a match is actually won.")
+      ? (LANG
+          ? (beatHer
+              ? (s.correct + "枚対" + G.hers + "枚。クイーンは自陣が速いので、敵陣で取った分がものを言います。")
+              : (G.hers + "枚対" + s.correct + "枚。向こうは自陣を誰よりも速く読みます。勝負がつくのは手前の半分です。"))
+          : (beatHer
+              ? "You took " + s.correct + " to her " + G.hers + ". She is quicker on her own half, so the ones you won across the mat are the ones that count."
+              : "She took " + G.hers + " to your " + s.correct + ". She reads her own half faster than anyone — the half in front of you is where a match is actually won."))
     : clean
-      ? "Every card taken, not one お手つき. In a real match that is the difference between grades."
-      : "The mat is clear, with " + G.faults + " miss" + (G.faults === 1 ? "" : "es") +
-        " along the way. Those hands are listed below and they are the next hour of practice.";
+      ? (LANG ? "すべて取り、お手つきなし。実際の試合では級の差はここに出ます。"
+              : "Every card taken, not one お手つき. In a real match that is the difference between grades.")
+      : (LANG ? ("場は空になりました。お手つきは" + G.faults + "回。下に出ている字が次の稽古です。")
+              : "The mat is clear, with " + G.faults + " miss" + (G.faults === 1 ? "" : "es") +
+                " along the way. Those hands are listed below and they are the next hour of practice.");
   $("stamp").textContent = "歌留多";
   $("statTiles").innerHTML = [
-    ["Misses", G.faults, ""],
-    ["Cards taken", s.correct, " / " + G.deck.length],
-    G.queen ? ["She took", G.hers, ""] : null,
-    ["Clean takes", acc, "%"],
-    ["Best run", "×" + s.best, ""],
-    ["Avg. per card", avg.toFixed(2), "s"],
-    ["Points", Math.round(s.points), ""]
+    [LANG ? "お手つき" : "Misses", G.faults, ""],
+    [LANG ? "取った枚数" : "Cards taken", s.correct, " / " + G.deck.length],
+    G.queen ? [LANG ? "クイーン" : "She took", G.hers, ""] : null,
+    [LANG ? "正確さ" : "Clean takes", acc, "%"],
+    [LANG ? "連取" : "Best run", "×" + s.best, ""],
+    [LANG ? "一枚あたり" : "Avg. per card", avg.toFixed(2), "s"],
+    [LANG ? "点" : "Points", Math.round(s.points), ""]
   ].filter(Boolean).map(t => '<div class="tile"><span class="k">' + t[0] + '</span><span class="v">' +
              t[1] + (t[2] ? '<em>' + t[2] + '</em>' : '') + '</span></div>').join("");
 
   const bad = [...s.perChar.values()].sort((a, b) => b.n - a.n).slice(0, 12);
   $("reviewNote").textContent = bad.length
-    ? "The hands that cost you. Turn these on the practice floor before the next match."
-    : "Nothing missed.";
+    ? (LANG ? "取り損ねた字です。次の試合の前に稽古場で裏返してください。"
+            : "The hands that cost you. Turn these on the practice floor before the next match.")
+    : (LANG ? "取り損ねなし。" : "Nothing missed.");
   $("review").innerHTML = bad.length
     ? bad.map(r => '<div class="rv"><span class="k">' + r.item.disp + '</span>' +
         '<span class="m"><b>' + r.item.r + '</b><span>' + r.item.z + '</span></span></div>').join("")
-    : '<p class="clean">CLEAN SHEET — every card taken first time.</p>';
+    : (LANG ? '<p class="clean">むきず — すべて一度で取りました。</p>'
+            : '<p class="clean">CLEAN SHEET — every card taken first time.</p>');
   $("s-report").scrollTop = 0;
   show("s-report");
 }
@@ -3232,6 +3356,10 @@ function previewVoice(){
 renderChips();
 refreshDojo();
 restorePack();
+
+/* last, so every screen exists before it is written into */
+$("btn-lang").addEventListener("click", () => setLang(LANG ? 0 : 1));
+setLang(load("lang") === "1" ? 1 : 0);
 sizeCanvas();
 </script>
 </body>
