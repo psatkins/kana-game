@@ -514,6 +514,10 @@ body.showtags .face.front .grp{display:block}
 }
 @keyframes nodeIn{from{opacity:0;transform:translateZ(140px) scale(.4)}to{opacity:1;transform:translateZ(140px) scale(1)}}
 #s-duel.choosing .node{cursor:pointer}
+#s-duel.choosing .node::after{
+  content:attr(data-n);position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:rgba(36,31,25,.42);
+}
 #s-duel.choosing .node:hover{border-color:var(--gold);transform:translateZ(150px) scale(1.04)}
 .node.live{border-color:var(--gold);box-shadow:0 0 42px rgba(201,162,39,.65), 0 10px 24px rgba(0,0,0,.5)}
 /* a sealed charm burns off rather than being cut in half */
@@ -530,7 +534,7 @@ body.showtags .face.front .grp{display:block}
 
 /* ---------- HUD ---------- */
 #hud{position:absolute;inset:0;z-index:3;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between}
-.hud-top{position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:clamp(12px,2vw,22px)}
+.hud-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:clamp(12px,2vw,22px)}
 .side{display:flex;flex-direction:column;gap:7px;min-width:190px}
 .side.right{align-items:flex-end;text-align:right}
 .who{display:flex;align-items:baseline;gap:9px}
@@ -776,17 +780,11 @@ body.showtags .face.front .grp{display:block}
 .rv .bj{font-family:var(--brush);font-size:27px;line-height:1.5;color:var(--sumi)}
 
 /* Escape has always worked, but only someone who read the footer knew that,
-   and there is no Escape key on a phone. */
-#btn-leave{
-  position:absolute;top:0;right:0;display:flex;flex-direction:column;align-items:center;gap:1px;
-  padding:7px 12px;border:1px solid rgba(159,182,208,.22);border-radius:2px;
-  background:rgba(10,14,20,.5);color:var(--slate);cursor:pointer;
-  transition:color .16s ease,border-color .16s ease;
-}
-#btn-leave:hover{color:var(--washi);border-color:rgba(159,182,208,.55)}
-#btn-leave b{font-family:var(--brush);font-size:17px;line-height:1.35;font-weight:400}
-#btn-leave span{font-family:var(--mono);font-size:8.5px;letter-spacing:.18em;text-transform:uppercase}
-@media (max-width:760px){#btn-leave span{display:none}}
+   and there is no Escape key on a phone. It flanks the input opposite the
+   replay button — the corner it started in was both behind the score and
+   inside #hud, which is pointer-events:none, so it was never clickable. */
+#btn-leave{font-family:var(--brush);font-size:19px;color:var(--slate)}
+#btn-leave:hover{border-color:var(--vermilion-hot);color:var(--vermilion-hot)}
 
 /* a badge, announced once and then left alone */
 /* two can be earned by the same answer, so they stack rather than pile up */
@@ -1070,9 +1068,6 @@ rt{
           <div class="bar foe"><i id="foeHp"></i></div>
         </div>
         <div class="phase-tag parry" id="phaseTag"><b>名</b><span>Name It</span></div>
-        <button id="btn-leave" title="Leave the road (esc)" aria-label="Leave the road">
-          <b><ruby>帰<rt>かえ</rt></ruby></b><span>Leave</span>
-        </button>
         <div class="side right">
           <div class="metrics">
             <span class="cb" id="combo">連撃 ×0</span>
@@ -1091,6 +1086,7 @@ rt{
             <div id="tiles"></div>
             <input id="bufferInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="latin" aria-label="Romaji input">
           </div>
+          <button class="spk" id="btn-leave" title="Leave the road (esc)" aria-label="Leave the road">帰</button>
         </div>
         <div id="hintLine"></div>
       </div>
@@ -2591,15 +2587,16 @@ function renderRecord(){
 }
 /* Clicking a charm is the point of "choose"; typing it still works, so a
    keyboard player is never stranded and a phone player never has to type. */
-enemyEl.addEventListener("click", e => {
-  if(G.phase !== "offense" || G.offenseMode !== "choose" || !G.running) return;
-  const el = e.target.closest(".node");
-  if(!el || el.classList.contains("cut")) return;
-  const n = G.nodes.find(x => x.el === el);
-  if(!n) return;
+function pickCharm(n){
+  if(!n || !G.running || G.phase !== "offense" || G.offenseMode !== "choose") return;
+  if(n.el.classList.contains("cut")) return;
   if(n.it === G.required) return strike();
-  const d = G.decoys.find(x => x.el === el);
+  const d = G.decoys.find(x => x.el === n.el);
   if(d) wrongTarget(d);
+}
+enemyEl.addEventListener("click", e => {
+  const el = e.target.closest(".node");
+  if(el) pickCharm(G.nodes.find(x => x.el === el));
 });
 $("btn-leave").addEventListener("click", () => { if(G.running){ G.withdrawn = true; endGame(false); } });
 $("btn-record").addEventListener("click", () => { renderRecord(); show("s-record"); });
@@ -2694,7 +2691,12 @@ function updateHud(){
   c.classList.remove("pop"); void c.offsetWidth; c.classList.add("pop");
 }
 function renderTiles(v){
-  if(!v){ tilesEl.innerHTML = '<span class="ph">type romaji</span>'; return; }
+  if(!v){
+    const choosing = G.phase === "offense" && G.offenseMode === "choose";
+    tilesEl.innerHTML = '<span class="ph">' +
+      (choosing ? "click a charm · or press 1 2 3" : "type romaji") + '</span>';
+    return;
+  }
   tilesEl.innerHTML = [...v].map(ch => '<span class="t">' + ch + '</span>').join("") + '<span class="caret"></span>';
 }
 function focusInput(){ try{ bufferInput.focus({preventScroll:true}); }catch(e){ bufferInput.focus(); } }
@@ -2759,7 +2761,7 @@ function updateTargetHint(){
     G.offenseMode === "ltr"    ? pre + "read them right to left" :
     G.offenseMode === "gojuon" ? pre + "read in gojūon order — look at all three first" :
     targetAidOn()              ? pre + "take the ringed charm" :
-    G.offenseMode === "choose" ? pre + "click the one you hear · or type it · Enter to replay" :
+    G.offenseMode === "choose" ? pre + "click the one you hear · or press 1 2 3 · Enter to replay" :
                                  pre + "type the one you hear · Enter to replay";
 }
 function syncTargetAid(){
@@ -3153,6 +3155,7 @@ function startOffense(){
     const el = document.createElement("div");
     el.className = "node";
     el.textContent = it.disp;
+    el.dataset.n = i + 1;                    // left to right, for the 1 2 3 keys
     el.style.left = NODE_POS[i][0] + "%";
     el.style.top = NODE_POS[i][1] + "%";
     el.style.animationDelay = (i * 0.08) + "s";
@@ -3309,6 +3312,13 @@ function clearIME(){
 function onInput(){
   if(G.phase !== "defense" && G.phase !== "offense" &&
      G.phase !== "between" && G.phase !== "stun"){ bufferInput.value = ""; return; }
+  /* In choose mode the mora has already been spoken, so accepting the typed
+     romaji would let you answer without ever looking at the three charms —
+     which is the one thing this phase exists to make you do. */
+  if(G.phase === "offense" && G.offenseMode === "choose"){
+    bufferInput.value = ""; G.buffer = ""; renderTiles("");
+    return;
+  }
   const raw = bufferInput.value;
   if(raw && /[^a-zA-Z]/.test(raw)) flagIME();
   let v = raw.toLowerCase().replace(/[^a-z]/g, "");
@@ -3355,6 +3365,10 @@ replayBtn.addEventListener("click", e => {
   setTimeout(focusInput, 0);
 });
 window.addEventListener("keydown", e => {
+  if(G.running && G.phase === "offense" && G.offenseMode === "choose" && /^[123]$/.test(e.key)){
+    e.preventDefault();
+    return pickCharm(G.nodes[+e.key - 1]);   // 1 2 3 run left to right, as drawn
+  }
   if(e.key === "Escape" && kOn()) return keikoQuit();
   if(e.key === "Escape" && G.running){ G.withdrawn = true; endGame(false); }
   if(e.key === "Enter" && G.phase === "offense" && G.required){
