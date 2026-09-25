@@ -857,6 +857,45 @@ body.showtags .face.front .grp{display:block}
 #recMap .mf .sq{width:40px;aspect-ratio:1/1.08;font-size:23px}
 
 /* ==========================================================
+   クイーン
+   ========================================================== */
+#queen{
+  max-width:1000px;margin:0 auto;padding:0 clamp(16px,3vw,28px);
+  position:relative;display:flex;justify-content:center;
+}
+#queen[hidden]{display:none}
+#queen svg{width:min(420px,70vw);height:auto;display:block;filter:drop-shadow(0 10px 22px rgba(60,46,26,.30))}
+#queen .qname{
+  position:absolute;right:clamp(16px,3vw,28px);bottom:8px;text-align:right;
+  font-family:var(--brush);font-size:20px;line-height:1.5;color:var(--sumi);
+}
+#queen .qname i{
+  display:block;font-style:normal;font-family:var(--mono);font-size:9px;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--sumi-2);
+}
+/* the arm comes down and across; the sleeve follows it */
+#queen .arm{transform-origin:214px 168px}
+#queen.strike .arm{animation:qStrike .62s cubic-bezier(.2,1.05,.3,1)}
+@keyframes qStrike{
+  0%{transform:none}
+  28%{transform:rotate(-30deg) translate(-26px,86px)}
+  46%{transform:rotate(-34deg) translate(-40px,96px)}
+  100%{transform:none}
+}
+/* and the card goes with it */
+.fuda.hers{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,39,.5)}
+.fuda.hers.gone{
+  opacity:0;
+  transform:translate(-120px,-300px) rotate(-54deg) scale(.72);
+  transition:opacity .5s ease-out, transform .5s cubic-bezier(.22,.9,.32,1);
+}
+.mat-stats .st.queen i{color:var(--gold)}
+.mat-stats .st.queen small{color:var(--gold);opacity:.85}
+.mat-stats .st.queen[hidden]{display:none}
+.btn.solid.queen{background:#4A3757;border-color:#4A3757}
+.btn.solid.queen:hover{background:#5E4770;border-color:#5E4770}
+
+/* ==========================================================
    THE MAT
    Tatami under the cards, washi on them. The cards are the proportions of a
    real 取り札, laid flat in rows the way a side of the field is set out.
@@ -1073,6 +1112,7 @@ rt{
           <button class="btn dark" id="btn-keiko"><span class="jpx"><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby>　</span>Drill</button>
           <button class="btn solid" id="btn-duel"><span class="jpx"><ruby>並<rt>なら</rt></ruby>び　</span>Side by Side</button>
           <button class="btn solid" id="btn-facing"><span class="jpx"><ruby>対<rt>たい</rt></ruby><ruby>面<rt>めん</rt></ruby>　</span>Facing</button>
+          <button class="btn solid queen" id="btn-queen"><span class="jpx">クイーン　</span>The Queen</button>
         </div>
       </div>
 
@@ -1213,6 +1253,7 @@ rt{
         <span class="st"><i id="mLeft">0</i><small>on the mat</small></span>
         <span class="st miss"><i id="mFaults">0</i><small>お手つき misses</small></span>
         <span class="st"><i id="mTaken">0</i><small>taken</small></span>
+        <span class="st queen" id="stQueen" hidden><i id="mHers">0</i><small>クイーン hers</small></span>
       </div>
       <div class="mat-acts">
         <button class="btn dark tiny" id="m-pause"><span class="jpx"><ruby>休<rt>やす</rt></ruby>み　</span>Pause</button>
@@ -1229,6 +1270,53 @@ rt{
       <button class="btn dark tiny" id="m-resume"><span class="jpx"><ruby>続<rt>つづ</rt></ruby>ける　</span>Resume</button></div>
     <canvas id="fx"></canvas>
     <div id="flash" aria-hidden="true"></div>
+    <!-- She sits across the mat. Not a silhouette: the yokai game's flat
+         black bodies were for things that were not people, and she is. -->
+    <div id="queen" hidden>
+      <svg viewBox="0 0 560 250" role="img" aria-label="The Queen, seated across the mat in kimono">
+        <defs>
+          <linearGradient id="silk" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#43314F"/><stop offset="1" stop-color="#2A1F34"/>
+          </linearGradient>
+          <linearGradient id="obi" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#A5822F"/><stop offset=".5" stop-color="#C9A227"/>
+            <stop offset="1" stop-color="#A5822F"/>
+          </linearGradient>
+        </defs>
+        <!-- sleeves, spread on the tatami -->
+        <path d="M118 250 Q104 176 148 140 L214 168 L206 250 Z" fill="url(#silk)"/>
+        <path d="M442 250 Q456 176 412 140 L346 168 L354 250 Z" fill="url(#silk)"/>
+        <!-- body -->
+        <path d="M206 250 L214 150 Q280 118 346 150 L354 250 Z" fill="url(#silk)"/>
+        <!-- obi -->
+        <rect x="210" y="206" width="140" height="26" fill="url(#obi)"/>
+        <rect x="262" y="200" width="36" height="38" rx="3" fill="#8E6F26"/>
+        <!-- collar, right lapped over left as the living wear it -->
+        <path d="M280 128 L246 250 L214 250 L252 132 Z" fill="#F2EADA"/>
+        <path d="M280 128 L314 250 L346 250 L308 132 Z" fill="#EFE4D2"/>
+        <path d="M280 128 L268 176 L292 176 Z" fill="#3A2F44"/>
+        <!-- arms: the one on your left is the one that comes down -->
+        <g class="arm">
+          <path d="M214 168 Q188 206 206 240 L236 232 Q224 200 240 176 Z" fill="url(#silk)"/>
+          <ellipse cx="212" cy="243" rx="17" ry="12" fill="#E7D2BB"/>
+        </g>
+        <path d="M346 168 Q372 206 354 240 L324 232 Q336 200 320 176 Z" fill="url(#silk)"/>
+        <ellipse cx="348" cy="243" rx="17" ry="12" fill="#E7D2BB"/>
+        <!-- neck and face -->
+        <path d="M266 118 h28 v22 h-28 z" fill="#E0C7AE"/>
+        <ellipse cx="280" cy="92" rx="34" ry="40" fill="#E7D2BB"/>
+        <!-- hair, up, with a single ornament -->
+        <path d="M280 44 q44 0 46 44 q2 20 -8 30 q4 -40 -18 -52 q-22 10 -40 4 q-16 -4 -20 12 q-6 -38 40 -38 z" fill="#15121A"/>
+        <ellipse cx="280" cy="46" rx="26" ry="18" fill="#15121A"/>
+        <path d="M306 40 l30 -12 l4 9 l-30 12 z" fill="#C9A227"/>
+        <circle cx="338" cy="30" r="6" fill="#C9A227"/>
+        <!-- eyes, lowered at the mat -->
+        <path d="M262 94 q9 -6 18 0" fill="none" stroke="#2A2028" stroke-width="2.6" stroke-linecap="round"/>
+        <path d="M282 94 q9 -6 18 0" fill="none" stroke="#2A2028" stroke-width="2.6" stroke-linecap="round"/>
+        <path d="M274 110 q6 4 12 0" fill="none" stroke="#9E6A63" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      <span class="qname">クイーン<i>the Queen</i></span>
+    </div>
     <div id="mat">
       <div class="zone far" id="matFar"><span class="zlab" id="farLab"></span></div>
       <div class="zone near" id="matNear"><span class="zlab">自陣 your side</span></div>
@@ -1988,6 +2076,7 @@ const G = {
   promptAt: 0, tStart: 0, tDur: 0, tActive: false,
   /* the practice floor and the settings it carries */
   dojoMode: "ordered", aid: false, easy: false, paused: false, anki: false, timed: false, facing: false,
+  queen: false, hers: 0,
   shake: 0, shakeDirty: false, scale: 1,
   rate: 0.9, twice: false, speakOnHit: true,
   stats: null
@@ -2611,9 +2700,64 @@ function dealMat(){
     .map(r => { const f = byMora.get(r); return f[Math.floor(Math.random() * f.length)]; });
 }
 
-function startMatch(facing){
+/* クイーン. The women's champion, and the only rung with anybody sitting
+   opposite. She races you for every card.
+
+   Her reaction is not uniform, and the asymmetry is the real one: from her
+   seat the far side is HER 自陣, so she is quicker there and slower on the
+   half in front of you. You have a genuine edge on your own side, which is
+   exactly the edge a real player has, and it is why 自陣 is worth clearing.
+
+   She is beatable on a hand you know — recognition takes about a second —
+   and not beatable on one you have to hunt for. That is the whole test. */
+const QUEEN_BASE = 2800;     // ms from the call to her hand landing
+const QUEEN_HOME = -500;     // quicker on her own side
+const QUEEN_AWAY =  600;     // slower reaching across
+function queenReaction(it){
+  const i = G.deck.indexOf(it);
+  const hers = i < Math.ceil(G.deck.length / 2);   // the far half is her side
+  return QUEEN_BASE + (hers ? QUEEN_HOME : QUEEN_AWAY) + (Math.random() * 700 - 350);
+}
+function cancelQueen(){ clearTimeout(G.queenTimer); G.queenTimer = null; }
+function armQueen(){
+  if(!G.queen || !G.call) return;
+  cancelQueen();
+  const gen = G.callIdx;
+  G.queenTimer = setTimeout(() => {
+    if(!G.running || G.paused || G.locked || G.callIdx !== gen) return;
+    queenTakes();
+  }, queenReaction(G.call));
+}
+function queenTakes(){
+  if(!G.running || G.locked) return;
+  G.locked = true; G.tActive = false; cancelQueen();
+  const q = $("queen");
+  q.classList.remove("strike"); void q.offsetWidth; q.classList.add("strike");
+  sfxSlash(); shake(0.5);
+  const i = G.deck.findIndex(d => d.r === G.call.r);
+  const el = cardAt(i);
+  /* her hand lands first, then the card leaves with it */
+  if(el) setTimeout(() => { el.classList.add("hers"); setTimeout(() => el.classList.add("gone"), 130); }, 170);
+  G.hers++; G.stats.combo = 0;
+  noteAnswer(G.call, false);
+  const rec = G.stats.perChar.get(G.call.key) || {item: G.call, n: 0};
+  rec.n++; G.stats.perChar.set(G.call.key, rec);
+  updateMatStats();
+  showResolved(G.call, false);
+  hintLine.textContent = "She had it. Look at the hand, then continue.";
+  $("calledKana").textContent = G.call.disp;
+  $("calledKana").classList.remove("call");
+  $("calledNote").innerHTML = G.call.r + " &nbsp;·&nbsp; from <b>" + G.call.z + "</b>";
+  setTimeout(() => $("missGo").focus(), 0);
+}
+
+function startMatch(facing, queen){
   ac();
   G.facing = !!facing;
+  G.queen = !!queen;
+  G.hers = 0;
+  $("stQueen").hidden = !G.queen;
+  $("queen").hidden = !G.queen;
   buildPool();
   const deck = dealMat();
   if(deck.length < 3) return;
@@ -2688,9 +2832,12 @@ function renderMat(){
   updateMatStats();
 }
 function updateMatStats(){
-  $("mTaken").textContent = G.taken;
+  /* G.taken counts every card off the mat, hers included; the player's own
+     tally is stats.correct, which is what "taken" means on screen. */
+  $("mTaken").textContent = G.stats ? G.stats.correct : 0;
   $("mFaults").textContent = G.faults;
   $("mLeft").textContent = G.deck.length - G.taken;
+  $("mHers").textContent = G.hers;
 }
 
 function nextCall(){
@@ -2703,10 +2850,11 @@ function nextCall(){
   syncTargetAid();
   hintLine.textContent = "Take the card the reader called · " + (G.deck.length - G.taken) + " left on the mat";
   speakKana(G.call, G.twice, true);
+  armQueen();
   /* No clock unless one is asked for. Take as long as you like over a hand
      you cannot place: hurrying is a separate skill from reading, and it is
      not the one being taught here. */
-  if(G.timed){
+  if(G.timed && !G.queen){
     G.tStart = performance.now(); G.tDur = CALL_SECONDS * 1000; G.tActive = true;
   }else{
     G.tActive = false;
@@ -2721,6 +2869,7 @@ function cardAt(i){ return matEl.querySelector('.fuda[data-i="' + i + '"]'); }
 function pauseMatch(){
   if(!G.running || G.paused) return;
   G.paused = true;
+  cancelQueen();
   if(G.tActive){ G.tLeft = Math.max(0, G.tDur - (performance.now() - G.tStart)); G.tActive = false; }
   $("s-match").classList.add("paused");
   $("matPause").hidden = false;
@@ -2736,6 +2885,7 @@ function resumeMatch(){
     G.tActive = true;
     G.tLeft = null;
   }
+  armQueen();
 }
 
 /* One reading each, so a card is the right take when it writes the mora that
@@ -2750,7 +2900,7 @@ function takeCard(i){
   if(!el || el.classList.contains("gone")) return;
   if(!matchesCall(it)) return otetsuki(el, it);
 
-  G.locked = true; G.tActive = false;
+  G.locked = true; G.tActive = false; cancelQueen();
   const el2 = el.getBoundingClientRect();
   const cx = el2.left + el2.width / 2, cy = el2.top + el2.height / 2;
   /* 払い — the card is swept off the mat, not cut */
@@ -2795,6 +2945,9 @@ function otetsuki(el, it){
   el.classList.remove("fault"); void el.offsetWidth; el.classList.add("fault");
   setTimeout(() => el.classList.remove("fault"), 460);
   hintLine.textContent = "お手つき — that one is " + it.r + ", from " + it.z;
+  /* Against the Queen a wrong hand costs you the card, which is what an
+     お手つき costs in a real match. On the quieter rungs it only counts. */
+  if(G.queen){ setTimeout(() => { if(G.running && !G.locked) queenTakes(); }, 420); }
 }
 
 /* A card that got past you is the one worth looking at, so it stays on the
@@ -2840,6 +2993,7 @@ function missContinue(){
 function endMatch(){
   if(!G.running) return;
   G.running = false; G.tActive = false; G.paused = false; G.anki = false;
+  cancelQueen();
   clearInterval(G.ankiTimer);
   $("s-match").classList.remove("paused");
   $("matPause").hidden = true;
@@ -2851,11 +3005,20 @@ function endMatch(){
   const avg = s.correct ? (s.time / s.correct) : 0;
   const clean = s.errors === 0 && !G.withdrawn;
 
-  $("verdictJp").textContent = G.withdrawn ? "退" : clean ? "勝" : "了";
-  $("verdictJp").classList.toggle("loss", G.withdrawn);
-  $("verdictEn").textContent = G.withdrawn ? "Left the Mat" : clean ? "Clean Sweep" : "Mat Cleared";
+  const beatHer = G.queen && s.correct > G.hers;
+  $("verdictJp").textContent = G.withdrawn ? "退"
+    : G.queen ? (beatHer ? "勝" : "敗")
+    : clean ? "勝" : "了";
+  $("verdictJp").classList.toggle("loss", G.withdrawn || (G.queen && !beatHer));
+  $("verdictEn").textContent = G.withdrawn ? "Left the Mat"
+    : G.queen ? (beatHer ? "You Took More" : "She Took More")
+    : clean ? "Clean Sweep" : "Mat Cleared";
   $("verdictSub").textContent = G.withdrawn
     ? "You stood up with " + (G.deck.length - G.taken) + " still face up."
+    : G.queen
+      ? (beatHer
+          ? "You took " + s.correct + " to her " + G.hers + ". She is quicker on her own half, so the ones you won across the mat are the ones that count."
+          : "She took " + G.hers + " to your " + s.correct + ". She reads her own half faster than anyone — the half in front of you is where a match is actually won.")
     : clean
       ? "Every card taken, not one お手つき. In a real match that is the difference between grades."
       : "The mat is clear, with " + G.faults + " miss" + (G.faults === 1 ? "" : "es") +
@@ -2864,11 +3027,12 @@ function endMatch(){
   $("statTiles").innerHTML = [
     ["Misses", G.faults, ""],
     ["Cards taken", s.correct, " / " + G.deck.length],
+    G.queen ? ["She took", G.hers, ""] : null,
     ["Clean takes", acc, "%"],
     ["Best run", "×" + s.best, ""],
     ["Avg. per card", avg.toFixed(2), "s"],
     ["Points", Math.round(s.points), ""]
-  ].map(t => '<div class="tile"><span class="k">' + t[0] + '</span><span class="v">' +
+  ].filter(Boolean).map(t => '<div class="tile"><span class="k">' + t[0] + '</span><span class="v">' +
              t[1] + (t[2] ? '<em>' + t[2] + '</em>' : '') + '</span></div>').join("");
 
   const bad = [...s.perChar.values()].sort((a, b) => b.n - a.n).slice(0, 12);
@@ -2939,9 +3103,10 @@ requestAnimationFrame(frame);
    11. WIRING
    ========================================================== */
 $("btn-enter").addEventListener("click", () => { ac(); show("s-dojo"); });
-$("btn-duel").addEventListener("click", () => startMatch(false));
-$("btn-facing").addEventListener("click", () => startMatch(true));
-$("btn-rematch").addEventListener("click", () => startMatch(G.facing));
+$("btn-duel").addEventListener("click", () => startMatch(false, false));
+$("btn-facing").addEventListener("click", () => startMatch(true, false));
+$("btn-queen").addEventListener("click", () => startMatch(true, true));
+$("btn-rematch").addEventListener("click", () => startMatch(G.facing, G.queen));
 $("btn-back").addEventListener("click", () => { show("s-dojo"); refreshDojo(); });
 $("btn-audio").addEventListener("click", testAudio);
 $("voicewarn").addEventListener("click", e => {
