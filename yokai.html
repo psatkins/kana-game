@@ -790,8 +790,19 @@ body.showtags .face.front .grp{display:block}
    and there is no Escape key on a phone. It flanks the input opposite the
    replay button — the corner it started in was both behind the score and
    inside #hud, which is pointer-events:none, so it was never clickable. */
-#btn-leave{font-family:var(--brush);font-size:19px;color:var(--slate)}
-#btn-leave:hover{border-color:var(--vermilion-hot);color:var(--vermilion-hot)}
+/* A bare 帰 told a first-year nothing, and sitting beside the input it read
+   as something that would clear the field. It says かえる and it says Leave,
+   like everything else in here, and it lives under the health bar where
+   quitting belongs. pointer-events because #hud switches them off. */
+#btn-leave{
+  pointer-events:auto;align-self:flex-end;margin-top:3px;
+  padding:4px 10px;border:1px solid rgba(159,182,208,.25);border-radius:2px;
+  background:rgba(10,14,20,.45);color:var(--slate);cursor:pointer;
+  font-family:var(--body);font-size:12px;letter-spacing:.04em;line-height:1.9;
+  transition:color .16s ease,border-color .16s ease;
+}
+#btn-leave:hover{color:var(--washi);border-color:var(--vermilion-hot)}
+#btn-leave rt{font-size:.46em;opacity:.7}
 
 /* a badge, announced once and then left alone */
 /* two can be earned by the same answer, so they stack rather than pile up */
@@ -1081,6 +1092,7 @@ rt{
             <span class="sc"><span id="score">0</span><small>点</small></span>
           </div>
           <div class="bar me"><i id="myHp"></i></div>
+          <button id="btn-leave" title="Leave the road (esc)" aria-label="Leave the road"><ruby>帰<rt>かえ</rt></ruby>る Leave</button>
         </div>
       </div>
 
@@ -1093,7 +1105,6 @@ rt{
             <div id="tiles"></div>
             <input id="bufferInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="latin" aria-label="Romaji input">
           </div>
-          <button class="spk" id="btn-leave" title="Leave the road (esc)" aria-label="Leave the road">帰</button>
         </div>
         <div id="hintLine"></div>
       </div>
@@ -1943,20 +1954,24 @@ function spokenForm(item){
   const base = item.h || item.k;
   return SPEAK_AS[base] || base;
 }
-function speakKana(item, repeat){
+/* `slow` is for the phases where the answer depends on hearing it. A single
+   mora out of context is the hardest thing a speech engine is ever asked to
+   say — ふ against く, し against ち — and dropping the rate is the one lever
+   that reliably helps without a recording. */
+function speakKana(item, repeat, slow){
   if(!item) return noteSpeechMiss();
   if(playClip(item.r, repeat)) return;          // recorded audio wins
   const base = jaVoice ? spokenForm(item) : item.r;
-  speakText(repeat ? base + (jaVoice ? "\u3001" : ", ") + base : base, !jaVoice);
+  speakText(repeat ? base + (jaVoice ? "\u3001" : ", ") + base : base, !jaVoice, slow);
 }
-function speakText(text, forceEnglish){
+function speakText(text, forceEnglish, slow){
   if(!("speechSynthesis" in window) || !text){ noteSpeechMiss(); return; }
   const ss = window.speechSynthesis;
   const fire = () => {
     try{
       const u = new SpeechSynthesisUtterance(text);
       if(jaVoice && !forceEnglish){ u.voice = jaVoice; u.lang = "ja-JP"; } else { u.lang = "en-US"; }
-      u.rate = (G && G.rate) || 0.9; u.pitch = 1;
+      u.rate = Math.max(0.5, ((G && G.rate) || 0.9) * (slow ? 0.78 : 1)); u.pitch = 1;
       let started = false;
       u.onstart = () => {
         started = true; speechMisses = 0;
@@ -2206,7 +2221,7 @@ const G = {
   required: null, answers: [], buffer: "", lastKey: null, promptAt: 0,
   tStart: 0, tDur: 0, tActive: false, replayed: false,
   nodes: [], order: [], nodeIdx: 0, decoys: [], aid: false, offenseMode: "choose",
-  stunZ: STUN_FAR, offTime: 0, volley: [], volleyIdx: 0, revealed: false, lateral: 0,
+  stunZ: STUN_FAR, offTime: 0, acousticsRelaxed: false, volley: [], volleyIdx: 0, revealed: false, lateral: 0,
   enemyZ: -1400, zFrom: -1400, zTo: -1400, zT: 1, zDur: 1, zEase: "out",
   bob: 0, shake: 0, shakeDirty: false, scale: 1, rate: 0.9, twice: false, speakOnHit: true,
   dojoMode: "ordered",
@@ -2765,6 +2780,7 @@ function targetAidOn(){
   if(G.offenseMode === "ltr") return true;        // next target is obvious anyway
   /* Choosing is impossible with no sound, so the ring has to stand in. */
   if(G.offenseMode === "choose"){
+    if(G.acousticsRelaxed) return true;   // this set cannot be told apart by ear
     if(G.aid) return true;
     if(G.required && clips.has(G.required.r)) return false;
     return speechOK === false;
@@ -2896,7 +2912,12 @@ function pickDistinct(n, preferErrors){
     }
   };
   draw(true);
+  const clean = out.length;
   draw(false);   // pool too homogeneous to separate — better to play than to stall
+  /* If the acoustic guard had to be dropped, two of these three may sound
+     alike, and choosing by ear becomes a coin toss. Remember it so the round
+     can be made answerable by reading instead. */
+  G.acousticsRelaxed = listening && out.length > clean;
   while(out.length < n) out.push(src[out.length % src.length]);
   return out;
 }
@@ -3220,7 +3241,7 @@ function nextTarget(){
     .map(x => ({item: x.it, el: x.el, answers: answersFor(x.it)}));
   const listening = G.offenseMode === "listen" || G.offenseMode === "choose";
   replayBtn.disabled = !listening;
-  if(listening) speakKana(n.it, G.twice);
+  if(listening) speakKana(n.it, G.twice, true);
   syncTargetAid();
   $("s-duel").classList.toggle("choosing", G.offenseMode === "choose");
   startTimer(G.offTime || TIERS[G.tier].off);
@@ -3394,7 +3415,7 @@ window.addEventListener("keydown", e => {
   if(e.key === "Escape" && G.running){ G.withdrawn = true; endGame(false); }
   if(e.key === "Enter" && G.phase === "offense" && G.required){
     e.preventDefault();
-    if(listenMode()) speakKana(G.required, G.twice);
+    if(listenMode()) speakKana(G.required, G.twice, true);
   }
 });
 
@@ -3481,7 +3502,7 @@ function frame(ts){
       timerBar.classList.toggle("urgent", p < 0.3);
       if(G.phase === "offense" && !G.replayed && p < 0.5 && !G.buffer){
         G.replayed = true;
-        if(listenMode()) speakKana(G.required, G.twice);
+        if(listenMode()) speakKana(G.required, G.twice, true);
       }
       if(el >= G.tDur){
         G.tActive = false;
