@@ -950,6 +950,9 @@ body.showtags .face.front .grp{display:block}
 .reader{display:flex;align-items:center;gap:14px;min-width:0}
 .reader .called{display:flex;flex-direction:column;gap:2px;min-width:0}
 .reader .called b{font-family:var(--kana);font-size:40px;line-height:1.15;color:var(--sumi)}
+.reader .called b.call{
+  font-family:var(--mono);font-size:34px;letter-spacing:.1em;color:var(--vermilion);
+}
 .reader .called span{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--sumi-2);text-transform:uppercase}
 .reader .called span b{font-family:var(--body);font-size:15px;letter-spacing:0;text-transform:none}
 .mat-stats{display:flex;gap:20px}
@@ -1009,9 +1012,11 @@ body.showtags .face.front .grp{display:block}
 
 /* 暗記時間: every card wears its reading until the reader starts */
 .fuda .hint{
-  position:absolute;left:0;right:0;bottom:5px;text-align:center;
-  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:rgba(36,31,25,.6);
+  position:absolute;left:0;right:0;bottom:4px;
+  display:flex;align-items:baseline;justify-content:center;gap:7px;
 }
+.fuda .hint b{font-family:var(--mono);font-size:15px;letter-spacing:.06em;color:rgba(36,31,25,.82)}
+.fuda .hint i{font-style:normal;font-family:var(--body);font-size:17px;color:rgba(36,31,25,.6)}
 .fuda .zb{
   position:absolute;left:0;right:0;top:5px;text-align:center;
   font-family:var(--body);font-size:14px;color:rgba(36,31,25,.42);
@@ -1201,7 +1206,7 @@ rt{
           <span class="big"><ruby>記<rt>き</rt></ruby><ruby>録<rt>ろく</rt></ruby></span>
           <span class="sub"><b>Record</b><span id="recNote"></span></span>
         </div>
-        <button class="btn dark tiny" id="rec-back"><span class="jpx"><ruby>道<rt>どう</rt></ruby><ruby>場<rt>じょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
+        <button class="btn dark tiny" id="rec-back"><span class="jpx"><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby><ruby>場<rt>ば</rt></ruby>へ　</span>Practice Floor</button>
       </div>
       <div class="tiles" id="recTiles"></div>
       <h3><span class="jp"><ruby>五<rt>ご</rt></ruby><ruby>十<rt>じゅう</rt></ruby><ruby>音<rt>おん</rt></ruby><ruby>図<rt>ず</rt></ruby></span><span class="en">What You Hold</span></h3>
@@ -1221,7 +1226,7 @@ rt{
           <span class="big" id="kStageJp">選</span>
           <span class="sub"><b id="kStageEn">Choose</b><span id="kStageNote"></span></span>
         </div>
-        <button class="btn dark tiny" id="k-quit"><span class="jpx"><ruby>道<rt>どう</rt></ruby><ruby>場<rt>じょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
+        <button class="btn dark tiny" id="k-quit"><span class="jpx"><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby><ruby>場<rt>ば</rt></ruby>へ　</span>Practice Floor</button>
       </div>
 
       <div class="kprog"><span class="track"><i id="kProgBar"></i></span><span class="ct" id="kProgText"></span></div>
@@ -1246,7 +1251,7 @@ rt{
         <div class="review" id="kReview"></div>
         <div class="rep-acts">
           <button class="btn dark" id="k-again"><span class="jpx">もう<ruby>一<rt>いち</rt></ruby><ruby>度<rt>ど</rt></ruby>　</span>Drill Again</button>
-          <button class="btn dark" id="k-done-back"><span class="jpx"><ruby>道<rt>どう</rt></ruby><ruby>場<rt>じょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
+          <button class="btn dark" id="k-done-back"><span class="jpx"><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby><ruby>場<rt>ば</rt></ruby>へ　</span>Practice Floor</button>
         </div>
       </div>
     </div>
@@ -1328,12 +1333,12 @@ rt{
       <div class="tiles" id="statTiles"></div>
 
       <h3><span class="jp"><ruby>要<rt>よう</rt></ruby><ruby>復<rt>ふく</rt></ruby><ruby>習<rt>しゅう</rt></ruby></span><span class="en">Needs Review</span></h3>
-      <p id="reviewNote">The characters that cost you the most keystrokes. Take these back to the dojo first.</p>
+      <p id="reviewNote">The hands that cost you. Turn these on the practice floor before the next match.</p>
       <div class="review" id="review"></div>
 
       <div class="rep-acts">
         <button class="btn solid" id="btn-rematch"><span class="jpx">もう<ruby>一<rt>いち</rt></ruby><ruby>度<rt>ど</rt></ruby>　</span>Walk It Again</button>
-        <button class="btn dark" id="btn-back"><span class="jpx"><ruby>道<rt>どう</rt></ruby><ruby>場<rt>じょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
+        <button class="btn dark" id="btn-back"><span class="jpx"><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby><ruby>場<rt>ば</rt></ruby>へ　</span>Practice Floor</button>
       </div>
     </div>
   </section>
@@ -2192,7 +2197,7 @@ function refreshDojo(){ buildPool(); renderGrid(); }
    ========================================================== */
 const K_STAGES = [
   {jp:"選", en:"Choose",
-   note:"Read the character, then choose its romaji. Nothing is timed and nothing is lost."},
+   note:"Read the hand, then choose the mora it writes. Nothing is timed and nothing is lost."},
   {jp:"書", en:"Write",
    note:"The same forms, with no choices offered. Type the romaji from the hand alone."}
 ];
@@ -2209,25 +2214,23 @@ function kShuffle(a){
   return d;
 }
 
-/* Near-misses teach; random wrong answers only pad the row. confusable()
-   already knows which mora the eye and ear run together, so the decoys come
-   from there first. Homophones are barred outright — お against を has no
-   right answer once the clip plays. */
+/* Distractors for the drill. The kana game picked acoustic near-misses,
+   because there the question was what you HEARD. Here the question is what
+   you are LOOKING at, so the wrong answers only need to be other mora in the
+   pool — and with か carrying thirty-seven hands, the pool supplies plenty.
+   (This is why confusable() is not missed: it belonged to the duel.) */
 function kDecoys(it, n){
-  const seen = new Set([it.r, reading(it.r)]);
+  const seen = new Set([it.r]);
   const out = [];
-  const push = x => {
-    if(seen.has(x.r) || seen.has(reading(x.r))) return;
-    seen.add(x.r); seen.add(reading(x.r)); out.push(x);
-  };
-  kShuffle(G.pool).forEach(x => { if(out.length < n && confusable(it, x)) push(x); });
-  kShuffle(G.pool).forEach(x => { if(out.length < n) push(x); });
+  kShuffle(G.pool).forEach(x => {
+    if(out.length >= n || seen.has(x.r)) return;
+    seen.add(x.r); out.push(x);
+  });
   return out;
 }
 
-/* A pass is capped so that a sitting ends. Everything (both scripts) is 208
-   characters — 416 questions across two passes, which is a homework set, not
-   a drill. */
+/* A pass is capped so that a sitting ends. All 285 forms would be 570
+   questions across two passes, which is a homework set, not a drill. */
 const K_CAP = 20;
 
 /* What this browser has got wrong before, so that drilling twice is not the
@@ -2755,7 +2758,10 @@ function bzEnd(){
 }
 
 $("btn-bozu").addEventListener("click", bzStart);
-$("bzPile").addEventListener("click", bzTurn);
+/* NOT `addEventListener("click", bzTurn)`: that hands the MouseEvent to
+   bzTurn's generation parameter, which then refuses the turn as stale.
+   Every click was being silently discarded. */
+$("bzPile").addEventListener("click", () => bzTurn());
 $("bz-again").addEventListener("click", bzStart);
 $("bz-back").addEventListener("click", () => { show("s-dojo"); refreshDojo(); });
 $("bz-leave").addEventListener("click", () => { B.over = true; B.gen++; show("s-dojo"); refreshDojo(); });
@@ -2784,11 +2790,15 @@ function aidOn(){
   if(G.call && clipFor(G.call.r)) return false;   // a recording covers this one
   return speechOK === false;
 }
+/* The call is always written out, not only when the audio fails. Showing
+   「ka」 gives nothing away: the difficulty is working out which of the hands
+   on the mat is a か, and the romaji does not answer that. So anyone playing
+   with the sound off, or who simply did not catch it, is not shut out. */
 function syncTargetAid(){
   const el = document.getElementById("calledKana");
-  if(!el) return;
-  if(!G.running || !G.call || G.locked) return;
-  el.textContent = aidOn() ? (G.call.mk || G.call.reads[0]) : "?";
+  if(!el || !G.running || !G.call || G.locked) return;
+  el.textContent = G.call.r;
+  el.classList.add("call");
 }
 
 function shuffled(a){
@@ -2835,6 +2845,7 @@ function startAnki(){
   $("missBox").hidden = true;
   hintLine.textContent = "Learn the mat. The reader waits.";
   $("calledKana").textContent = "—";
+  $("calledKana").classList.remove("call");
   $("calledNote").textContent = "not begun";
   let left = ANKI_SECONDS;
   $("ankiLeft").textContent = left + "s";
@@ -2862,9 +2873,11 @@ function renderMat(){
     el.className = "fuda";
     el.type = "button";
     el.dataset.i = i;
+    /* During 暗記時間 a card wears both halves of what it is: the mora it
+       writes and the kanji it came from. Easy mode keeps the 字母 afterwards. */
     el.innerHTML = '<span class="g">' + it.disp + '</span>' +
       (G.easy ? '<span class="zb">' + it.z + '</span>' : '') +
-      '<span class="hint">' + it.r + '</span>';
+      '<span class="hint"><b>' + it.r + '</b><i>' + it.z + '</i></span>';
     el.setAttribute("aria-label", "card " + (i + 1));
     matEl.appendChild(el);
   });
@@ -2882,7 +2895,7 @@ function nextCall(){
   G.locked = false;
   G.call = G.deck[G.order[G.callIdx]];
   G.promptAt = performance.now();
-  $("calledNote").textContent = aidOn() ? "the reader is shown, not heard" : "listening";
+  $("calledNote").textContent = "the reader calls";
   syncTargetAid();
   hintLine.textContent = "Take the card the reader called · " + (G.deck.length - G.taken) + " left on the mat";
   speakKana(G.call, G.twice, true);
@@ -2946,6 +2959,7 @@ function takeCard(i){
   G.taken++; updateMatStats();
 
   $("calledKana").textContent = it.disp;
+  $("calledKana").classList.remove("call");
   $("calledNote").innerHTML = it.r + " &nbsp;·&nbsp; from <b>" + it.z + "</b>";
   hintLine.textContent = "Taken";
   G.callIdx++;
@@ -2974,6 +2988,7 @@ function missCall(){
   if(el) el.classList.add("missed");
   hintLine.textContent = "Not taken. Look at it, then continue.";
   $("calledKana").textContent = G.call.disp;
+  $("calledKana").classList.remove("call");
   $("calledNote").innerHTML = G.call.r + " &nbsp;·&nbsp; from <b>" + G.call.z + "</b>";
   $("missGlyph").textContent = G.call.disp;
   $("missRomaji").textContent = G.call.r;
