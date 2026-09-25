@@ -853,6 +853,80 @@ body.showtags .face.front .grp{display:block}
 #recMap .mf .sq{width:40px;aspect-ratio:1/1.08;font-size:23px}
 
 /* ==========================================================
+   坊主めくり
+   ========================================================== */
+#s-bozu{overflow-y:auto;display:none}
+#s-bozu.on{display:block}
+.bz-head{
+  display:flex;align-items:baseline;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  max-width:920px;margin:0 auto;padding:clamp(18px,4vh,34px) clamp(16px,3vw,28px) 6px;
+  border-bottom:2px solid var(--sumi);
+}
+.bz-head h2{font-family:var(--brush);font-weight:400;font-size:clamp(26px,5vw,40px);margin:0;color:var(--sumi)}
+.bz-head h2 span{
+  font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--sumi-2);margin-left:10px;
+}
+.bz-table{
+  max-width:920px;margin:0 auto;padding:clamp(18px,4vh,34px) clamp(16px,3vw,28px) 0;
+  display:grid;grid-template-columns:1fr auto 1fr;gap:clamp(12px,3vw,30px);align-items:start;
+}
+@media (max-width:640px){.bz-table{grid-template-columns:1fr;justify-items:center}}
+.bz-side{
+  display:flex;flex-direction:column;align-items:center;gap:1px;padding:14px 10px;
+  border:1px solid var(--washi-3);border-radius:2px;background:rgba(255,255,255,.28);
+  transition:border-color .2s ease,background .2s ease;
+}
+.bz-side.active{border-color:var(--sumi);background:rgba(255,255,255,.62)}
+.bz-side b{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--sumi-2)}
+.bz-side i{font-style:normal;font-family:var(--mono);font-size:38px;color:var(--sumi);font-variant-numeric:tabular-nums;line-height:1.1}
+.bz-side span{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--sumi-2)}
+.bz-centre{display:flex;flex-direction:column;align-items:center;gap:16px}
+#bzPile{
+  width:120px;aspect-ratio:53/73;border-radius:3px;cursor:pointer;
+  border:1px solid rgba(90,72,44,.5);
+  background:repeating-linear-gradient(46deg,#8E7C55 0 3px,#82714C 3px 7px);
+  box-shadow:0 6px 16px rgba(60,46,26,.34), 3px 3px 0 -1px #9C8A62, 6px 6px 0 -2px #8E7C55;
+  color:#F2EADA;display:grid;place-items:center;gap:2px;
+  transition:transform .14s ease;
+}
+#bzPile:hover:not(:disabled){transform:translateY(-3px)}
+#bzPile:disabled{opacity:.55;cursor:default}
+#bzPile span{font-family:var(--mono);font-size:27px;line-height:1}
+#bzPile small{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;opacity:.75}
+.bz-card{
+  width:min(240px,64vw);aspect-ratio:53/73;border-radius:3px;
+  border:1px solid rgba(90,72,44,.42);
+  background:linear-gradient(#F4ECD6 0%,#E8DCBC 64%,#DBCDA6 100%);
+  box-shadow:0 8px 22px rgba(60,46,26,.3);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px;
+}
+.bz-card[hidden]{display:none}
+.bz-card.in{animation:bzFlip .4s cubic-bezier(.2,1.1,.3,1)}
+@keyframes bzFlip{from{opacity:0;transform:rotateY(-70deg) scale(.9)}to{opacity:1;transform:none}}
+.bz-card .g{font-family:var(--kana);font-size:clamp(64px,15vw,104px);color:#221E19;line-height:1}
+.bz-card .meta{display:flex;align-items:baseline;gap:12px}
+.bz-card .meta b{font-family:var(--mono);font-size:16px;letter-spacing:.1em;color:var(--sumi)}
+.bz-card .meta i{font-style:normal;font-family:var(--body);font-size:26px;color:var(--sumi-2)}
+.bz-card .role{
+  font-family:var(--brush);font-size:23px;line-height:1.5;color:var(--sumi);
+  padding:3px 14px;border-radius:2px;border:1px solid var(--washi-3);
+}
+.bz-card .role em{font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--sumi-2)}
+.bz-card .role.bozu{background:rgba(192,57,43,.14);border-color:var(--vermilion)}
+.bz-card .role.hime{background:rgba(201,162,39,.18);border-color:var(--gold)}
+.bz-pool{display:flex;flex-direction:column;align-items:center;gap:1px}
+.bz-pool b{font-family:var(--mono);font-size:22px;color:var(--sumi);font-variant-numeric:tabular-nums}
+.bz-pool span{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--sumi-2)}
+#bzHint{
+  max-width:920px;margin:0 auto;padding:22px clamp(16px,3vw,28px) 0;text-align:center;
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;color:var(--sumi-2);
+  text-transform:uppercase;min-height:18px;
+}
+#s-bozu .rep-acts{max-width:920px;margin:0 auto;padding:0 clamp(16px,3vw,28px) 40px;justify-content:center;border-top:0}
+#bzEnd[hidden]{display:none}
+
+/* ==========================================================
    THE MAT
    Tatami under the cards, washi on them. The cards are the proportions of a
    real 取り札, laid flat in rows the way a side of the field is set out.
@@ -1007,6 +1081,7 @@ rt{
           <button class="btn dark tiny" id="btn-revealall">Reveal all</button>
           <button class="btn dark tiny" id="btn-record"><span class="jpx"><ruby>記<rt>き</rt></ruby><ruby>録<rt>ろく</rt></ruby>　</span>Record</button>
           <button class="btn dark" id="btn-keiko"><span class="jpx"><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby>　</span>Drill</button>
+          <button class="btn dark" id="btn-bozu"><span class="jpx"><ruby>坊<rt>ぼう</rt></ruby><ruby>主<rt>ず</rt></ruby>めくり　</span>Bōzu Mekuri</button>
           <button class="btn solid" id="btn-duel"><span class="jpx"><ruby>試<rt>し</rt></ruby><ruby>合<rt>あい</rt></ruby>　</span>Begin a Match</button>
         </div>
       </div>
@@ -1132,6 +1207,32 @@ rt{
           <button class="btn dark" id="k-done-back"><span class="jpx"><ruby>道<rt>どう</rt></ruby><ruby>場<rt>じょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ BOZU MEKURI ============ -->
+  <section class="screen paper" id="s-bozu">
+    <div class="bz-head">
+      <h2><ruby>坊<rt>ぼう</rt></ruby><ruby>主<rt>ず</rt></ruby>めくり <span>Bōzu Mekuri</span></h2>
+      <button class="btn dark tiny" id="bz-leave"><span class="jpx"><ruby>帰<rt>かえ</rt></ruby>る　</span>Leave</button>
+    </div>
+    <div class="bz-table">
+      <div class="bz-side" id="bzYou"><b>You</b><i id="bzYouN">0</i><span>cards</span></div>
+      <div class="bz-centre">
+        <button id="bzPile" aria-label="Turn the top card"><span id="bzPileN">0</span><small>face down</small></button>
+        <div id="bzCard" class="bz-card" hidden>
+          <span class="g" id="bzGlyph"></span>
+          <span class="meta"><b id="bzRomaji"></b><i id="bzZibo"></i></span>
+          <span class="role" id="bzRole"></span>
+        </div>
+        <div class="bz-pool"><b id="bzPoolN">0</b><span>in the middle</span></div>
+      </div>
+      <div class="bz-side" id="bzThem"><b>Opponent</b><i id="bzThemN">0</i><span>cards</span></div>
+    </div>
+    <p id="bzHint"></p>
+    <div class="rep-acts" id="bzEnd" hidden>
+      <button class="btn solid" id="bz-again"><span class="jpx">もう<ruby>一<rt>いち</rt></ruby><ruby>度<rt>ど</rt></ruby>　</span>Again</button>
+      <button class="btn dark" id="bz-back"><span class="jpx"><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby><ruby>場<rt>ば</rt></ruby>へ　</span>Practice Floor</button>
     </div>
   </section>
 
@@ -2471,6 +2572,136 @@ function shake(amp){ G.shake = Math.max(G.shake, amp); G.shakeDirty = true; }
 function show(id){
   document.querySelectorAll(".screen").forEach(s => s.classList.toggle("on", s.id === id));
 }
+
+/* ==========================================================
+   8b. 坊主めくり — the rung below the match
+   Pure luck: turn the top card, and what happens is decided by the card and
+   not by you. Nothing is asked, nothing is timed, and nothing can be got
+   wrong — which is the point. You will see sixty hands in five minutes and
+   be told each one, and the ones that cost you everything you will remember.
+
+   Which cards are 坊主 and which are 姫 is arbitrary, exactly as a poet's
+   portrait is arbitrary to their poem. It is FIXED per form, so "that hand
+   is a monk" is learnable the way the real deck is learnable, and the
+   proportions follow the Hyakunin Isshu: roughly one card in eight a monk,
+   one in five a lady.
+
+   I did look for something in the character itself to hang it on — the 字母's
+   Kangxi radical, from Unihan, which covers all 223 of them. The radicals are
+   spread far too thin to carry it: the commonest, 人, is 6% of the deck and
+   女 is four cards. Forcing it would have been a worse lie than this.
+   ========================================================== */
+const BZ_DECK = 40;
+/* `gen` counts games. Every deferred turn carries the generation it was
+   scheduled in and does nothing if a new game has started since — otherwise
+   a timer left over from an abandoned game turns a card into the new one,
+   which is how a ten-card deck ended up holding eleven. */
+const B = {deck: [], you: 0, them: 0, pool: 0, turn: "you", over: false, busy: false, gen: 0};
+
+function cardRole(it){
+  let h = 0;
+  const key = it.h + it.z;
+  for(let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+  const n = h % 100;
+  return n < 13 ? "bozu" : n < 34 ? "hime" : "otoko";
+}
+const BZ_ROLE = {
+  otoko: {jp:"男",   rb:"男|おとこ",  en:"a nobleman", note:"keeps it"},
+  bozu:  {jp:"坊主", rb:"坊|ぼう 主|ず", en:"a monk",    note:"puts everything back"},
+  hime:  {jp:"姫",   rb:"姫|ひめ",    en:"a lady",     note:"takes the middle"}
+};
+
+function bzStart(){
+  ac();
+  buildPool();
+  if(!G.pool.length) return;
+  B.deck = shuffled(G.pool).slice(0, Math.min(BZ_DECK, G.pool.length));
+  B.you = 0; B.them = 0; B.pool = 0; B.turn = "you"; B.over = false; B.busy = false;
+  B.gen++;
+  $("bzCard").hidden = true;
+  $("bzEnd").hidden = true;
+  bzPaint();
+  $("bzHint").textContent = "Turn the top card. Nothing here can be got wrong.";
+  show("s-bozu");
+}
+
+function bzPaint(){
+  $("bzPileN").textContent = B.deck.length;
+  $("bzYouN").textContent = B.you;
+  $("bzThemN").textContent = B.them;
+  $("bzPoolN").textContent = B.pool;
+  $("bzYou").classList.toggle("active", B.turn === "you" && !B.over);
+  $("bzThem").classList.toggle("active", B.turn === "them" && !B.over);
+  $("bzPile").disabled = B.over || B.busy || B.turn !== "you";
+}
+
+function bzTurn(scheduledIn){
+  if(scheduledIn != null && scheduledIn !== B.gen) return;   // a turn from a game that is over
+  if(B.over || B.busy || !B.deck.length) return;
+  B.busy = true;
+  const gen = B.gen;
+  const it = B.deck.pop();
+  const role = cardRole(it);
+  const who = B.turn, mine = who === "you";
+
+  $("bzGlyph").textContent = it.h;
+  $("bzRomaji").textContent = it.r;
+  $("bzZibo").textContent = it.z;
+  $("bzRole").className = "role " + role;
+  $("bzRole").innerHTML = ruby(BZ_ROLE[role].rb) + " <em>" + BZ_ROLE[role].en + "</em>";
+  $("bzCard").hidden = false;
+  $("bzCard").classList.remove("in"); void $("bzCard").offsetWidth; $("bzCard").classList.add("in");
+  speakKana(it, false, true);
+  /* Every card turned is a card seen, whoever turned it. */
+  noteAnswer(it, true);
+
+  let said;
+  if(role === "otoko"){
+    if(mine) B.you++; else B.them++;
+    said = (mine ? "Yours" : "Theirs") + " — " + it.r + ", from " + it.z;
+  }else if(role === "bozu"){
+    const lost = mine ? B.you : B.them;
+    B.pool += lost + 1;
+    if(mine) B.you = 0; else B.them = 0;
+    said = "坊主 — " + (mine ? "you put " : "they put ") + (lost ? lost + " back" : "nothing back") +
+           ", and the card with it";
+    sfxBad(); shake(0.55);
+  }else{
+    const won = B.pool + 1;
+    if(mine) B.you += won; else B.them += won;
+    B.pool = 0;
+    said = "姫 — " + (mine ? "you take " : "they take ") + won + " from the middle";
+    sfxParry(); shake(0.35);
+  }
+  $("bzHint").textContent = said;
+  bzPaint();
+
+  setTimeout(() => {
+    if(gen !== B.gen) return;
+    B.busy = false;
+    if(!B.deck.length) return bzEnd();
+    B.turn = mine ? "them" : "you";
+    bzPaint();
+    if(B.turn === "them") setTimeout(() => bzTurn(gen), 700);
+  }, role === "otoko" ? 900 : 1500);
+}
+
+function bzEnd(){
+  B.over = true;
+  bzPaint();
+  $("bzPile").disabled = true;
+  const d = B.you - B.them;
+  $("bzHint").textContent = d > 0 ? "You finish with " + B.you + " to " + B.them + "."
+    : d < 0 ? "They finish with " + B.them + " to " + B.you + "."
+    : "Level, " + B.you + " each.";
+  $("bzEnd").hidden = false;
+}
+
+$("btn-bozu").addEventListener("click", bzStart);
+$("bzPile").addEventListener("click", bzTurn);
+$("bz-again").addEventListener("click", bzStart);
+$("bz-back").addEventListener("click", () => { show("s-dojo"); refreshDojo(); });
+$("bz-leave").addEventListener("click", () => { B.over = true; B.gen++; show("s-dojo"); refreshDojo(); });
 
 /* ==========================================================
    9. THE MATCH
