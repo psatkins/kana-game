@@ -748,6 +748,25 @@ body.showtags .face.front .grp{display:block}
 #kDone[hidden],#kPlay[hidden]{display:none}
 
 /* ==========================================================
+   FURIGANA
+   The class is three weeks into hiragana and none of the way into kanji,
+   so every kanji in the interface carries its reading. This is the one
+   gloss they can actually use — and it makes the chrome practice rather
+   than an obstacle. Sized small and dimmed so it never competes with the
+   character being taught.
+   ========================================================== */
+ruby{ruby-position:over;-webkit-ruby-position:before}
+rt{
+  font-family:var(--kana);font-size:.42em;font-weight:400;line-height:1.1;
+  letter-spacing:.02em;opacity:.62;user-select:none;text-align:center;
+}
+/* the vertical rail and title set their ruby alongside, not above */
+.vtitle rt,.rail h2 rt{font-size:.3em;letter-spacing:.06em;opacity:.55}
+.btn rt,.chip rt{font-size:.5em;opacity:.6}
+.tc .jp rt{font-size:.3em;opacity:.65}
+.who b rt{font-size:.44em;opacity:.6}
+
+/* ==========================================================
    responsive + motion
    ========================================================== */
 @media (max-width:760px){
@@ -799,7 +818,7 @@ body.showtags .face.front .grp{display:block}
       <h1 class="vtitle">仮名夜行</h1>
       <p class="romline">Kana Yakō</p>
       <p class="tag">Something is standing in the road. Read its name aloud and it must let you pass.</p>
-      <button class="btn big" id="btn-enter"><span class="jpx">道場へ入る　</span>Enter the Dojo</button>
+      <button class="btn big" id="btn-enter"><span class="jpx"><ruby>道場<rt>どうじょう</rt></ruby>へ<ruby>入<rt>はい</rt></ruby>る　</span>Enter the Dojo</button>
       <p class="fine">Hardware keyboard recommended · Sound on · Best in a dark room</p>
     </div>
   </section>
@@ -807,7 +826,7 @@ body.showtags .face.front .grp{display:block}
   <!-- ============ DOJO ============ -->
   <section class="screen paper" id="s-dojo">
     <aside class="rail">
-      <h2>練習道場</h2>
+      <h2><ruby>練習道場<rt>れんしゅうどうじょう</rt></ruby></h2>
       <p class="rail-en">Practice Dojo</p>
       <div class="seal" aria-hidden="true">臨</div>
     </aside>
@@ -819,8 +838,8 @@ body.showtags .face.front .grp{display:block}
         </div>
         <div class="acts">
           <button class="btn dark tiny" id="btn-revealall">Reveal all</button>
-          <button class="btn dark" id="btn-keiko"><span class="jpx">稽古　</span>Drill</button>
-          <button class="btn solid" id="btn-duel"><span class="jpx">夜道へ　</span>Take the Night Road</button>
+          <button class="btn dark" id="btn-keiko"><span class="jpx"><ruby>稽古<rt>けいこ</rt></ruby>　</span>Drill</button>
+          <button class="btn solid" id="btn-duel"><span class="jpx"><ruby>夜道<rt>よみち</rt></ruby>へ　</span>Take the Night Road</button>
         </div>
       </div>
 
@@ -830,7 +849,7 @@ body.showtags .face.front .grp{display:block}
       </div>
       <div class="chipset">
         <span class="seg" id="segDojo">
-          <button data-d="ordered" aria-pressed="true">五十音図 Table</button>
+          <button data-d="ordered" aria-pressed="true"><ruby>五十音図<rt>ごじゅうおんず</rt></ruby> Table</button>
           <button data-d="shuffle" aria-pressed="false">シャッフル Shuffle</button>
         </span>
         <span class="seg" id="segScript">
@@ -838,18 +857,18 @@ body.showtags .face.front .grp{display:block}
           <button data-s="kata" aria-pressed="false">カタカナ</button>
           <button data-s="both" aria-pressed="false">Both</button>
         </span>
-        <button class="chip" id="preset-basic"><span class="jp">五十音</span> Kana 46</button>
-        <button class="chip" id="preset-all"><span class="jp">全</span> Everything</button>
-        <button class="btn dark tiny" id="btn-settings" aria-expanded="false" aria-controls="settings">設定 Settings ▾</button>
+        <button class="chip" id="preset-basic"><span class="jp"><ruby>五十音<rt>ごじゅうおん</rt></ruby></span> Kana 46</button>
+        <button class="chip" id="preset-all"><span class="jp"><ruby>全<rt>ぜん</rt></ruby></span> Everything</button>
+        <button class="btn dark tiny" id="btn-settings" aria-expanded="false" aria-controls="settings"><ruby>設定<rt>せってい</rt></ruby> Settings ▾</button>
       </div>
 
       <div id="settings" hidden>
         <div class="chipset">
           <span class="lbl">Sealing phase</span>
           <span class="seg" id="segOffense">
-            <button data-o="ltr" aria-pressed="true">右→左 Read in order</button>
-            <button data-o="gojuon" aria-pressed="false">五十音順 Gojūon</button>
-            <button data-o="listen" aria-pressed="false">聞き取り Listen</button>
+            <button data-o="ltr" aria-pressed="true"><ruby>右<rt>みぎ</rt></ruby>→<ruby>左<rt>ひだり</rt></ruby> Read in order</button>
+            <button data-o="gojuon" aria-pressed="false"><ruby>五十音順<rt>ごじゅうおんじゅん</rt></ruby> Gojūon</button>
+            <button data-o="listen" aria-pressed="false"><ruby>聞<rt>き</rt></ruby>き<ruby>取<rt>と</rt></ruby>り Listen</button>
           </span>
           <label class="switch"><input type="checkbox" id="hitSpeakToggle" checked> Speak each character once it is answered</label>
           <label class="switch"><input type="checkbox" id="altToggle" checked> Accept Kunrei-shiki as well as Hepburn (si · ti · tu · hu · zi · sya…)</label>
@@ -857,9 +876,9 @@ body.showtags .face.front .grp{display:block}
         <div class="chipset">
           <span class="lbl">Glyph</span>
           <span class="seg" id="segGlyph">
-            <button data-g="brush" aria-pressed="true">筆 Brush</button>
-            <button data-g="hand" aria-pressed="false">手書き Hand</button>
-            <button data-g="print" aria-pressed="false">明朝 Print</button>
+            <button data-g="brush" aria-pressed="true"><ruby>筆<rt>ふで</rt></ruby> Brush</button>
+            <button data-g="hand" aria-pressed="false"><ruby>手書<rt>てが</rt></ruby>き Hand</button>
+            <button data-g="print" aria-pressed="false"><ruby>明朝<rt>みんちょう</rt></ruby> Print</button>
           </span>
           <label class="switch"><input type="checkbox" id="tagToggle"> Show 行 label on card fronts</label>
           <label class="switch"><input type="checkbox" id="aidToggle"> Ring the spoken target (for rooms without audio)</label>
@@ -901,7 +920,7 @@ body.showtags .face.front .grp{display:block}
           <span class="big" id="kStageJp">選</span>
           <span class="sub"><b id="kStageEn">Choose</b><span id="kStageNote"></span></span>
         </div>
-        <button class="btn dark tiny" id="k-quit"><span class="jpx">道場へ戻る　</span>Return to Dojo</button>
+        <button class="btn dark tiny" id="k-quit"><span class="jpx"><ruby>道場<rt>どうじょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
       </div>
 
       <div class="kprog"><span class="track"><i id="kProgBar"></i></span><span class="ct" id="kProgText"></span></div>
@@ -921,12 +940,12 @@ body.showtags .face.front .grp{display:block}
 
       <div id="kDone" hidden>
         <div class="tiles" id="kTiles"></div>
-        <h3><span class="jp">要復習</span><span class="en">Needs Review</span></h3>
+        <h3><span class="jp"><ruby>要復習<rt>ようふくしゅう</rt></ruby></span><span class="en">Needs Review</span></h3>
         <p id="kReviewNote"></p>
         <div class="review" id="kReview"></div>
         <div class="rep-acts">
-          <button class="btn dark" id="k-again"><span class="jpx">もう一度　</span>Drill Again</button>
-          <button class="btn dark" id="k-done-back"><span class="jpx">道場へ戻る　</span>Return to Dojo</button>
+          <button class="btn dark" id="k-again"><span class="jpx">もう<ruby>一度<rt>いちど</rt></ruby>　</span>Drill Again</button>
+          <button class="btn dark" id="k-done-back"><span class="jpx"><ruby>道場<rt>どうじょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
         </div>
       </div>
     </div>
@@ -1006,13 +1025,13 @@ body.showtags .face.front .grp{display:block}
 
       <div class="tiles" id="statTiles"></div>
 
-      <h3><span class="jp">要復習</span><span class="en">Needs Review</span></h3>
+      <h3><span class="jp"><ruby>要復習<rt>ようふくしゅう</rt></ruby></span><span class="en">Needs Review</span></h3>
       <p id="reviewNote">The characters that cost you the most keystrokes. Take these back to the dojo first.</p>
       <div class="review" id="review"></div>
 
       <div class="rep-acts">
-        <button class="btn solid" id="btn-rematch"><span class="jpx">もう一度　</span>Walk It Again</button>
-        <button class="btn dark" id="btn-back"><span class="jpx">道場へ戻る　</span>Return to Dojo</button>
+        <button class="btn solid" id="btn-rematch"><span class="jpx">もう<ruby>一度<rt>いちど</rt></ruby>　</span>Walk It Again</button>
+        <button class="btn dark" id="btn-back"><span class="jpx"><ruby>道場<rt>どうじょう</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る　</span>Return to Dojo</button>
       </div>
     </div>
   </section>
@@ -1036,20 +1055,20 @@ const ROWS = [
   {g:"m",  jp:"ま", label:"m-",  items:[["ま","マ","ma"],["み","ミ","mi"],["む","ム","mu"],["め","メ","me"],["も","モ","mo"]]},
   {g:"y",  jp:"や", label:"y-",  items:[["や","ヤ","ya"],["ゆ","ユ","yu"],["よ","ヨ","yo"]]},
   {g:"r",  jp:"ら", label:"r-",  items:[["ら","ラ","ra"],["り","リ","ri"],["る","ル","ru"],["れ","レ","re"],["ろ","ロ","ro"]]},
-  {g:"w",  jp:"わ", label:"わ行 w-", items:[["わ","ワ","wa"],["を","ヲ","wo"]]},
+  {g:"w",  jp:"わ", label:"<ruby>わ行<rt>ぎょう</rt></ruby> w-", items:[["わ","ワ","wa"],["を","ヲ","wo"]]},
   /* ゐ and ゑ are not taught in a first-year course and have not been in
      ordinary use since 1946, but they are exactly what a reader of premodern
      texts needs — so they come out of the default set without leaving the
      game. Dropping them is what makes the basic set 46 rather than 48. */
-  {g:"old", jp:"ゐゑ", label:"歴史的仮名 historical", items:[["ゐ","ヰ","wi"],["ゑ","ヱ","we"]]},
+  {g:"old", jp:"ゐゑ", label:"<ruby>歴史的仮名<rt>れきしてきかな</rt></ruby> historical", items:[["ゐ","ヰ","wi"],["ゑ","ヱ","we"]]},
   {g:"nn", jp:"ん", label:"n",   items:[["ん","ン","n"]]},
-  {g:"daku",jp:"濁音", label:"g z d b p", items:[
+  {g:"daku",jp:"濁音", yomi:"だくおん", label:"g z d b p", items:[
     ["が","ガ","ga"],["ぎ","ギ","gi"],["ぐ","グ","gu"],["げ","ゲ","ge"],["ご","ゴ","go"],
     ["ざ","ザ","za"],["じ","ジ","ji",["zi"]],["ず","ズ","zu"],["ぜ","ゼ","ze"],["ぞ","ゾ","zo"],
     ["だ","ダ","da"],["で","デ","de"],["ど","ド","do"],
     ["ば","バ","ba"],["び","ビ","bi"],["ぶ","ブ","bu"],["べ","ベ","be"],["ぼ","ボ","bo"],
     ["ぱ","パ","pa"],["ぴ","ピ","pi"],["ぷ","プ","pu"],["ぺ","ペ","pe"],["ぽ","ポ","po"]]},
-  {g:"yoon",jp:"拗音", label:"-ya -yu -yo", items:[
+  {g:"yoon",jp:"拗音", yomi:"ようおん", label:"kya · sha · cho …", items:[
     ["きゃ","キャ","kya"],["きゅ","キュ","kyu"],["きょ","キョ","kyo"],
     ["しゃ","シャ","sha",["sya"]],["しゅ","シュ","shu",["syu"]],["しょ","ショ","sho",["syo"]],
     ["ちゃ","チャ","cha",["tya"]],["ちゅ","チュ","chu",["tyu"]],["ちょ","チョ","cho",["tyo"]],
@@ -1150,15 +1169,15 @@ ALL.forEach(it => { it.ord = gojuonRank(it.r); });
    comes at you differs, so reading pressure arrives a different way each time.
    `hidden` keeps an encounter off the ladder count until it reveals itself. */
 const TIERS = [
-  {key:"hitotsume", jp:"一つ目小僧", en:"One-Eyed Boy", hp:6, def:5.4, off:3.6,
+  {key:"hitotsume", jp:"一つ目小僧", yomi:"ひとつめこぞう", en:"One-Eyed Boy", hp:6, def:5.4, off:3.6,
    style:"thrust", accent:"#C6D3B8",
    line:"He steps out of the hedge at dusk to be gasped at, and sulks when he is not. Name him and he will stand aside — it is only politeness he is after."},
 
-  {key:"tengu", jp:"天狗", en:"Tengu", hp:8, def:5.0, off:3.2,
+  {key:"tengu", jp:"天狗", yomi:"てんぐ", en:"Tengu", hp:8, def:5.0, off:3.2,
    style:"arrow", accent:"#8FA9C4",
    line:"He will not come down off the cedar. One beat of the feather fan and the name arrives from the top of the mountain, small and a long way off."},
 
-  {key:"kamaitachi", jp:"鎌鼬", en:"Kamaitachi", hp:10, def:5.0, off:2.9,
+  {key:"kamaitachi", jp:"鎌鼬", yomi:"かまいたち", en:"Kamaitachi", hp:10, def:5.0, off:2.9,
    style:"ride", accent:"#B4726A",
    line:"It travels inside the gust and does not stop. You feel the cold on your shin long before you find the cut, and by then it is three fields away."},
 
@@ -1166,11 +1185,11 @@ const TIERS = [
    style:"dance", hidden:true, accent:"#C9A227",
    line:"An interlude. Someone else is on the road, walking your way at your pace, a little ahead. Rest your hands. Nothing is asked of you while a back is turned."},
 
-  {key:"chagama", jp:"分福茶釜", en:"Bunbuku Chagama", hp:11, def:4.8, off:2.9,
+  {key:"chagama", jp:"分福茶釜", yomi:"ぶんぶくちゃがま", en:"Bunbuku Chagama", hp:11, def:4.8, off:2.9,
    style:"tea", scene:"tearoom", accent:"#6E8F7D",
    line:"Set on the fire it grew a head, four feet and a tail, and would not be a kettle again. It has agreed to sit still while the water heats, and asks only that you read the scroll while it does."},
 
-  {key:"hyakki", jp:"百鬼夜行", en:"The Night Parade", hp:14, def:4.2, off:2.2,
+  {key:"hyakki", jp:"百鬼夜行", yomi:"ひゃっきやぎょう", en:"The Night Parade", hp:14, def:4.2, off:2.2,
    style:"cannon", accent:"#C9A227",
    line:"Every broken umbrella, every discarded pot, every thing that was used for a hundred years and then thrown away. They come down the road together, and they do not go around you."}
 ];
@@ -1200,6 +1219,13 @@ const STYLE = {
   tea:    {enemy:[-330, -330],prompt:[-30, -30],  sway:0,    promptSway:0, offsetX:340},
   cannon: {enemy:[-880, 60],  prompt:[-320, 80],  sway:0,    promptSway:0}
 };
+/* 漢字 with its reading over it. Group ruby — the whole word at once —
+   because 分福茶釜 is read as a unit and a beginner does not yet need to
+   know which syllable belongs to which character. Kana names pass through
+   untouched. */
+function ruby(text, yomi){
+  return yomi ? '<ruby>' + text + '<rt>' + yomi + '</rt></ruby>' : text;
+}
 function styleOf(){ return (TIERS[G.tier] && TIERS[G.tier].style) || "thrust"; }
 function envelope(){ return STYLE[styleOf()] || STYLE.thrust; }
 function approachProgress(){
@@ -2003,7 +2029,7 @@ function renderChips(){
     const b = document.createElement("button");
     b.className = "chip";
     b.setAttribute("aria-pressed", G.groups.has(row.g));
-    b.innerHTML = '<span class="jp">' + row.jp + '</span>' + row.label +
+    b.innerHTML = '<span class="jp">' + ruby(row.jp, row.yomi) + '</span>' + row.label +
                   '<span class="ct">' + row.items.length + '</span>';
     b.addEventListener("click", () => {
       if(G.groups.has(row.g)) G.groups.delete(row.g); else G.groups.add(row.g);
@@ -2593,7 +2619,7 @@ function startTier(){
   document.getElementById("scene").classList.toggle("tearoom", T.scene === "tearoom");
   G.foeMax = T.hp; G.foeHp = T.hp;
   enemyEl.innerHTML = silhouette(T.key);
-  $("foeJp").textContent = T.jp;
+  $("foeJp").innerHTML = ruby(T.jp, T.yomi);
   $("foeEn").textContent = T.en;
   updateBars();
   setZ(-1600, -1000, 1.4, "out");
@@ -2604,7 +2630,7 @@ function startTier(){
     (T.hidden ? '<p class="rank">Interlude</p>'
               : '<p class="rank">Encounter ' + (TIERS.slice(0, G.tier + 1).filter(x => !x.hidden).length) +
                 ' of ' + LADDER_COUNT + '</p>') +
-    '<p class="jp">' + T.jp + '</p>' +
+    '<p class="jp">' + ruby(T.jp, T.yomi) + '</p>' +
     '<p class="en">' + T.en + '</p>' +
     '<p class="line">' + T.line + '</p>';
   tierCard.classList.add("on");
