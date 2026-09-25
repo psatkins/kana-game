@@ -893,10 +893,23 @@ body.showtags .face.front .grp{display:block}
 #matTimer i.urgent{background:var(--vermilion)}
 
 #mat{
-  max-width:1000px;margin:0 auto;padding:clamp(16px,3vh,30px) clamp(16px,3vw,28px) 10px;
-  display:grid;gap:clamp(8px,1.6vw,14px);
-  grid-template-columns:repeat(auto-fit,minmax(104px,1fr));
+  max-width:1000px;margin:0 auto;padding:clamp(14px,2.5vh,26px) clamp(16px,3vw,28px) 10px;
+  display:flex;flex-direction:column;gap:clamp(14px,3vh,26px);
 }
+.zone{
+  position:relative;display:grid;gap:clamp(8px,1.6vw,14px);
+  grid-template-columns:repeat(auto-fit,minmax(104px,1fr));
+  padding-top:16px;
+}
+.zone .zlab{
+  position:absolute;top:0;left:0;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--sumi-2);opacity:.7;
+}
+/* the halfway line, as the mat has */
+.zone.far{border-bottom:1px solid rgba(34,30,25,.22);padding-bottom:clamp(14px,3vh,26px)}
+#mat.facing .zone.far .fuda .g{transform:rotate(180deg)}
+#mat.facing .zone.far .fuda{border-color:rgba(90,72,44,.6)}
 .fuda{
   aspect-ratio:53/73;border:1px solid rgba(90,72,44,.42);border-radius:3px;
   background:linear-gradient(#F4ECD6 0%,#E8DCBC 64%,#DBCDA6 100%);
@@ -1058,7 +1071,8 @@ rt{
           <button class="btn dark tiny" id="btn-revealall">Reveal all</button>
           <button class="btn dark tiny" id="btn-record"><span class="jpx"><ruby>記<rt>き</rt></ruby><ruby>録<rt>ろく</rt></ruby>　</span>Record</button>
           <button class="btn dark" id="btn-keiko"><span class="jpx"><ruby>稽<rt>けい</rt></ruby><ruby>古<rt>こ</rt></ruby>　</span>Drill</button>
-          <button class="btn solid" id="btn-duel"><span class="jpx"><ruby>試<rt>し</rt></ruby><ruby>合<rt>あい</rt></ruby>　</span>Begin a Match</button>
+          <button class="btn solid" id="btn-duel"><span class="jpx"><ruby>並<rt>なら</rt></ruby>び　</span>Side by Side</button>
+          <button class="btn solid" id="btn-facing"><span class="jpx"><ruby>対<rt>たい</rt></ruby><ruby>面<rt>めん</rt></ruby>　</span>Facing</button>
         </div>
       </div>
 
@@ -1215,7 +1229,10 @@ rt{
       <button class="btn dark tiny" id="m-resume"><span class="jpx"><ruby>続<rt>つづ</rt></ruby>ける　</span>Resume</button></div>
     <canvas id="fx"></canvas>
     <div id="flash" aria-hidden="true"></div>
-    <div id="mat"></div>
+    <div id="mat">
+      <div class="zone far" id="matFar"><span class="zlab" id="farLab"></span></div>
+      <div class="zone near" id="matNear"><span class="zlab">自陣 your side</span></div>
+    </div>
     <p id="matHint"></p>
     <div id="missBox" hidden>
       <span class="g" id="missGlyph"></span>
@@ -1970,7 +1987,7 @@ const G = {
   deck: [], order: [], call: null, callIdx: 0, taken: 0, faults: 0, locked: false,
   promptAt: 0, tStart: 0, tDur: 0, tActive: false,
   /* the practice floor and the settings it carries */
-  dojoMode: "ordered", aid: false, easy: false, paused: false, anki: false, timed: false,
+  dojoMode: "ordered", aid: false, easy: false, paused: false, anki: false, timed: false, facing: false,
   shake: 0, shakeDirty: false, scale: 1,
   rate: 0.9, twice: false, speakOnHit: true,
   stats: null
@@ -2594,8 +2611,9 @@ function dealMat(){
     .map(r => { const f = byMora.get(r); return f[Math.floor(Math.random() * f.length)]; });
 }
 
-function startMatch(){
+function startMatch(facing){
   ac();
+  G.facing = !!facing;
   buildPool();
   const deck = dealMat();
   if(deck.length < 3) return;
@@ -2641,8 +2659,19 @@ function endAnki(){
   setTimeout(() => { if(G.running) nextCall(); }, 500);
 }
 
+/* Two sides, as a real mat is laid: 自陣 in front of you and 敵陣 across it.
+   Sitting 対面 turns the far side upside down, which is the thing karuta
+   players actually have to learn — and it is harder here than with modern
+   kana, because an inverted hentaigana gives you no familiar outline to fall
+   back on. The romaji label during 暗記時間 stays upright: the glyph is what
+   is being learned, the label is only the answer key. */
 function renderMat(){
-  matEl.innerHTML = "";
+  const far = $("matFar"), near = $("matNear");
+  far.querySelectorAll(".fuda").forEach(n => n.remove());
+  near.querySelectorAll(".fuda").forEach(n => n.remove());
+  $("farLab").textContent = G.facing ? "敵陣 across the mat — upside down" : "向こう側 the other side";
+  matEl.classList.toggle("facing", !!G.facing);
+  const half = Math.ceil(G.deck.length / 2);
   G.deck.forEach((it, i) => {
     const el = document.createElement("button");
     el.className = "fuda";
@@ -2654,7 +2683,7 @@ function renderMat(){
       (G.easy ? '<span class="zb">' + it.z + '</span>' : '') +
       '<span class="hint"><b>' + it.r + '</b><i>' + it.z + '</i></span>';
     el.setAttribute("aria-label", "card " + (i + 1));
-    matEl.appendChild(el);
+    (i < half ? far : near).appendChild(el);
   });
   updateMatStats();
 }
@@ -2910,8 +2939,9 @@ requestAnimationFrame(frame);
    11. WIRING
    ========================================================== */
 $("btn-enter").addEventListener("click", () => { ac(); show("s-dojo"); });
-$("btn-duel").addEventListener("click", startMatch);
-$("btn-rematch").addEventListener("click", startMatch);
+$("btn-duel").addEventListener("click", () => startMatch(false));
+$("btn-facing").addEventListener("click", () => startMatch(true));
+$("btn-rematch").addEventListener("click", () => startMatch(G.facing));
 $("btn-back").addEventListener("click", () => { show("s-dojo"); refreshDojo(); });
 $("btn-audio").addEventListener("click", testAudio);
 $("voicewarn").addEventListener("click", e => {
