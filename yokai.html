@@ -1844,7 +1844,31 @@ function testAudio(){
    Recorded human mora beat synthesis outright for fu/ku discrimination, but
    the recordings have to be supplied by the user: their licence is theirs to
    honour, not ours to assume. Clips win where present; TTS covers the rest. */
-const clips = new Map();                       // romaji -> {url}
+const clips = new Map();                       // romaji -> {url}  (loaded here)
+/* A pack that ships with the game, so a class does not have to do anything.
+   Drop recordings in audio/ next to this file, list them in audio/pack.json,
+   and every student at the URL hears them. A pack the player loaded
+   themselves still wins, and with no pack.json nothing happens at all. */
+const bundled = new Map();                     // romaji -> {url}  (served)
+let bundledCredit = "";
+async function loadBundledPack(){
+  let man;
+  try{
+    const res = await fetch("audio/pack.json", {cache: "no-cache"});
+    if(!res.ok) return;                        // no pack shipped; this is normal
+    man = await res.json();
+  }catch(e){ return; }                         // offline, or opened as a file://
+  if(!man || !Array.isArray(man.mora)) return;
+  const ext = (man.ext || "mp3").replace(/^\./, "");
+  man.mora.forEach(m => {
+    const r = ROMAJI_SET.has(m) ? m : (KANA_TO_R.has(m) ? KANA_TO_R.get(m) : null);
+    if(r) bundled.set(r, {url: "audio/" + encodeURIComponent(m) + "." + ext});
+  });
+  bundledCredit = man.credit || "";
+  if(bundledCredit && !load("credit")) $("creditFoot").textContent = "Audio: " + bundledCredit;
+  updateCoverage();
+}
+function clipFor(r){ return clips.get(r) || bundled.get(r); }
 const ROMAJI_SET = new Set(ALL.map(i => i.r));
 const KANA_TO_R = new Map();
 ALL.forEach(i => { KANA_TO_R.set(i.h, i.r); KANA_TO_R.set(i.k, i.r); });
@@ -1899,6 +1923,7 @@ async function importPack(files){
   updateCoverage(added, skipped);
 }
 async function restorePack(){
+  loadBundledPack();
   packDB = await openPackDB();
   if(!packDB) return updateCoverage();
   try{
@@ -1913,9 +1938,12 @@ async function restorePack(){
 function updateCoverage(added, skipped){
   const el = document.getElementById("packInfo");
   if(!el) return;
-  const have = G.pool.filter(i => clips.has(i.r)).length;
-  let t = clips.size
-    ? have + " / " + G.pool.length + " selected characters have recordings"
+  const have = G.pool.filter(i => clipFor(i.r)).length;
+  const total = clips.size + bundled.size;
+  let t = total
+    ? have + " / " + G.pool.length + " selected characters have recordings" +
+      (clips.size && bundled.size ? " (yours, over the ones that came with the game)"
+       : bundled.size ? " (supplied with the game)" : "")
     : "no recordings loaded — using the system voice";
   if(added != null) t = "loaded " + added + " clip" + (added === 1 ? "" : "s") + " · " + t;
   if(skipped && skipped.length) t += " · " + skipped.length + " unrecognised filename" + (skipped.length === 1 ? "" : "s");
@@ -1924,7 +1952,7 @@ function updateCoverage(added, skipped){
 
 let curClip = null;
 function playClip(r, repeat){
-  const c = clips.get(r);
+  const c = clipFor(r);
   if(!c) return false;
   try{
     if(curClip){ try{ curClip.pause(); }catch(e){} }

@@ -1,0 +1,14 @@
+{
+  "_readme": [
+    "Recordings that ship with the game, so a class needs no setup.",
+    "To add them: drop clips in this folder named by romaji (a.mp3, ka.mp3,",
+    "shi.mp3, kya.mp3 ...), list those romaji in 'mora' below, set 'ext' to",
+    "the file extension, and put the recordist's name in 'credit'. Push, and",
+    "everyone at the URL hears them. Leave 'mora' empty and the game uses the",
+    "device's own Japanese voice, as it always has.",
+    "A pack a player loads themselves still takes precedence over this one."
+  ],
+  "credit": "",
+  "ext": "mp3",
+  "mora": []
+}

@@ -46,9 +46,18 @@ at all, it says so and falls back to reading the romaji aloud in English.
 Human recordings still beat synthesis on exactly those confusable pairs, so the
 "Load recordings…" button accepts a folder of clips named by romaji (`a.mp3`,
 `ka.mp3`, `shi.mp3`, `kya.mp3` …), keeps them in the browser, and uses a clip
-wherever one exists. Recordings are supplied by whoever is playing rather than
-shipped with the game: their licence is theirs to honour, not the game's to
-assume.
+wherever one exists.
+
+That is per-browser, which is fine for one person and useless for a class. A
+pack can also ship with the game instead, so nobody has to load anything: drop
+the clips in `audio/`, list their romaji in `audio/pack.json`, and everyone at
+the URL hears them. Leave that list empty — as it is now — and the game uses the
+device's own Japanese voice exactly as before. A pack a player loads themselves
+still takes precedence over the shipped one.
+
+No recordings are included here. Whose voice it is, and under what terms, is for
+whoever records it to decide: their licence is theirs to honour, not the game's
+to assume.
 
 `make_audio_pack.py` generates such a pack:
 
