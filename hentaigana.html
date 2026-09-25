@@ -541,7 +541,8 @@ body.showtags .face.front .grp{display:block}
 }
 
 /* ---------- canvas ---------- */
-#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
+/* fixed, not absolute: the mat scrolls and the sweep should not scroll with it */
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
 
 /* ---------- HUD ---------- */
 #hud{position:absolute;inset:0;z-index:3;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between}
@@ -614,7 +615,7 @@ body.showtags .face.front .grp{display:block}
 #imeWarn kbd{font-family:var(--mono);font-size:12px;background:rgba(0,0,0,.28);padding:1px 6px;border-radius:2px}
 #hintLine{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--slate);text-transform:uppercase;min-height:14px}
 
-#flash{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .12s linear}
+#flash{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .12s linear}
 #flash.hit{opacity:1;background:radial-gradient(circle at 50% 50%, transparent 42%, rgba(192,57,43,.55) 100%)}
 #flash.heal{opacity:1;background:radial-gradient(circle at 50% 50%, transparent 48%, rgba(110,143,125,.4) 100%)}
 
@@ -852,6 +853,68 @@ body.showtags .face.front .grp{display:block}
 #recMap .mf .sq{width:40px;aspect-ratio:1/1.08;font-size:23px}
 
 /* ==========================================================
+   THE MAT
+   Tatami under the cards, washi on them. The cards are the proportions of a
+   real 取り札, laid flat in rows the way a side of the field is set out.
+   ========================================================== */
+#s-match{overflow-y:auto;display:none}
+#s-match.on{display:block}
+#s-match{
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 2px, transparent 2px 190px),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.035) 0 2px, transparent 2px 96px),
+    linear-gradient(170deg,#DCD3B2 0%,#CFC5A0 55%,#BFB48D 100%);
+}
+.mat-head{
+  display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  max-width:1000px;margin:0 auto;padding:clamp(14px,3vh,26px) clamp(16px,3vw,28px) 12px;
+}
+.reader{display:flex;align-items:center;gap:14px;min-width:0}
+.reader .called{display:flex;flex-direction:column;gap:2px;min-width:0}
+.reader .called b{font-family:var(--kana);font-size:40px;line-height:1.15;color:var(--sumi)}
+.reader .called span{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--sumi-2);text-transform:uppercase}
+.reader .called span b{font-family:var(--body);font-size:15px;letter-spacing:0;text-transform:none}
+.mat-stats{display:flex;gap:20px}
+.mat-stats .st{display:flex;flex-direction:column;align-items:center;gap:1px}
+.mat-stats .st i{font-style:normal;font-family:var(--mono);font-size:25px;color:var(--sumi);font-variant-numeric:tabular-nums;line-height:1}
+.mat-stats .st small{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--sumi-2);text-transform:uppercase}
+#matTimer{max-width:1000px;margin:0 auto;height:3px;background:rgba(34,30,25,.16)}
+#matTimer i{display:block;height:100%;width:100%;background:var(--sumi);transform-origin:left center}
+#matTimer i.urgent{background:var(--vermilion)}
+
+#mat{
+  max-width:1000px;margin:0 auto;padding:clamp(16px,3vh,30px) clamp(16px,3vw,28px) 10px;
+  display:grid;gap:clamp(8px,1.6vw,14px);
+  grid-template-columns:repeat(auto-fit,minmax(104px,1fr));
+}
+.fuda{
+  aspect-ratio:53/73;border:1px solid rgba(90,72,44,.42);border-radius:3px;
+  background:linear-gradient(#F4ECD6 0%,#E8DCBC 64%,#DBCDA6 100%);
+  box-shadow:0 5px 14px rgba(60,46,26,.26), inset 0 -6px 12px rgba(150,122,74,.13);
+  display:grid;place-items:center;cursor:pointer;padding:0;
+  transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease;
+}
+.fuda .g{font-family:var(--kana);font-size:clamp(40px,7vw,62px);color:#221E19;line-height:1.1}
+.fuda:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(60,46,26,.32);border-color:var(--sumi-2)}
+.fuda.fault{animation:fudaFault .46s ease-out;border-color:var(--vermilion)}
+@keyframes fudaFault{
+  0%,100%{transform:none}
+  20%{transform:translateX(-7px) rotate(-2deg)}
+  60%{transform:translateX(7px) rotate(2deg)}
+}
+/* 払い: swept off, not faded out */
+.fuda.gone{
+  opacity:0;transform:translateX(150px) rotate(16deg) scale(.94);
+  transition:opacity .42s ease-out,transform .42s ease-out;pointer-events:none;
+}
+.fuda.shown{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,39,.45), 0 5px 14px rgba(60,46,26,.26)}
+#matHint{
+  max-width:1000px;margin:0 auto;padding:4px clamp(16px,3vw,28px) 30px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--sumi-2);
+  text-transform:uppercase;min-height:16px;
+}
+
+/* ==========================================================
    FURIGANA
    The class is three weeks into hiragana and none of the way into kanji,
    so every kanji in the interface carries its reading. This is the one
@@ -1072,66 +1135,25 @@ rt{
     </div>
   </section>
 
-  <!-- ============ DUEL ============ -->
-  <section class="screen" id="s-duel">
-    <div id="scene">
-      <div class="teaset" aria-hidden="true">
-        <div class="wall"></div>
-        <div class="tokonoma"><div class="scroll"><i></i></div></div>
-        <div class="tatami"></div>
-        <div class="kama"></div>
+  <!-- ============ MATCH ============ -->
+  <section class="screen paper" id="s-match">
+    <div class="mat-head">
+      <div class="reader">
+        <button class="spk paper" id="callAgain" title="Read it again (enter)" aria-label="Read it again">&#128266;</button>
+        <div class="called"><b id="calledKana">—</b><span id="calledNote">the reader has not begun</span></div>
       </div>
-      <div id="camera">
-        <div class="moon" aria-hidden="true"></div>
-        <div class="ridge far" aria-hidden="true"></div>
-        <div class="ridge near" aria-hidden="true"></div>
-        <div class="torii" aria-hidden="true"><i class="cap"></i><i class="b1"></i><i class="b2"></i><i class="p1"></i><i class="p2"></i></div>
-        <div class="bamboo l1" aria-hidden="true"></div>
-        <div class="bamboo l2" aria-hidden="true"></div>
-        <div class="bamboo r1" aria-hidden="true"></div>
-        <div class="bamboo r2" aria-hidden="true"></div>
-        <div class="floor" aria-hidden="true"></div>
-        <div id="enemy"></div>
-        <div id="promptKana"><b></b></div>
-        <div id="volley" hidden></div>
+      <div class="mat-stats">
+        <span class="st"><i id="mTaken">0</i><small>taken</small></span>
+        <span class="st"><i id="mFaults">0</i><small>お手つき</small></span>
+        <span class="st"><i id="mLeft">0</i><small>on the mat</small></span>
       </div>
+      <button class="btn dark tiny" id="m-leave"><span class="jpx"><ruby>帰<rt>かえ</rt></ruby>る　</span>Leave</button>
     </div>
-
+    <div id="matTimer"><i id="matTimerBar"></i></div>
     <canvas id="fx"></canvas>
-
-    <div id="hud">
-      <div class="hud-top">
-        <div class="side">
-          <div class="who"><b id="foeJp">一つ目小僧</b><span id="foeEn">One-Eyed Boy</span></div>
-          <div class="bar foe"><i id="foeHp"></i></div>
-        </div>
-        <div class="phase-tag parry" id="phaseTag"><b>名</b><span>Name It</span></div>
-        <div class="side right">
-          <div class="metrics">
-            <span class="cb" id="combo">連撃 ×0</span>
-            <span class="sc"><span id="score">0</span><small>点</small></span>
-          </div>
-          <div class="bar me"><i id="myHp"></i></div>
-          <button id="btn-leave" title="Leave the road (esc)" aria-label="Leave the road"><ruby>帰<rt>かえ</rt></ruby>る Leave</button>
-        </div>
-      </div>
-
-      <div class="hud-bottom">
-        <div id="imeWarn" hidden></div>
-        <div id="timerWrap"><i id="timerBar"></i></div>
-        <div class="bufferRow">
-          <button class="spk" id="replay" title="Replay the spoken target" aria-label="Replay the spoken target" disabled>🔊</button>
-          <div id="bufferBox">
-            <div id="tiles"></div>
-            <input id="bufferInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="latin" aria-label="Romaji input">
-          </div>
-        </div>
-        <div id="hintLine"></div>
-      </div>
-    </div>
-
     <div id="flash" aria-hidden="true"></div>
-    <div id="tiercard"><div class="tc" id="tcBody"></div></div>
+    <div id="mat"></div>
+    <p id="matHint"></p>
   </section>
 
   <!-- ============ REPORT ============ -->
@@ -1276,394 +1298,6 @@ HG_DATA.trim().split(/\s+/).forEach(rec => {
 const MORA_ORDER = "a i u e o ka ki ku ke ko sa shi su se so ta chi tsu te to na ni nu ne no ha hi fu he ho ma mi mu me mo ya yu yo ra ri ru re ro wa wi we wo n".split(" ");
 function gojuonRank(r){ const i = MORA_ORDER.indexOf(r); return i < 0 ? 999 : i; }
 ALL.forEach(it => { it.ord = gojuonRank(it.r); });
-
-/* ==========================================================
-   2. TIERS
-   ========================================================== */
-/* Six encounters. Each owns a distinct defense mechanic — the thing that
-   comes at you differs, so reading pressure arrives a different way each time.
-   `hidden` keeps an encounter off the ladder count until it reveals itself. */
-const TIERS = [
-  {key:"hitotsume", jp:"一つ目小僧", rb:"一|ひと つ 目|め 小|こ 僧|ぞう", en:"One-Eyed Boy", hp:6, def:5.4, off:3.6,
-   style:"thrust", accent:"#C6D3B8",
-   line:"He steps out of the hedge at dusk to be gasped at, and sulks when he is not. Name him and he will stand aside — it is only politeness he is after."},
-
-  {key:"tengu", jp:"天狗", rb:"天|てん 狗|ぐ", en:"Tengu", hp:8, def:5.0, off:3.2,
-   style:"arrow", accent:"#8FA9C4",
-   line:"He will not come down off the cedar. One beat of the feather fan and the name arrives from the top of the mountain, small and a long way off."},
-
-  {key:"kamaitachi", jp:"鎌鼬", rb:"鎌|かま 鼬|いたち", en:"Kamaitachi", hp:10, def:5.0, off:2.9,
-   style:"ride", accent:"#B4726A",
-   line:"It travels inside the gust and does not stop. You feel the cold on your shin long before you find the cut, and by then it is three fields away."},
-
-  {key:"nopperabo", jp:"のっぺらぼう", en:"Nopperabō", hp:8, def:5.6, off:2.4,
-   style:"dance", hidden:true, accent:"#C9A227",
-   line:"An interlude. Someone else is on the road, walking your way at your pace, a little ahead. Rest your hands. Nothing is asked of you while a back is turned."},
-
-  {key:"chagama", jp:"分福茶釜", rb:"分|ぶん 福|ぶく 茶|ちゃ 釜|がま", en:"Bunbuku Chagama", hp:11, def:4.8, off:2.9,
-   style:"tea", scene:"tearoom", accent:"#6E8F7D",
-   line:"Set on the fire it grew a head, four feet and a tail, and would not be a kettle again. It has agreed to sit still while the water heats, and asks only that you read the scroll while it does."},
-
-  {key:"hyakki", jp:"百鬼夜行", rb:"百|ひゃっ 鬼|き 夜|や 行|ぎょう", en:"The Night Parade", hp:14, def:4.2, off:2.2,
-   style:"cannon", accent:"#C9A227",
-   line:"Every broken umbrella, every discarded pot, every thing that was used for a hundred years and then thrown away. They come down the road together, and they do not go around you."}
-];
-/* the ladder the player is shown — the hidden one is not counted */
-const LADDER_COUNT = TIERS.filter(t => !t.hidden).length;
-const MAX_HP = 5;
-
-/* The opponent closes distance as you wear them down: the target glyphs grow
-   (easier to read) while the strike window tightens (harder to answer). The
-   distance is fixed for the whole strike phase — moving it mid-phase would
-   shift the characters under the reader's eye. */
-const STUN_FAR = -300, STUN_NEAR = -100, STRIKE_URGENCY = 0.25;
-/* How the threat arrives, per encounter. enemy = the figure's charge, prompt =
-   the character's own travel. The archer's shot starts far enough to be barely
-   legible; the rider crosses laterally instead of closing head-on. */
-const STYLE = {
-  thrust: {enemy:[-980, 165], prompt:[-300, 90],  sway:0,    promptSway:0},
-  arrow:  {enemy:[-980, 40],  prompt:[-680, 150], sway:0,    promptSway:0},
-  /* The rider crosses the field, but the character he carries only drifts.
-     A glyph that slides off the edge cannot be read, and reading is the game. */
-  ride:   {enemy:[-620, -170],prompt:[-250, 40],  sway:0.62, promptSway:0.20},
-  dance:  {enemy:[-900, 120], prompt:[-280, 70],  sway:0.30, promptSway:0.14},
-  /* The scroll hangs in the alcove at negative z, so the brushed character
-     must sit in front of it or the tokonoma planes occlude it entirely — and
-     the daimyo himself sits to one side, clear of the paper. The alcove is
-     painted behind the camera layer, so no depth will put him behind it. */
-  tea:    {enemy:[-330, -330],prompt:[-30, -30],  sway:0,    promptSway:0, offsetX:340},
-  cannon: {enemy:[-880, 60],  prompt:[-320, 80],  sway:0,    promptSway:0}
-};
-/* 漢字 with its reading over it. Group ruby — the whole word at once —
-   because 分福茶釜 is read as a unit and a beginner does not yet need to
-   know which syllable belongs to which character. Kana names pass through
-   untouched. */
-/* "分|ぶん 福|ぶく 茶|ちゃ 釜|がま" — a reading over each kanji rather than one
-   reading spread over the whole word, so a beginner can see which sound
-   belongs to which character. Segments with no pipe are kana and pass
-   through bare. */
-function ruby(spec){
-  if(!spec) return "";
-  return spec.split(" ").map(seg => {
-    const i = seg.indexOf("|");
-    return i < 0 ? seg
-      : '<ruby>' + seg.slice(0, i) + '<rt>' + seg.slice(i + 1) + '</rt></ruby>';
-  }).join("");
-}
-/* ==========================================================
-   PROGRESS — held in this browser and nowhere else
-   No account, no server, no row anywhere with a student's name on it.
-   A character gains a point every time it is answered correctly and loses
-   two when it is missed, so strength is something held rather than
-   something reached once and banked. Everything here is best-effort: a
-   browser with storage blocked simply plays the game without a record,
-   which is why every read is guarded and every write can fail silently.
-   ========================================================== */
-const MASTERY_MAX = 4;
-let PROG = null;
-function progress(){
-  if(!PROG){ try{ PROG = JSON.parse(load("progress") || "{}"); }catch(e){ PROG = {}; } }
-  return PROG;
-}
-function saveProgress(){ try{ save("progress", JSON.stringify(progress())); }catch(e){} }
-function noteAnswer(it, ok){
-  if(!it || !it.key) return;
-  const p = progress(), cur = p[it.key] || 0;
-  p[it.key] = ok ? Math.min(MASTERY_MAX, cur + 1) : Math.max(0, cur - 2);
-  saveProgress();
-  noteDay();
-  awardBadges();
-}
-function masteredKeys(){
-  const p = progress();
-  return Object.keys(p).filter(k => p[k] >= MASTERY_MAX);
-}
-function touchedKeys(){
-  const p = progress();
-  return Object.keys(p).filter(k => p[k] > 0);
-}
-
-/* days, for the streak. Dates only — no times, nothing identifying. */
-function dayStamp(d){
-  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") +
-         "-" + String(d.getDate()).padStart(2, "0");
-}
-function loadDays(){
-  try{ return JSON.parse(load("days") || '{"last":"","streak":0,"total":0}'); }
-  catch(e){ return {last:"", streak:0, total:0}; }
-}
-function noteDay(){
-  const d = loadDays(), t = dayStamp(new Date());
-  if(d.last === t) return;
-  const yesterday = dayStamp(new Date(Date.now() - 864e5));
-  d.streak = (d.last === yesterday) ? (d.streak || 0) + 1 : 1;
-  d.last = t; d.total = (d.total || 0) + 1;
-  try{ save("days", JSON.stringify(d)); }catch(e){}
-}
-
-/* Badges are for things that are actually hard, not for turning up. */
-const BADGES = [
-  {id:"first",  jp:"初夜", rb:"初|しょ 夜|や",   en:"First Night",
-   note:"One yōkai named and sealed."},
-  {id:"muzu",   jp:"無傷", rb:"無|む 傷|きず",   en:"Unscathed",
-   note:"An encounter cleared without a single miss."},
-  {id:"gojuon", jp:"五十音", rb:"五|ご 十|じゅう 音|おん", en:"Gojūon",
-   note:"All 46 basic kana answered correctly at least once."},
-  {id:"daku",   jp:"濁点", rb:"濁|だく 点|てん", en:"Dakuten",
-   note:"All 23 voiced kana answered correctly at least once."},
-  {id:"yoon",   jp:"拗音", rb:"拗|よう 音|おん", en:"Yōon",
-   note:"All 33 small-ya kana answered correctly at least once."},
-  {id:"nanoya", jp:"七夜", rb:"七|なな 夜|や",   en:"Seven Nights",
-   note:"Came back on seven different days."},
-  {id:"kaiden", jp:"皆伝", rb:"皆|かい 伝|でん", en:"Full Transmission",
-   note:"All 46 basic kana held at full strength at once."},
-  {id:"yoake",  jp:"夜明", rb:"夜|よ 明|あけ",   en:"Daybreak",
-   note:"Walked the whole road and came out the other side."}
-];
-function loadBadges(){
-  try{ return JSON.parse(load("badges") || "{}"); }catch(e){ return {}; }
-}
-function grant(id){
-  const b = loadBadges();
-  if(b[id]) return false;
-  b[id] = dayStamp(new Date());
-  try{ save("badges", JSON.stringify(b)); }catch(e){}
-  return true;
-}
-function groupKeys(g){
-  const out = [];
-  ALL.filter(i => i.g === g).forEach(i => { out.push("h|" + i.id); out.push("k|" + i.id); });
-  return out;
-}
-/* a mora counts as known once either script of it has been read */
-function groupKnown(groups, atLeast){
-  return groups.every(g => ALL.filter(i => i.g === g).every(i =>
-    (progress()["h|" + i.id] || 0) >= atLeast || (progress()["k|" + i.id] || 0) >= atLeast));
-}
-function awardBadges(){
-  const got = [];
-  const days = loadDays();
-  if(groupKnown(BASIC_GROUPS, 1) && grant("gojuon")) got.push("gojuon");
-  if(groupKnown(BASIC_GROUPS, MASTERY_MAX) && grant("kaiden")) got.push("kaiden");
-  if(groupKnown(["daku"], 1) && grant("daku")) got.push("daku");
-  if(groupKnown(["yoon"], 1) && grant("yoon")) got.push("yoon");
-  if((days.total || 0) >= 7 && grant("nanoya")) got.push("nanoya");
-  got.forEach(id => toastBadge(BADGES.find(b => b.id === id)));
-  return got;
-}
-function toastBadge(b){
-  if(!b) return;
-  let stack = document.getElementById("badgeStack");
-  if(!stack){
-    stack = document.createElement("div");
-    stack.id = "badgeStack";
-    document.body.appendChild(stack);
-  }
-  const el = document.createElement("div");
-  el.className = "badge-toast";
-  el.innerHTML = '<span class="bj">' + ruby(b.rb || b.jp) + '</span>' +
-                 '<span class="bm"><b>' + b.en + '</b><i>' + b.note + '</i></span>';
-  stack.appendChild(el);
-  setTimeout(() => el.remove(), 5200);
-}
-
-function styleOf(){ return (TIERS[G.tier] && TIERS[G.tier].style) || "thrust"; }
-function envelope(){ return STYLE[styleOf()] || STYLE.thrust; }
-function approachProgress(){
-  return G.foeMax ? Math.min(1, Math.max(0, 1 - G.foeHp / G.foeMax)) : 0;
-}
-
-
-/* ==========================================================
-   3. SILHOUETTES — stylized ink figures, built from primitives
-   ========================================================== */
-function silhouette(kind, ch){
-  const body = "#070A0F", trim = "#161E29", steel = "#2A3444";
-  const eyes = '<g class="eye">';
-
-  /* A 小僧 is a novice, so he is a child: small, round, and standing in the
-     lower half of the frame where a child would be. The whole joke is the one
-     eye, so it is pale and it blinks — a glowing red slit would make him a
-     demon, and he is not one. He only wants to be gasped at. */
-  if(kind === "hitotsume") return `
-  <svg viewBox="0 0 440 560" role="img" aria-label="One-eyed boy in a novice's robe">
-    <g fill="${body}">
-      <path d="M148 548 Q158 424 188 372 L252 372 Q282 424 292 548 Z"/>
-      <ellipse cx="148" cy="446" rx="29" ry="48"/>
-      <ellipse cx="292" cy="446" rx="29" ry="48"/>
-      <path d="M204 378 h32 v-24 h-32 z"/>
-      <circle cx="220" cy="292" r="80"/>
-      <path d="M140 300 q-18 -28 6 -40 q10 20 18 30 z"/>
-      <path d="M300 300 q18 -28 -6 -40 q-10 20 -18 30 z"/>
-    </g>
-    <ellipse class="yeye" cx="220" cy="280" rx="37" ry="37" fill="#F2EADA"/>
-    <circle cx="220" cy="286" r="16" fill="#0A0C10"/>
-    <path d="M204 344 q16 30 32 0 q-16 10 -32 0 z" fill="#B8503F"/>
-  </svg>`;
-
-  /* A kettle that stopped being one. The silhouette has to read as crockery
-     first and animal second — round body, lid, handle — so the tail and the
-     four feet do the telling. It keeps the blinking pale eyes the one-eyed
-     boy established: this is a creature that got caught, not a threat. */
-  /* Never comes down. The wings and the nose do all the work in silhouette,
-     so the nose is a long triangle rather than a bump, and the feather fan
-     is held up where it can be read against the sky. */
-  if(kind === "tengu") return `
-  <svg viewBox="0 0 440 560" role="img" aria-label="Tengu with a feather fan">
-    <g fill="${body}">
-      <path d="M162 320 Q52 252 14 142 Q100 200 168 262 Z"/>
-      <path d="M278 320 Q388 252 426 142 Q340 200 272 262 Z"/>
-      <path d="M170 548 L182 416 L258 416 L270 548 Z"/>
-      <path d="M154 292 Q220 262 286 292 L296 420 Q220 448 144 420 Z"/>
-      <ellipse cx="146" cy="316" rx="26" ry="20"/>
-      <path d="M292 304 L340 250 L362 270 L314 324 Z"/>
-      <path d="M206 268 h28 v-20 h-28 z"/>
-      <ellipse cx="220" cy="206" rx="44" ry="40"/>
-      <rect x="206" y="156" width="28" height="19" rx="3"/>
-      <path d="M170 224 q-14 46 6 74 q12 -42 12 -70 z"/>
-      <path d="M270 224 q14 46 -6 74 q-12 -42 -12 -70 z"/>
-    </g>
-    <!-- the nose has to leave the head entirely or it is just a dark face -->
-    <path d="M206 212 L234 212 L232 252 L219 334 L208 252 Z" fill="${body}"/>
-    <path d="M211 246 L229 246 L219 330 Z" fill="#7A3E33"/>
-    <ellipse class="yeye" cx="192" cy="202" rx="13" ry="13" fill="#F2EADA"/>
-    <ellipse class="yeye" cx="248" cy="202" rx="13" ry="13" fill="#F2EADA"/>
-    <circle cx="193" cy="204" r="5.5" fill="#0A0C10"/>
-    <circle cx="249" cy="204" r="5.5" fill="#0A0C10"/>
-    <path d="M340 250 q56 -70 92 -38 q-20 48 -74 62 z" fill="#4E4E3E"/>
-    <g stroke="#0A0C10" stroke-width="2" opacity=".45" fill="none">
-      <path d="M348 244 q40 -36 72 -24"/><path d="M358 262 q38 -32 68 -22"/>
-    </g>
-  </svg>`;
-
-  /* A weasel, which means long and thin and almost no leg. The first version
-     was too round and read as a fish. The tail is nearly the length of the
-     body, the snout comes to a point, and the gust is drawn as streaks it is
-     already ahead of. */
-  if(kind === "kamaitachi") return `
-  <svg viewBox="0 0 440 560" role="img" aria-label="Kamaitachi travelling inside a gust">
-    <g stroke="${body}" fill="none" opacity=".4" stroke-linecap="round">
-      <path d="M8 262 q120 -34 224 -14" stroke-width="7"/>
-      <path d="M4 428 q130 -20 232 -6" stroke-width="6"/>
-      <path d="M22 340 q104 -46 196 -30" stroke-width="5"/>
-    </g>
-    <g fill="${body}">
-      <path d="M6 404 q52 12 96 -18 q34 -24 70 -34 q-44 34 -58 66 q-58 14 -108 -14 z"/>
-      <path d="M104 372 q54 -46 128 -56 q78 -10 106 16 q26 26 -2 46 q-34 24 -112 22 q-72 -2 -120 -28 z"/>
-      <path d="M330 328 q52 -14 74 18 q-30 34 -78 22 z"/>
-      <ellipse cx="342" cy="306" rx="13" ry="16" transform="rotate(22 342 306)"/>
-      <ellipse cx="376" cy="302" rx="11" ry="14" transform="rotate(30 376 302)"/>
-      <path d="M186 398 l-12 44 l18 6 l16 -44 z"/>
-      <path d="M268 392 l-6 46 l18 4 l10 -46 z"/>
-    </g>
-    <path d="M172 442 q-42 20 -50 -10 q34 12 50 -8 z" fill="#6E6552"/>
-    <path d="M282 444 q-42 20 -50 -10 q34 12 50 -8 z" fill="#6E6552"/>
-    <path d="M404 346 q22 6 30 -6 q-16 16 -30 6 z" fill="${body}"/>
-    <ellipse class="yeye" cx="356" cy="332" rx="10" ry="10" fill="#F2EADA"/>
-    <circle cx="358" cy="333" r="4.5" fill="#0A0C10"/>
-  </svg>`;
-
-  if(kind === "nopperabo") return `
-  <svg viewBox="0 0 440 560" role="img" aria-label="A traveller on the road, turned away">
-    <g fill="${body}">
-      <path d="M150 546 q14 -232 70 -276 q56 44 70 276 z"/>
-      <ellipse cx="220" cy="222" rx="38" ry="37"/>
-      <path d="M118 204 q102 -70 204 0 q-102 24 -204 0 z"/>
-      <rect x="318" y="176" width="9" height="370" rx="4"/>
-      <ellipse cx="136" cy="336" rx="36" ry="42"/>
-      <path d="M160 318 q60 -22 120 0" fill="none" stroke="${body}" stroke-width="9"/>
-    </g>
-  </svg>`;
-
-  /* And after. Same traveller, same hat, and nothing at all where a face
-     was. The blank is pale so that it is the brightest thing on the road. */
-  if(kind === "nopperabo2") return `
-  <svg viewBox="0 0 440 560" role="img" aria-label="A traveller with no face">
-    <g fill="${body}">
-      <path d="M150 546 q14 -232 70 -276 q56 44 70 276 z"/>
-      <rect x="318" y="176" width="9" height="370" rx="4"/>
-      <ellipse cx="136" cy="336" rx="36" ry="42"/>
-    </g>
-    <ellipse cx="220" cy="222" rx="38" ry="40" fill="#EFE6CE"/>
-    ${ch ? '<text x="220" y="222" text-anchor="middle" dominant-baseline="central"' +
-           ' font-family="var(--kana)" font-size="56" fill="#241F19">' + ch + '</text>' : ''}
-    <g fill="${body}">
-      <path d="M118 204 q102 -70 204 0 q-102 24 -204 0 z"/>
-      <path d="M160 318 q60 -22 120 0" fill="none" stroke="${body}" stroke-width="9"/>
-    </g>
-  </svg>`;
-
-  /* Not one thing but a crowd of them, at every height, with paper lanterns
-     over the top. Read as a procession rather than an opponent. */
-  if(kind === "hyakki") return `
-  <svg viewBox="0 0 440 560" role="img" aria-label="The night parade of a hundred demons">
-    <g fill="${body}">
-      <path d="M22 546 q10 -128 44 -128 q34 0 44 128 z"/>
-      <path d="M96 546 q8 -96 34 -96 q26 0 34 96 z"/>
-      <path d="M176 546 q12 -168 50 -168 q38 0 50 168 z"/>
-      <path d="M282 546 q8 -110 36 -110 q28 0 36 110 z"/>
-      <path d="M360 546 q10 -84 30 -84 q20 0 30 84 z"/>
-      <circle cx="66" cy="400" r="26"/>
-      <circle cx="130" cy="432" r="20"/>
-      <ellipse cx="226" cy="362" rx="32" ry="30"/>
-      <circle cx="318" cy="418" r="22"/>
-      <circle cx="390" cy="444" r="18"/>
-      <path d="M196 336 q30 -26 60 0 q-30 -10 -60 0 z"/>
-      <path d="M44 376 l-14 -34 l20 -6 l12 32 z"/>
-      <path d="M88 376 l14 -34 l-20 -6 l-12 32 z"/>
-      <path d="M306 396 q-22 -34 4 -44 q10 24 22 34 z"/>
-      <path d="M150 470 q-40 -10 -44 -44 q26 26 48 28 z"/>
-    </g>
-    <g fill="#E8D9A8" opacity=".92">
-      <ellipse cx="108" cy="300" rx="17" ry="23"/>
-      <ellipse cx="262" cy="268" rx="15" ry="20"/>
-      <ellipse cx="356" cy="322" rx="13" ry="18"/>
-    </g>
-    <g stroke="#6B5A32" stroke-width="2" opacity=".55" fill="none">
-      <path d="M91 300 h34"/><path d="M247 268 h30"/><path d="M343 322 h26"/>
-    </g>
-    <ellipse class="yeye" cx="216" cy="356" rx="10" ry="10" fill="#F2EADA"/>
-    <ellipse class="yeye" cx="238" cy="356" rx="10" ry="10" fill="#F2EADA"/>
-    <circle cx="217" cy="357" r="4" fill="#0A0C10"/>
-    <circle cx="239" cy="357" r="4" fill="#0A0C10"/>
-    <circle cx="60" cy="398" r="7" fill="#F2EADA"/><circle cx="74" cy="398" r="7" fill="#F2EADA"/>
-    <circle cx="318" cy="416" r="8" fill="#F2EADA"/>
-  </svg>`;
-
-  if(kind === "chagama") return `
-  <svg viewBox="0 0 440 560" role="img" aria-label="Tanuki tea kettle, lid askew">
-    <g fill="${body}">
-      <path d="M322 424 q82 -10 100 -76 q10 -42 -18 -60 q-2 46 -32 72 q-26 20 -54 22 z"/>
-      <path d="M104 398 q0 -88 116 -88 q116 0 116 88 q0 76 -116 76 q-116 0 -116 -76 z"/>
-      <path d="M134 460 q16 32 -6 42 q-26 4 -24 -20 z"/>
-      <path d="M306 460 q-16 32 6 42 q26 4 24 -20 z"/>
-      <path d="M186 478 h26 v36 h-26 z"/><path d="M228 478 h26 v36 h-26 z"/>
-    </g>
-    <path d="M124 302 q96 -202 192 0" fill="none" stroke="#584C3D" stroke-width="13" stroke-linecap="round"/>
-    <ellipse cx="220" cy="310" rx="95" ry="21" fill="#584C3D"/>
-    <ellipse cx="220" cy="314" rx="78" ry="15" fill="#100D0A"/>
-    <g transform="rotate(-26 120 296)">
-      <ellipse cx="120" cy="296" rx="50" ry="15" fill="#6A5B48"/>
-      <ellipse cx="120" cy="288" rx="12" ry="9" fill="#6A5B48"/>
-    </g>
-    <path d="M132 374 q-14 -36 16 -62" fill="none" stroke="#6A5B48" stroke-width="7"
-          stroke-linecap="round" opacity=".5"/>
-    <g fill="${body}">
-      <circle cx="220" cy="266" r="52"/>
-      <ellipse cx="182" cy="228" rx="19" ry="22" transform="rotate(-20 182 228)"/>
-      <ellipse cx="258" cy="228" rx="19" ry="22" transform="rotate(20 258 228)"/>
-      <path d="M207 288 q13 22 26 0 q-13 10 -26 0 z"/>
-    </g>
-    <ellipse class="yeye" cx="201" cy="261" rx="15" ry="15" fill="#F2EADA"/>
-    <ellipse class="yeye" cx="239" cy="261" rx="15" ry="15" fill="#F2EADA"/>
-    <circle cx="202" cy="263" r="6.5" fill="#0A0C10"/>
-    <circle cx="240" cy="263" r="6.5" fill="#0A0C10"/>
-    <path d="M256 202 q30 -24 50 -6 q-18 26 -50 6 z" fill="#7E9468"/>
-  </svg>`;
-
-  /* Unknown key — hand back the least alarming thing on the road. */
-  return silhouette("hitotsume");
-}
 
 /* ==========================================================
    4. AUDIO — Web Speech + a small WebAudio kit
@@ -2246,27 +1880,22 @@ function stepFx(dt){
    6. STATE + DOM HANDLES
    ========================================================== */
 const $ = id => document.getElementById(id);
-const enemyEl = $("enemy"), cameraEl = $("camera"), promptWrap = $("promptKana"),
-      promptB = promptWrap.querySelector("b"), volleyEl = $("volley"), bufferInput = $("bufferInput"),
-      bufferBox = $("bufferBox"), tilesEl = $("tiles"), timerBar = $("timerBar"),
-      hintLine = $("hintLine"), replayBtn = $("replay"), phaseTag = $("phaseTag"),
-      flashEl = $("flash"), tierCard = $("tiercard"), tcBody = $("tcBody");
+const matEl = $("mat"), timerBar = $("matTimerBar"), hintLine = $("matHint"),
+      flashEl = $("flash");
 
 const G = {
   groups: new Set(BASIC_GROUPS),
-  script: "hira",
   alt: true,
   pool: [],
-  running: false, phase: "idle",
-  tier: 0, foeHp: 0, foeMax: 0, hp: MAX_HP,
-  required: null, answers: [], buffer: "", lastKey: null, promptAt: 0,
-  tStart: 0, tDur: 0, tActive: false, replayed: false,
-  nodes: [], order: [], nodeIdx: 0, decoys: [], aid: false, offenseMode: "choose",
-  stunZ: STUN_FAR, offTime: 0, acousticsRelaxed: false, volley: [], volleyIdx: 0, revealed: false, lateral: 0,
-  enemyZ: -1400, zFrom: -1400, zTo: -1400, zT: 1, zDur: 1, zEase: "out",
-  bob: 0, shake: 0, shakeDirty: false, scale: 1, rate: 0.9, twice: false, speakOnHit: true,
-  dojoMode: "ordered",
-  stats: null, withdrawn: false
+  running: false, withdrawn: false,
+  /* the match: the cards dealt, the order they are called in, and where we are */
+  deck: [], order: [], call: null, callIdx: 0, taken: 0, faults: 0, locked: false,
+  promptAt: 0, tStart: 0, tDur: 0, tActive: false,
+  /* the practice floor and the settings it carries */
+  dojoMode: "ordered", aid: false,
+  shake: 0, shakeDirty: false, scale: 1,
+  rate: 0.9, twice: false, speakOnHit: true,
+  stats: null
 };
 function rescale(){ G.scale = Math.max(0.66, Math.min(1, window.innerWidth / 880)); }
 rescale();
@@ -2639,34 +2268,6 @@ function renderRecord(){
     '<span class="m"><b>' + b.en + '</b><span>' +
     (got[b.id] ? got[b.id] : "not yet") + '</span></span></div>').join("");
 }
-/* Clicking a charm is the point of "choose"; typing it still works, so a
-   keyboard player is never stranded and a phone player never has to type. */
-function pickCharm(n){
-  if(!n || !G.running || G.phase !== "offense" || G.offenseMode !== "choose") return;
-  if(n.el.classList.contains("cut")) return;
-  if(n.it === G.required) return strike();
-  const d = G.decoys.find(x => x.el === n.el);
-  if(d) wrongTarget(d);
-}
-/* The charms live inside #camera, which is a preserve-3d subtree — the
-   browser hands every click there to #camera itself rather than to the
-   transformed charm under the pointer, so .closest(".node") never matched
-   and nothing was clickable. Test the coordinates against each charm's own
-   rectangle instead and skip DOM hit-testing altogether. */
-$("s-duel").addEventListener("click", e => {
-  if(!G.running || G.phase !== "offense" || G.offenseMode !== "choose") return;
-  /* A little tolerance round each charm: they are being hit quickly, they
-     drift a few pixels as the figure breathes, and a click one pixel below
-     the paper should still count. */
-  const PAD = 12;
-  const hit = G.nodes.find(x => {
-    const r = x.el.getBoundingClientRect();
-    return e.clientX >= r.left - PAD && e.clientX <= r.right  + PAD &&
-           e.clientY >= r.top  - PAD && e.clientY <= r.bottom + PAD;
-  });
-  if(hit) pickCharm(hit);
-});
-$("btn-leave").addEventListener("click", () => { if(G.running){ G.withdrawn = true; endGame(false); } });
 $("btn-record").addEventListener("click", () => { renderRecord(); show("s-record"); });
 $("rec-back").addEventListener("click", () => { show("s-dojo"); refreshDojo(); });
 
@@ -2726,795 +2327,346 @@ $("k-quit").addEventListener("click", keikoQuit);
 $("k-done-back").addEventListener("click", keikoQuit);
 $("k-again").addEventListener("click", keikoStart);
 
+/* "分|ぶん 福|ぶく 茶|ちゃ 釜|がま" — a reading over each kanji rather than one
+   reading spread over the whole word, so a beginner can see which sound
+   belongs to which character. Segments with no pipe are kana and pass
+   through bare. */
+function ruby(spec){
+  if(!spec) return "";
+  return spec.split(" ").map(seg => {
+    const i = seg.indexOf("|");
+    return i < 0 ? seg
+      : '<ruby>' + seg.slice(0, i) + '<rt>' + seg.slice(i + 1) + '</rt></ruby>';
+  }).join("");
+}
+/* ==========================================================
+   PROGRESS — held in this browser and nowhere else
+   No account, no server, no row anywhere with a student's name on it.
+   A character gains a point every time it is answered correctly and loses
+   two when it is missed, so strength is something held rather than
+   something reached once and banked. Everything here is best-effort: a
+   browser with storage blocked simply plays the game without a record,
+   which is why every read is guarded and every write can fail silently.
+   ========================================================== */
+const MASTERY_MAX = 4;
+let PROG = null;
+function progress(){
+  if(!PROG){ try{ PROG = JSON.parse(load("progress") || "{}"); }catch(e){ PROG = {}; } }
+  return PROG;
+}
+function saveProgress(){ try{ save("progress", JSON.stringify(progress())); }catch(e){} }
+function noteAnswer(it, ok){
+  if(!it || !it.key) return;
+  const p = progress(), cur = p[it.key] || 0;
+  p[it.key] = ok ? Math.min(MASTERY_MAX, cur + 1) : Math.max(0, cur - 2);
+  saveProgress();
+  noteDay();
+  awardBadges();
+}
+function masteredKeys(){
+  const p = progress();
+  return Object.keys(p).filter(k => p[k] >= MASTERY_MAX);
+}
+function touchedKeys(){
+  const p = progress();
+  return Object.keys(p).filter(k => p[k] > 0);
+}
+
+/* days, for the streak. Dates only — no times, nothing identifying. */
+function dayStamp(d){
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") +
+         "-" + String(d.getDate()).padStart(2, "0");
+}
+function loadDays(){
+  try{ return JSON.parse(load("days") || '{"last":"","streak":0,"total":0}'); }
+  catch(e){ return {last:"", streak:0, total:0}; }
+}
+function noteDay(){
+  const d = loadDays(), t = dayStamp(new Date());
+  if(d.last === t) return;
+  const yesterday = dayStamp(new Date(Date.now() - 864e5));
+  d.streak = (d.last === yesterday) ? (d.streak || 0) + 1 : 1;
+  d.last = t; d.total = (d.total || 0) + 1;
+  try{ save("days", JSON.stringify(d)); }catch(e){}
+}
+
+/* Badges are for things that are actually hard, not for turning up. */
+const BADGES = [
+  {id:"first",  jp:"初夜", rb:"初|しょ 夜|や",   en:"First Night",
+   note:"One match played to the last card."},
+  {id:"muzu",   jp:"無傷", rb:"無|む 傷|きず",   en:"Unscathed",
+   note:"A mat cleared without one お手つき."},
+  {id:"gojuon", jp:"五十音", rb:"五|ご 十|じゅう 音|おん", en:"Gojūon",
+   note:"Every mora met — at least one form of each taken."},
+  {id:"nanoya", jp:"七夜", rb:"七|なな 夜|や",   en:"Seven Nights",
+   note:"Came back on seven different days."},
+  {id:"kaiden", jp:"皆伝", rb:"皆|かい 伝|でん", en:"Full Transmission",
+   note:"Every one of the 285 forms held at full strength."},
+  {id:"yoake",  jp:"夜明", rb:"夜|よ 明|あけ",   en:"Daybreak",
+   note:"Every form of か taken — all thirty-seven of them."}
+];
+function loadBadges(){
+  try{ return JSON.parse(load("badges") || "{}"); }catch(e){ return {}; }
+}
+function grant(id){
+  const b = loadBadges();
+  if(b[id]) return false;
+  b[id] = dayStamp(new Date());
+  try{ save("badges", JSON.stringify(b)); }catch(e){}
+  return true;
+}
+function groupKeys(g){
+  const out = [];
+  ALL.filter(i => i.g === g).forEach(i => { out.push("h|" + i.id); out.push("k|" + i.id); });
+  return out;
+}
+/* a mora counts as known once either script of it has been read */
+function groupKnown(groups, atLeast){
+  return groups.every(g => ALL.filter(i => i.g === g).every(i =>
+    (progress()["h|" + i.id] || 0) >= atLeast || (progress()["k|" + i.id] || 0) >= atLeast));
+}
+function awardBadges(){
+  const got = [];
+  const days = loadDays();
+  if(groupKnown(BASIC_GROUPS, 1) && grant("gojuon")) got.push("gojuon");
+  if(groupKnown(BASIC_GROUPS, MASTERY_MAX) && grant("kaiden")) got.push("kaiden");
+  if(ALL.filter(i => i.r === "ka").every(i => (progress()["g|" + i.id] || 0) > 0) && grant("yoake")) got.push("yoake");
+  if((days.total || 0) >= 7 && grant("nanoya")) got.push("nanoya");
+  got.forEach(id => toastBadge(BADGES.find(b => b.id === id)));
+  return got;
+}
+function toastBadge(b){
+  if(!b) return;
+  let stack = document.getElementById("badgeStack");
+  if(!stack){
+    stack = document.createElement("div");
+    stack.id = "badgeStack";
+    document.body.appendChild(stack);
+  }
+  const el = document.createElement("div");
+  el.className = "badge-toast";
+  el.innerHTML = '<span class="bj">' + ruby(b.rb || b.jp) + '</span>' +
+                 '<span class="bm"><b>' + b.en + '</b><i>' + b.note + '</i></span>';
+  stack.appendChild(el);
+  setTimeout(() => el.remove(), 5200);
+}
+
 /* ==========================================================
    8. SCREENS
    ========================================================== */
+/* The mat jolts when a card is swept or a wrong one is touched. Lived in the
+   duel section with the camera shake; the canvas still wants it. */
+function shake(amp){ G.shake = Math.max(G.shake, amp); G.shakeDirty = true; }
+
 function show(id){
   document.querySelectorAll(".screen").forEach(s => s.classList.toggle("on", s.id === id));
 }
 
 /* ==========================================================
-   9. DUEL
+   9. THE MATCH
+   A reader calls a syllable; you take the card that writes it. Every card on
+   the mat writes a DIFFERENT mora, so a call has exactly one right answer —
+   put two forms of さ out at once and 「さ」 is ambiguous, which is fine in a
+   real match with a poem behind it and unfair here.
    ========================================================== */
-function setZ(from, to, dur, ease){
-  G.zFrom = from; G.zTo = to; G.zDur = Math.max(0.001, dur); G.zT = 0; G.zEase = ease || "inout";
-}
-function shake(amp){ G.shake = Math.max(G.shake, amp); G.shakeDirty = true; }
-function flash(kind){
-  flashEl.className = kind;
-  setTimeout(() => { flashEl.className = ""; }, kind === "heal" ? 420 : 240);
-}
-function setPhaseTag(mode){
-  phaseTag.className = "phase-tag " + mode;
-  phaseTag.innerHTML = mode === "parry" ? "<b>名</b><span>Name It</span>" : "<b>祓</b><span>Seal It</span>";
-}
-function updateBars(){
-  $("foeHp").style.width = (G.foeMax ? (G.foeHp / G.foeMax) * 100 : 0) + "%";
-  $("myHp").style.width = (G.hp / MAX_HP) * 100 + "%";
-}
-function updateHud(){
-  $("score").textContent = G.stats.points;
-  const c = $("combo");
-  c.textContent = "連撃 ×" + G.stats.combo;
-  c.classList.remove("pop"); void c.offsetWidth; c.classList.add("pop");
-}
-function renderTiles(v){
-  if(!v){
-    const choosing = G.phase === "offense" && G.offenseMode === "choose";
-    tilesEl.innerHTML = '<span class="ph">' +
-      (choosing ? "press 1 2 3 · or click a charm" : "type romaji") + '</span>';
-    return;
-  }
-  tilesEl.innerHTML = [...v].map(ch => '<span class="t">' + ch + '</span>').join("") + '<span class="caret"></span>';
-}
-function focusInput(){ try{ bufferInput.focus({preventScroll:true}); }catch(e){ bufferInput.focus(); } }
+const MAT_SIZE = 12;
+const CALL_SECONDS = 7;
 
-function startTimer(sec){ G.tStart = performance.now(); G.tDur = sec * 1000; G.tActive = true; G.replayed = false; }
-function stopTimer(){ G.tActive = false; timerBar.classList.remove("urgent"); }
-
-function setPrompt(it){
-  G.required = it;
-  G.answers = answersFor(it);
-  G.decoys = [];
-  G.buffer = ""; bufferInput.value = ""; renderTiles("");
-  bufferBox.classList.remove("bad", "good");
-  G.promptAt = performance.now();
-}
-function markError(it){
-  if(!it) return;
-  noteAnswer(it, false);
-  const m = G.stats.perChar;
-  const rec = m.get(it.key) || {item: it, n: 0};
-  rec.n++; m.set(it.key, rec);
-  G.stats.errors++;
-}
-function breakCombo(){ G.stats.combo = 0; updateHud(); }
-function award(){
-  clearIME();
-  noteAnswer(G.required, true);
-  G.stats.correct++;
-  const el = (performance.now() - G.promptAt) / 1000;
-  G.stats.time += el;
-  G.stats.combo++;
-  if(G.stats.combo > G.stats.best) G.stats.best = G.stats.combo;
-  const mult = Math.min(4, 1 + Math.floor(G.stats.combo / 4) * 0.5);
-  const bonus = Math.max(0, Math.round((TIERS[G.tier].def - el) * 18));
-  G.stats.points += Math.round((100 + bonus) * mult);
-  updateHud();
-}
-
-/* The listening challenge only works if the student can actually hear.
-   Fall back to ringing the live target when speech is unavailable, or
-   whenever the teacher has switched the aid on. */
-/* both modes where the mora is spoken before the answer */
-function listenMode(){ return G.offenseMode === "listen" || G.offenseMode === "choose"; }
-function targetAidOn(){
-  if(G.offenseMode === "ltr") return true;        // next target is obvious anyway
-  /* Choosing is impossible with no sound, so the ring has to stand in. */
-  if(G.offenseMode === "choose"){
-    if(G.acousticsRelaxed) return true;   // this set cannot be told apart by ear
-    if(G.aid) return true;
-    if(G.required && clips.has(G.required.r)) return false;
-    return speechOK === false;
-  }
-  if(G.offenseMode === "gojuon") return false;    // deducing the order IS the task
+/* A silent reader makes the match unplayable, so when there is no working
+   audio — or the player has asked for it — the call is shown as text and the
+   match becomes a reading exercise instead of a listening one. This is the
+   same bargain the kana game strikes when it rings the spoken target. */
+function aidOn(){
   if(G.aid) return true;
-  if(G.required && clips.has(G.required.r)) return false;   // recording covers this one
+  if(G.call && clipFor(G.call.r)) return false;   // a recording covers this one
   return speechOK === false;
 }
-function updateTargetHint(){
-  if(G.phase !== "offense") return;
-  const num = Math.min(G.nodeIdx + 1, G.order.length || 3);
-  const pre = "Charm " + num + " of 3 — ";
-  hintLine.textContent =
-    G.offenseMode === "ltr"    ? pre + "read them right to left" :
-    G.offenseMode === "gojuon" ? pre + "read in gojūon order — look at all three first" :
-    targetAidOn()              ? pre + "take the ringed charm" :
-    G.offenseMode === "choose" ? pre + "press 1 2 3 for the one you hear · or click it · Enter to replay" :
-                                 pre + "type the one you hear · Enter to replay";
-}
 function syncTargetAid(){
-  if(!G.nodes || !G.nodes.length) return;
-  G.nodes.forEach(nd => nd.el.classList.remove("live"));
-  if(targetAidOn() && G.phase === "offense" && G.nodeIdx < G.order.length){
-    const nd = G.nodes[G.order[G.nodeIdx]];
-    if(nd) nd.el.classList.add("live");
-  }
-  updateTargetHint();
+  const el = document.getElementById("calledKana");
+  if(!el) return;
+  if(!G.running || !G.call || G.locked) return;
+  el.textContent = aidOn() ? (G.call.mk || G.call.reads[0]) : "?";
 }
 
-function pickItem(){
-  let src = G.pool;
-  if(G.tier <= 1){
-    const basic = G.pool.filter(i => BASIC_GROUPS.indexOf(i.g) >= 0);
-    if(basic.length >= 4) src = basic;
-  } else if(styleOf() === "cannon" || G.tier >= 4){
-    const errs = [...G.stats.perChar.values()];
-    /* "tests you with all the kana you got wrong previously" */
-    if(errs.length && Math.random() < (styleOf() === "cannon" ? 0.7 : 0.45)){
-      const pick = errs[Math.floor(Math.random() * errs.length)].item;
-      G.lastKey = pick.key;
-      return pick;
-    }
-    const adv = G.pool.filter(i => ADVANCED_GROUPS.indexOf(i.g) >= 0);
-    if(adv.length >= 4 && Math.random() < 0.5) src = adv;
+function shuffled(a){
+  const d = a.slice();
+  for(let i = d.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = d[i]; d[i] = d[j]; d[j] = t;
   }
-  let it, guard = 0;
-  do { it = src[Math.floor(Math.random() * src.length)]; guard++; }
-  while(src.length > 1 && it.key === G.lastKey && guard < 14);
-  G.lastKey = it.key;
-  return it;
-}
-/* ---- acoustic separation of simultaneous targets ----
-   Identifying a bare mora by ear is hard; identifying it against two
-   acoustically adjacent decoys is unfair. ふ / く / す differ only in a short
-   voiceless onset, and before /u/ and /i/ the vowel devoices, so almost
-   nothing is left to hear. Keep the three targets phonetically apart. */
-const ONSET_CLASS = {
-  "":"V", k:"K", g:"K", ky:"K", gy:"K",
-  s:"S", z:"S", sh:"S", j:"S", ts:"S", ch:"S", sy:"S", zy:"S", ty:"S",
-  t:"T", d:"T",
-  n:"N", m:"N", ny:"N", my:"N",
-  h:"H", b:"H", p:"H", f:"H", hy:"H", by:"H", py:"H",
-  r:"R", ry:"R", w:"W", y:"Y"
-};
-const VOICELESS_ONSET = /^(k|s|t|h|f|p|sh|ch|ts|ky|hy|py)$/;
-/* Synthesised isolated mora carry two further artifacts, both reported from
-   real play: an abrupt vowel attack is heard as a plosive burst (あ mistaken
-   for ぱ), and the nasal cue on /n/ is too weak to separate it from the /r/
-   flap (ぬ mistaken for る). Neither is fixable from this side, so the pairs
-   must never appear in the same round. */
-const STOP_ONSET = /^(p|b|k|g|t|d|py|by|ky|gy)$/;
-const SONORANT_ONSET = /^(n|m|r|ny|my|ry)$/;
-const NASAL_ONSET = /^(n|m|ny|my)$/;
-function onsetOf(r){ return r.replace(/[aiueo]+$/, ""); }
-function vowelOf(r){ const m = /[aiueo](?![\s\S]*[aiueo])/.exec(r); return m ? m[0] : "n"; }
-/* Modern を is /o/, identical to お. No engine and no recording can separate
-   them by ear, so they must never share a round. */
-const SPOKEN_READING = {wo: "o", wi: "i", we: "e"};
-function reading(r){ return SPOKEN_READING[r] || r; }
-function confusable(a, b){
-  if(reading(a.r) === reading(b.r)) return true;      // true homophones
-  /* ん is a bare nasal, and む / ぬ with a devoiced vowel reduce to almost
-     the same thing — so this one ignores the vowel entirely. */
-  const aN = a.r === "n", bN = b.r === "n";
-  if(aN || bN){
-    if(aN && bN) return true;
-    return NASAL_ONSET.test(onsetOf((aN ? b : a).r));
-  }
-  const va = vowelOf(a.r), vb = vowelOf(b.r);
-  if(va !== vb) return false;                       // different vowel carries the contrast
-  const oa = onsetOf(a.r), ob = onsetOf(b.r);
-  if(oa === ob) return true;
-  if((ONSET_CLASS[oa] || oa) === (ONSET_CLASS[ob] || ob)) return true;   // ka/ga, shi/chi, nu/mu
-  if((va === "u" || va === "i") && VOICELESS_ONSET.test(oa) && VOICELESS_ONSET.test(ob)) return true;  // fu/ku/su/tsu
-  if((oa === "" && STOP_ONSET.test(ob)) || (ob === "" && STOP_ONSET.test(oa))) return true;             // a/pa
-  if(SONORANT_ONSET.test(oa) && SONORANT_ONSET.test(ob)) return true;                                   // nu/ru, na/ma
-  return false;
-}
-/* を is spoken "o" but typed "wo". Hearing it can never tell you what to
-   type, so it is barred from the listening phase. It still appears in the
-   dojo and in the defense phase, where it is read, not heard. */
-const EAR_UNSUITABLE = new Set(["wo", "wi", "we"]);
-function pickDistinct(n, preferErrors){
-  const out = [], seen = new Set();
-  const listening = G.offenseMode === "listen" || G.offenseMode === "choose";
-  if(preferErrors && G.stats){
-    [...G.stats.perChar.values()]
-      .sort((a, b) => b.n - a.n)
-      .forEach(rec => {
-        if(out.length >= n) return;
-        const it = rec.item;
-        if(!it || seen.has(it.r) || seen.has(it.key)) return;
-        if(out.some(o => confusable(o, it))) return;
-        seen.add(it.r); seen.add(it.key); out.push(it);
-      });
-  }
-  const usable = listening ? G.pool.filter(i => !EAR_UNSUITABLE.has(i.r)) : G.pool;
-  const src = usable.length >= n ? usable : G.pool;
-  const draw = (respectAcoustics) => {
-    let guard = 0;
-    while(out.length < n && guard < 600){
-      guard++;
-      const it = src[Math.floor(Math.random() * src.length)];
-      if(seen.has(it.r) || seen.has(it.key)) continue;
-      if(listening && respectAcoustics && out.some(o => confusable(o, it))) continue;
-      seen.add(it.r); seen.add(it.key);
-      out.push(it);
-    }
-  };
-  draw(true);
-  const clean = out.length;
-  draw(false);   // pool too homogeneous to separate — better to play than to stall
-  /* If the acoustic guard had to be dropped, two of these three may sound
-     alike, and choosing by ear becomes a coin toss. Remember it so the round
-     can be made answerable by reading instead. */
-  G.acousticsRelaxed = listening && out.length > clean;
-  while(out.length < n) out.push(src[out.length % src.length]);
-  return out;
+  return d;
 }
 
-function startDuel(){
-  buildPool();
-  if(G.pool.length < 4) return;
+/* One form per mora, the form chosen at random — so か comes up as a
+   different hand in the next match and the variety is met over time. */
+function dealMat(){
+  const byMora = new Map();
+  G.pool.forEach(i => { if(!byMora.has(i.r)) byMora.set(i.r, []); byMora.get(i.r).push(i); });
+  return shuffled([...byMora.keys()])
+    .slice(0, Math.min(MAT_SIZE, byMora.size))
+    .map(r => { const f = byMora.get(r); return f[Math.floor(Math.random() * f.length)]; });
+}
+
+function startMatch(){
   ac();
-  probeSpeech();
+  buildPool();
+  const deck = dealMat();
+  if(deck.length < 3) return;
+  G.deck = deck;
+  G.order = shuffled(deck.map((_, i) => i));
+  G.callIdx = 0; G.taken = 0; G.faults = 0; G.locked = false;
+  G.running = true; G.withdrawn = false;
   G.stats = {correct:0, errors:0, time:0, combo:0, best:0, points:0, perChar:new Map()};
-  G.hp = MAX_HP; G.tier = 0; G.running = true; G.withdrawn = false;
-  show("s-duel");
-  sizeCanvas();
-  strokes.length = 0; sparks.length = 0;
-  updateBars(); updateHud();
-  focusInput();
-  startTier();
+  renderMat();
+  show("s-match");
+  setTimeout(nextCall, 700);
 }
 
-function startTier(){
-  const T = TIERS[G.tier];
-  strokes.length = 0; sparks.length = 0;
-  G.revealed = false; G.beats = 0;
-  clearTimeout(G.danceTimer); clearInterval(G.motes);
-  enemyEl.classList.remove("dancing");
-  document.querySelectorAll(".mote").forEach(m => m.remove());
-  G.volley = []; volleyEl.hidden = true;
-  document.getElementById("scene").classList.toggle("tearoom", T.scene === "tearoom");
-  G.tierErrors = G.stats ? G.stats.errors : 0;
-  G.foeMax = T.hp; G.foeHp = T.hp;
-  enemyEl.innerHTML = silhouette(T.key);
-  $("foeJp").innerHTML = ruby(T.rb || T.jp);
-  $("foeEn").textContent = T.en;
-  updateBars();
-  setZ(-1600, -1000, 1.4, "out");
-  G.phase = "intro";
-  promptWrap.style.opacity = 0;
-  hintLine.textContent = "";
-  tcBody.innerHTML =
-    (T.hidden ? '<p class="rank">Interlude</p>'
-              : '<p class="rank">Encounter ' + (TIERS.slice(0, G.tier + 1).filter(x => !x.hidden).length) +
-                ' of ' + LADDER_COUNT + '</p>') +
-    '<p class="jp">' + ruby(T.rb || T.jp) + '</p>' +
-    '<p class="en">' + T.en + '</p>' +
-    '<p class="line">' + T.line + '</p>';
-  tierCard.classList.add("on");
-  setTimeout(() => {
-    tierCard.classList.remove("on");
-    if(!G.running) return;
-    if(T.style === "dance") danceInterlude(); else nextDefense();
-  }, 2400);
-}
-
-function clearNodes(){
-  G.nodes.forEach(n => n.el.remove());
-  G.nodes = []; G.order = []; G.nodeIdx = 0;
-}
-
-function renderVolley(){
-  volleyEl.innerHTML = G.volley.map((it, i) =>
-    '<b class="' + (i < G.volleyIdx ? "spent" : i === G.volleyIdx ? "live" : "") + '">' +
-    it.disp + '</b>').join("");
-}
-function nextDefense(){
-  if(!G.running) return;
-  if(G.hp <= 0) return endGame(false);
-  clearNodes();
-  G.phase = "defense";
-  setPhaseTag("parry");
-  replayBtn.disabled = true;
-  const st = styleOf(), env = envelope();
-  G.beats++;
-  const dur = TIERS[G.tier].def;
-
-  if(st === "cannon"){
-    /* three at once, because he does not fight fair */
-    G.volley = pickDistinct(3, true);
-    G.volleyIdx = 0;
-    setPrompt(G.volley[0]);
-    promptWrap.style.opacity = 0;
-    volleyEl.hidden = false;
-    renderVolley();
-    hintLine.textContent = "Three abreast — name them right to left";
-  }else{
-    G.volley = []; volleyEl.hidden = true;
-    const it = pickItem();
-    setPrompt(it);
-    promptB.textContent = it.disp;
-    promptWrap.style.opacity = 1;
-    hintLine.textContent =
-      st === "arrow" ? "The fan beats from the treetop — it arrives small" :
-      st === "ride"  ? "It is travelling inside the gust — read it as it goes" :
-      st === "tea"   ? "It sits still. Read the scroll in the alcove" :
-      st === "dance" && !G.revealed ? "An interlude. Read at your leisure." :
-                       "Say its name before it reaches you";
-  }
-  promptWrap.classList.remove("miss");
-  setZ(env.enemy[0], env.enemy[1], dur, st === "arrow" ? "in" : st === "ride" ? "inout" : "in");
-  startTimer(dur);
-  focusInput();
-}
-
-/* One correct answer clears a normal attack; a cannon volley needs all three. */
-function defenseHit(){
-  if(styleOf() === "dance") return dancerSlain();
-  if(styleOf() === "cannon" && G.volleyIdx < G.volley.length - 1){
-    award();
-    G.volleyIdx++;
-    renderVolley();
-    setPrompt(G.volley[G.volleyIdx]);
-    sfxParry();
-    const r = volleyEl.getBoundingClientRect();
-    addSparks(r.left + r.width * (0.8 - 0.3 * G.volleyIdx), r.top + r.height / 2, 14,
-              {color:"#C9A227", speed:260, g:200, max:0.5, r:2});
-    return;
-  }
-  volleyEl.hidden = true;
-  return parry();
-}
-
-/* Long enough to read as a genuine rest and to lull the hands off the
-   keys, short enough that it never reads as the game having hung. */
-const DANCE_SECONDS = 10;
-function danceInterlude(){
-  G.phase = "perform";
-  promptWrap.style.opacity = 0;
-  volleyEl.hidden = true;
-  enemyEl.classList.add("dancing");
-  phaseTag.className = "phase-tag";
-  phaseTag.innerHTML = "<b>連</b><span>Fellow Traveller</span>";
-  hintLine.textContent = "Nothing is asked of you. Someone is walking ahead of you.";
-  timerBar.style.transform = "scaleX(0)";
-  /* characters drift up like incense while she performs */
-  G.motes = setInterval(() => {
-    if(G.phase !== "perform") return;
-    const m = document.createElement("div");
-    m.className = "mote";
-    m.textContent = G.pool[Math.floor(Math.random() * G.pool.length)].disp;
-    m.style.left = (12 + Math.random() * 76) + "%";
-    m.style.top = (46 + Math.random() * 22) + "%";
-    m.style.fontSize = (22 + Math.random() * 34) + "px";
-    m.style.animationDuration = (5 + Math.random() * 4) + "s";
-    $("hud").appendChild(m);
-    setTimeout(() => m.remove(), 9000);
-  }, 900);
-  G.danceTimer = setTimeout(() => { if(G.running) fanStrike(); }, DANCE_SECONDS * 1000);
-}
-
-/* the fan opens, and there is exactly one chance */
-function fanStrike(){
-  clearInterval(G.motes);
-  enemyEl.classList.remove("dancing");
-  G.phase = "defense";
-  setPhaseTag("parry");
-  const it = pickItem();
-  setPrompt(it);
-  /* Drawn into the silhouette rather than floated over the scene: an overlay
-     at screen-centre drifted off the head the moment the figure moved. It
-     also has to come near, or the one character on it cannot be read. */
-  enemyEl.innerHTML = silhouette("nopperabo2", it.disp);
-  setZ(G.enemyZ, -170, 0.55, "out");
-  sfxParry();
-  shake(0.5);
-  hintLine.textContent = "It turns around. Read what is there.";
-  startTimer(3.4);
-  focusInput();
-}
-
-function dancerSlain(){
-  stopTimer();
-  award();
-  G.foeHp = 0;
-  updateBars();
-  revealDancer();
-  G.phase = "clear";
-  setTimeout(() => { if(G.running) tierClear(); }, 1800);
-}
-
-function revealDancer(){
-  G.revealed = true;
-  enemyEl.innerHTML = silhouette("nopperabo2");
-  $("foeJp").textContent = "のっぺらぼう";
-  $("foeEn").textContent = "Nopperabō";
-  /* Nobody is wounded here. The old reveal drew a red gash across the road,
-     which belonged to the ninja this encounter used to be. What is left is
-     the cold going down you: a pale ring, and the sound of a held breath. */
-  flash("heal");
-  shake(0.42);
-  sfxParry();
-  for(let i = 0; i < 12; i++){
-    const a = (Math.PI * 2 * i) / 12;
-    addStroke(CW/2 + Math.cos(a)*70, CH*0.40 + Math.sin(a)*70,
-              CW/2 + Math.cos(a)*(190 + Math.random()*46),
-              CH*0.40 + Math.sin(a)*(190 + Math.random()*46),
-              {w:5, color:"#E8EFE0", glow:"rgba(214,226,198,.7)", max:0.62, bow:0});
-  }
-  addSparks(CW/2, CH*0.40, 24, {color:"#E8F0DC", speed:190, g:40, max:1.1, r:2});
-  hintLine.textContent = "Further along, someone stops to ask what frightened you. 「こんな顔でしたか」";
-}
-
-function parry(){
-  stopTimer();
-  award();
-  /* A name is spoken, not swung. The old blade-sweep read as swordplay and
-     buried the charms behind it; this is a ring of light going out from the
-     thing that has just been named, and it leaves the screen legible. */
-  const cx = CW / 2, cy = CH * 0.42;
-  for(let i = 0; i < 10; i++){
-    const a = (Math.PI * 2 * i) / 10 + Math.random() * 0.2;
-    const r0 = 60, r1 = 168 + Math.random() * 40;
-    addStroke(cx + Math.cos(a)*r0, cy + Math.sin(a)*r0,
-              cx + Math.cos(a)*r1, cy + Math.sin(a)*r1,
-              {w:7, color:"#F4EDDD", glow:"rgba(214,226,198,.85)", max:0.55, bow:0});
-  }
-  addSparks(cx, cy, 20, {color:"#E8F0DC", speed:230, g:60, max:0.7, r:2});
-  addSparks(cx, cy, 30, {color:"#9FB6D0", speed:380, g:340, max:0.8, r:2.6});
-  sfxParry();
-  shake(0.5);
-  /* The phase is called Name It and nothing was ever said aloud. Speak it on
-     the way out — after the answer is committed, never before, which is the
-     same rule the charms already followed. */
-  if(G.speakOnHit) speakKana(G.required, false);
-  promptWrap.style.opacity = 0;
-  bufferBox.classList.add("good");
-  const prog = approachProgress();
-  G.stunZ = STUN_FAR + (STUN_NEAR - STUN_FAR) * prog;
-  G.offTime = TIERS[G.tier].off * (1 - STRIKE_URGENCY * prog);
-  setZ(G.enemyZ, G.stunZ, 0.45, "out");
-  G.phase = "stun";
-  hintLine.textContent = "Named. It falters — now the charms";
-  setTimeout(() => { bufferBox.classList.remove("good"); if(G.running) startOffense(); }, 520);
-}
-
-function failDefense(){
-  stopTimer();
-  volleyEl.hidden = true;
-  if(styleOf() === "dance"){
-    /* she does not need a second opening */
-      markError(G.required);
-    G.hp = 0; updateBars();
-    revealDancer();
-    sfxHurt(); shake(1); flash("hit");
-    G.phase = "over";
-    setTimeout(() => endGame(false), 1900);
-    return;
-  }
-  markError(G.required);
-  breakCombo();
-  G.hp = Math.max(0, G.hp - 1);
-  updateBars();
-  sfxHurt(); shake(0.9); flash("hit");
-  promptWrap.classList.add("miss");
-  addStroke(-40, CH * 0.18, CW + 40, CH * 0.78,
-            {w:26, color:"#C0392B", glow:"rgba(192,57,43,.95)", max:1.3});
-  addSparks(CW/2, CH*0.45, 22, {color:"#8E2A20", speed:300, g:520});
-  hintLine.textContent = (styleOf() === "tea" ? "The kettle sings on — it was 「" : "It slips past you — it was 「") +
-    G.required.disp + "」= " + G.required.r;
-  if(G.speakOnHit) speakKana(G.required, false);
-  if(G.hp <= 0){ G.phase = "over"; setTimeout(() => endGame(false), 1100); return; }
-  G.phase = "recover";
-  setZ(G.enemyZ, -980, 0.55, "out");
-  setTimeout(() => { promptWrap.style.opacity = 0; if(G.running) nextDefense(); }, 1150);
-}
-
-/* Around him, never across him. Twice now a prompt has been laid over the
-   thing it belonged to — the daimyo's scroll, and then this. A one-eyed
-   yokai whose eye you cannot see is just a shadow. */
-const NODE_POS = [[10, 22], [50, 22], [90, 22]];
-function startOffense(){
-  G.phase = "between";
-  setPhaseTag("strike");
-  promptWrap.style.opacity = 0;
-  fadeStrokes();          // clear the parry sweep before anything must be read
-  clearNodes();
-  const picks = pickDistinct(3);
-  G.nodes = picks.map((it, i) => {
-    const el = document.createElement("div");
-    el.className = "node";
-    el.textContent = it.disp;
-    el.dataset.n = i + 1;                    // left to right, for the 1 2 3 keys
-    el.style.left = NODE_POS[i][0] + "%";
-    el.style.top = NODE_POS[i][1] + "%";
-    el.style.animationDelay = (i * 0.08) + "s";
-    enemyEl.appendChild(el);
-    return {it, el};
+function renderMat(){
+  matEl.innerHTML = "";
+  G.deck.forEach((it, i) => {
+    const el = document.createElement("button");
+    el.className = "fuda";
+    el.type = "button";
+    el.dataset.i = i;
+    el.innerHTML = '<span class="g">' + it.disp + '</span>';
+    el.setAttribute("aria-label", "card " + (i + 1));
+    matEl.appendChild(el);
   });
-  /* Left-to-right and gojuon order force the student to READ each glyph in
-     order to produce its romaji. Hearing the mora and TYPING it does not,
-     because the sound hands over the romaji directly — which is why that
-     mode was never the default.
-     Hearing it and CLICKING is a different thing, and the objection does
-     not apply: you are told the sound, but finding which of the three
-     charms carries it means reading all three. So it tests reading, gives
-     the hands something other than typing to do, and is the default. */
-  if(G.offenseMode === "gojuon"){
-    G.order = [0,1,2].sort((x, y) => G.nodes[x].it.ord - G.nodes[y].it.ord);
-  }else if(G.offenseMode === "ltr"){
-    /* Right to left. These are vertical strips of paper, and a row of them
-       is read the way columns of 縦書き are read — from the right. The mode
-       key stays "ltr" so a saved setting still loads. */
-    G.order = [0,1,2].sort((x, y) => NODE_POS[y][0] - NODE_POS[x][0]);
-  }else{
-    G.order = [0,1,2].sort(() => Math.random() - 0.5);
-  }
-  G.nodeIdx = 0;
-  setTimeout(() => { if(G.running && G.phase === "between") nextTarget(); }, 340);
+  updateMatStats();
+}
+function updateMatStats(){
+  $("mTaken").textContent = G.taken;
+  $("mFaults").textContent = G.faults;
+  $("mLeft").textContent = G.deck.length - G.taken;
 }
 
-function nextTarget(){
+function nextCall(){
   if(!G.running) return;
-  if(G.nodeIdx >= G.order.length) return finishOffense();
-  /* Whatever was typed while the last one burned off, rescued before
-     setPrompt() clears the field to make room for this target. */
-  const ahead = bufferInput.value;
-  G.phase = "offense";
-  fadeStrokes();
-  const n = G.nodes[G.order[G.nodeIdx]];
-  setPrompt(n.it);
-  G.decoys = G.nodes
-    .filter(x => x !== n && !x.el.classList.contains("cut"))
-    .map(x => ({item: x.it, el: x.el, answers: answersFor(x.it)}));
-  const listening = G.offenseMode === "listen" || G.offenseMode === "choose";
-  replayBtn.disabled = !listening;
-  if(listening) speakKana(n.it, G.twice, true);
+  if(G.callIdx >= G.order.length) return endMatch();
+  G.locked = false;
+  G.call = G.deck[G.order[G.callIdx]];
+  G.promptAt = performance.now();
+  $("calledNote").textContent = aidOn() ? "the reader is shown, not heard" : "listening";
   syncTargetAid();
-  $("s-duel").classList.toggle("choosing", G.offenseMode === "choose");
-  startTimer(G.offTime || TIERS[G.tier].off);
-  focusInput();
-  if(ahead){ bufferInput.value = ahead; onInput(); }
+  hintLine.textContent = "Take the card the reader called · " + (G.deck.length - G.taken) + " left on the mat";
+  speakKana(G.call, G.twice, true);
+  G.tStart = performance.now(); G.tDur = CALL_SECONDS * 1000; G.tActive = true;
 }
 
-function strike(){
-  stopTimer();
-  award();
-  const n = G.nodes[G.order[G.nodeIdx]];
-  const r = n.el.getBoundingClientRect();
-  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-  /* The charm takes and burns off upward. Paper does not get cut in half. */
-  const L = Math.max(r.width, r.height) * 0.5;
-  for(let i = 0; i < 5; i++){
-    const a = -Math.PI/2 + (Math.random() * 0.9 - 0.45);
-    addStroke(cx, cy, cx + Math.cos(a)*L*(1.2 + Math.random()), cy + Math.sin(a)*L*(1.6 + Math.random()),
-              {w:6, color:"#FBF3DC", glow:"rgba(201,162,39,.8)", max:0.5});
-  }
-  addSparks(cx, cy, 22, {color:"#C9A227", speed:210, g:-120, max:0.9, r:2});
-  addSparks(cx, cy, 10, {color:"#F4E6BE", speed:150, g:-180, max:1.1, r:2});
-  n.el.classList.add("cut");
-  /* Speak it AFTER the strike: reinforcement once they have committed,
-     never a hint beforehand. */
-  if(!listenMode() && G.speakOnHit) speakKana(n.it, false);
-  sfxSlash();
-  shake(0.72);
-  enemyEl.classList.remove("hurt"); void enemyEl.offsetWidth; enemyEl.classList.add("hurt");
-  G.foeHp = Math.max(0, G.foeHp - 1);
-  updateBars();
-  G.nodeIdx++;
-  if(G.foeHp <= 0){ G.phase = "clear"; return setTimeout(tierClear, 820); }
-  G.phase = "between";
-  setTimeout(() => { if(G.running && G.phase === "between") nextTarget(); }, 430);
+function cardAt(i){ return matEl.querySelector('.fuda[data-i="' + i + '"]'); }
+
+/* A form with more than one reading is a correct take for any of them, so a
+   card matches when its readings and the called card's readings overlap. */
+function matchesCall(it){
+  return it === G.call || it.reads.some(r => G.call.reads.indexOf(r) >= 0);
 }
 
-function wrongTarget(d){
-  markError(G.required);
-  sfxBad();
-  d.el.classList.remove("wrong"); void d.el.offsetWidth; d.el.classList.add("wrong");
-  setTimeout(() => d.el.classList.remove("wrong"), 480);
-  hintLine.textContent = listenMode()
-    ? "「" + d.item.disp + "」= " + d.item.r + " is not the one you heard — Enter to replay"
-    : "「" + d.item.disp + "」= " + d.item.r + " comes later — wrong order";
-  bufferInput.value = ""; G.buffer = ""; renderTiles("");
-  bufferBox.classList.remove("bad"); void bufferBox.offsetWidth; bufferBox.classList.add("bad");
+function takeCard(i){
+  if(!G.running || G.locked) return;
+  const it = G.deck[i], el = cardAt(i);
+  if(!el || el.classList.contains("gone")) return;
+  if(!matchesCall(it)) return otetsuki(el, it);
+
+  G.locked = true; G.tActive = false;
+  const el2 = el.getBoundingClientRect();
+  const cx = el2.left + el2.width / 2, cy = el2.top + el2.height / 2;
+  /* 払い — the card is swept off the mat, not cut */
+  for(let k = 0; k < 4; k++){
+    const a = (Math.random() * 0.3 - 0.15);
+    addStroke(cx, cy, cx + Math.cos(a) * 320, cy + Math.sin(a) * 320,
+              {w:9, color:"#EFE4C6", glow:"rgba(201,162,39,.75)", max:0.55, bow:0.03});
+  }
+  addSparks(cx, cy, 18, {color:"#E8DFC6", speed:280, g:420, max:0.7, r:2});
+  sfxParry(); shake(0.4);
+  el.classList.add("gone");
+  noteAnswer(it, true);
+
+  const el3 = (performance.now() - G.promptAt) / 1000;
+  G.stats.correct++; G.stats.time += el3; G.stats.combo++;
+  if(G.stats.combo > G.stats.best) G.stats.best = G.stats.combo;
+  G.stats.points += Math.max(10, Math.round(140 - el3 * 16)) * (1 + G.stats.combo * 0.1);
+  G.taken++; updateMatStats();
+
+  $("calledKana").textContent = it.disp;
+  $("calledNote").innerHTML = it.reads.join(" · ") + " &nbsp;·&nbsp; from <b>" + it.z + "</b>";
+  hintLine.textContent = "Taken";
+  G.callIdx++;
+  setTimeout(() => { if(G.running) nextCall(); }, 1100);
 }
 
-function missTarget(){
-  stopTimer();
-  markError(G.required);
-  breakCombo();
-  hintLine.textContent = "The charm goes quiet — 「" + G.required.disp + "」was " + G.required.r;
-  if(G.speakOnHit) speakKana(G.required, false);
-  sfxBad();
-  G.phase = "recover";
-  clearNodes();
-  setZ(G.enemyZ, -980, 0.5, "out");
-  setTimeout(() => { if(G.running) nextDefense(); }, 900);
+function otetsuki(el, it){
+  G.faults++; G.stats.errors++; G.stats.combo = 0;
+  noteAnswer(G.call, false);
+  updateMatStats();
+  sfxBad(); shake(0.5);
+  el.classList.remove("fault"); void el.offsetWidth; el.classList.add("fault");
+  setTimeout(() => el.classList.remove("fault"), 460);
+  hintLine.textContent = "お手つき — that one is " + it.reads.join(" · ") + ", from " + it.z;
 }
 
-function finishOffense(){
-  clearNodes();
-  G.phase = "recover";
-  hintLine.textContent = "";
-  setZ(G.enemyZ, -980, 0.6, "out");
-  setTimeout(() => { if(G.running) nextDefense(); }, 700);
+function missCall(){
+  if(!G.running || G.locked) return;
+  G.locked = true;
+  G.stats.errors++; G.stats.combo = 0;
+  noteAnswer(G.call, false);
+  const i = G.order[G.callIdx], el = cardAt(i);
+  if(el){ el.classList.add("shown"); setTimeout(() => el.classList.add("gone"), 900); }
+  hintLine.textContent = "Not taken — it was " + G.call.reads.join(" · ") + ", from " + G.call.z;
+  $("calledKana").textContent = G.call.disp;
+  $("calledNote").innerHTML = G.call.reads.join(" · ") + " &nbsp;·&nbsp; from <b>" + G.call.z + "</b>";
+  G.taken++; updateMatStats();
+  G.callIdx++;
+  setTimeout(() => { if(G.running) nextCall(); }, 1500);
 }
 
-function tierClear(){
-  if(grant("first")) toastBadge(BADGES.find(b => b.id === "first"));
-  if(G.stats && G.stats.errors === G.tierErrors && grant("muzu"))
-    toastBadge(BADGES.find(b => b.id === "muzu"));
-  clearNodes();
-  stopTimer();
-  const cx = CW/2, cy = CH*0.42;
-  for(let i=0;i<3;i++){
-    const a = Math.PI * (0.18 + i * 0.28);
-    const L = Math.max(CW,CH) * 0.42;
-    setTimeout(() => {
-      addStroke(cx - Math.cos(a)*L, cy - Math.sin(a)*L, cx + Math.cos(a)*L, cy + Math.sin(a)*L,
-                {w:21, color:"#F8F2E2", glow:"rgba(228,87,63,.9)", max:2.3});
-      addSparks(cx, cy, 26, {color:"#0C0F14", speed:500, g:700, r:4});
-      sfxSlash(); shake(0.9);
-    }, i * 190);
-  }
-  setZ(G.enemyZ, -2200, 1.1, "in");
-  G.tier++;
-  if(G.tier >= TIERS.length){ G.phase = "won"; return setTimeout(() => endGame(true), 1500); }
-  G.hp = Math.min(MAX_HP, G.hp + 2);
-  updateBars();
-  setTimeout(() => { flash("heal"); if(G.running) startTier(); }, 1500);
-}
-
-/* ---------- input ---------- */
-/* A Japanese input source turns "sa" into さ before it ever reaches us, so
-   the sanitiser would silently eat the whole answer and the round would time
-   out looking like the student got it wrong. Say what is actually happening. */
-function flagIME(){
-  const w = $("imeWarn");
-  if(!w || !w.hidden) return;
-  w.hidden = false;
-  w.innerHTML = "Your keyboard is in <b>Japanese input mode</b>, so your typing arrives as kana and the duel cannot read it. Switch your input source to English \u2014 <kbd>\u2303 Space</kbd> or <kbd>caps lock</kbd> on macOS.";
-}
-function clearIME(){
-  const w = $("imeWarn");
-  if(w && !w.hidden) w.hidden = true;
-}
-function onInput(){
-  if(G.phase !== "defense" && G.phase !== "offense" &&
-     G.phase !== "between" && G.phase !== "stun"){ bufferInput.value = ""; return; }
-  /* In choose mode the mora has already been spoken, so accepting the typed
-     romaji would let you answer without ever looking at the three charms —
-     which is the one thing this phase exists to make you do. */
-  if(G.phase === "offense" && G.offenseMode === "choose"){
-    bufferInput.value = ""; G.buffer = ""; renderTiles("");
-    return;
-  }
-  const raw = bufferInput.value;
-  if(raw && /[^a-zA-Z]/.test(raw)) flagIME();
-  let v = raw.toLowerCase().replace(/[^a-z]/g, "");
-  if(v.length > 6) v = v.slice(0, 6);
-  bufferInput.value = v;
-  G.buffer = v;
-  renderTiles(v);
-  /* Someone reading well is already typing the next one while the last is
-     still burning off. Those keystrokes used to be wiped on the way in;
-     hold them instead and judge them the moment the next target is live. */
-  if(G.phase === "between" || G.phase === "stun") return;
-  if(!v) return;
-  if(G.answers.indexOf(v) >= 0){
-    /* clear the tiles too: an encounter that ends here (the interlude) never
-       calls setPrompt again, so the last answer used to sit there. */
-    bufferInput.value = ""; G.buffer = ""; renderTiles("");
-    return G.phase === "defense" ? defenseHit() : strike();
-  }
-  /* During offense all three kana are legal things to type. Judge only on a
-     complete match, so picking a decoy reads as "wrong target" instead of
-     detonating on its first letter. */
-  const decoy = G.decoys.find(d => d.answers.indexOf(v) >= 0);
-  if(decoy) return wrongTarget(decoy);
-  const onPath = G.answers.some(a => a.indexOf(v) === 0) ||
-                 G.decoys.some(d => d.answers.some(a => a.indexOf(v) === 0));
-  if(onPath){
-    bufferBox.classList.remove("bad");
-    return;
-  }
-  /* not a prefix of any accepted spelling — a real mistake */
-  markError(G.required);
-  breakCombo();
-  sfxBad();
-  bufferBox.classList.remove("bad"); void bufferBox.offsetWidth; bufferBox.classList.add("bad");
-  bufferInput.value = ""; G.buffer = ""; renderTiles("");
-}
-bufferInput.addEventListener("input", onInput);
-bufferInput.addEventListener("compositionstart", flagIME);
-bufferInput.addEventListener("blur", () => { if(G.running) setTimeout(focusInput, 30); });
-$("s-duel").addEventListener("pointerdown", () => { if(G.running) setTimeout(focusInput, 0); });
-replayBtn.addEventListener("click", e => {
-  e.preventDefault();
-  if(G.phase === "offense" && G.required && listenMode()) speakKana(G.required, G.twice);
-  setTimeout(focusInput, 0);
-});
-window.addEventListener("keydown", e => {
-  if(G.running && G.phase === "offense" && G.offenseMode === "choose" && /^[123]$/.test(e.key)){
-    e.preventDefault();
-    return pickCharm(G.nodes[+e.key - 1]);   // 1 2 3 run left to right, as drawn
-  }
-  if(e.key === "Escape" && kOn()) return keikoQuit();
-  if(e.key === "Escape" && G.running){ G.withdrawn = true; endGame(false); }
-  if(e.key === "Enter" && G.phase === "offense" && G.required){
-    e.preventDefault();
-    if(listenMode()) speakKana(G.required, G.twice, true);
-  }
-});
-
-/* ---------- end + report ---------- */
-function endGame(won){
+function endMatch(){
   if(!G.running) return;
-  clearTimeout(G.danceTimer); clearInterval(G.motes);
-  document.querySelectorAll(".mote").forEach(m => m.remove());
-  G.running = false;
-  G.phase = "idle";
-  stopTimer();
-  clearNodes();
+  G.running = false; G.tActive = false;
   if("speechSynthesis" in window) speechSynthesis.cancel();
-  const s = G.stats;
-  const attempts = s.correct + s.errors;
+  const s = G.stats, attempts = s.correct + s.errors;
   const acc = attempts ? Math.round((s.correct / attempts) * 100) : 0;
   const avg = s.correct ? (s.time / s.correct) : 0;
-  /* The ladder shown in the dojo and on the tier cards never counts the
-     dancer — naming her in advance is the whole trick. Once she has actually
-     been met there is nothing left to spoil, so she joins the tally here. A
-     player who fell before her still sees the ladder they were promised. */
-  const reached = Math.min(G.tier + (won ? 0 : 1), TIERS.length);
-  const hiddenMet = TIERS.slice(0, reached).filter(t => t.hidden).length;
+  const clean = s.errors === 0 && !G.withdrawn;
 
-  if(won && grant("yoake")) toastBadge(BADGES.find(b => b.id === "yoake"));
-  $("verdictJp").textContent = won ? "勝" : "敗";
-  $("verdictJp").classList.toggle("loss", !won);
-  $("verdictEn").textContent = won ? "Victory" : (G.withdrawn ? "Withdrawn" : "Defeat");
-  const foe = TIERS[Math.min(G.tier, TIERS.length - 1)].en;
-  $("verdictSub").textContent = won
-    ? "You named every one of them and walked out the other side by morning. " +
-      "Nothing on that road could hold a traveller who could read."
-    : (G.withdrawn
-        ? "You turned back down the road rather than finish naming the " + foe +
-          ". It is still there, and so is the road."
-        : "神隠し. Your lantern went out, and the path went with it. They will say " +
-          "you were spirited away, and leave rice at the roadside for a while.");
-  $("stamp").textContent = "夜行";
-
+  $("verdictJp").textContent = G.withdrawn ? "退" : clean ? "勝" : "了";
+  $("verdictJp").classList.toggle("loss", G.withdrawn);
+  $("verdictEn").textContent = G.withdrawn ? "Left the Mat" : clean ? "Clean Sweep" : "Match Over";
+  $("verdictSub").textContent = G.withdrawn
+    ? "You stood up with " + (G.deck.length - G.taken) + " still face up."
+    : clean
+      ? "Every card taken, not one お手つき. In a real match that is the difference between grades."
+      : "The mat is clear. " + s.errors + " card" + (s.errors === 1 ? "" : "s") +
+        " went the other way, which is where the next hour of practice is.";
+  $("stamp").textContent = "歌留多";
   $("statTiles").innerHTML = [
-    ["Points", s.points, ""],
-    ["Best combo", "×" + s.best, ""],
-    ["Accuracy", acc, "%"],
-    ["Avg. per character", avg.toFixed(2), "s"],
-    ["Characters cleared", s.correct, ""],
-    ["Named and sealed", reached, " / " + (LADDER_COUNT + hiddenMet)]
-  ].map(t =>
-    '<div class="tile"><span class="k">' + t[0] + '</span>' +
-    '<span class="v">' + t[1] + (t[2] ? '<em>' + t[2] + '</em>' : '') + '</span></div>'
-  ).join("");
+    ["Points", Math.round(s.points), ""],
+    ["Best run", "×" + s.best, ""],
+    ["Clean takes", acc, "%"],
+    ["Avg. per card", avg.toFixed(2), "s"],
+    ["Cards taken", s.correct, " / " + G.deck.length],
+    ["お手つき", G.faults, ""]
+  ].map(t => '<div class="tile"><span class="k">' + t[0] + '</span><span class="v">' +
+             t[1] + (t[2] ? '<em>' + t[2] + '</em>' : '') + '</span></div>').join("");
 
   const bad = [...s.perChar.values()].sort((a, b) => b.n - a.n).slice(0, 12);
-  const rv = $("review");
-  if(!bad.length){
-    rv.innerHTML = '<p class="clean">CLEAN SHEET — no character cost you a single keystroke.</p>';
-    $("reviewNote").textContent = "Nothing to review. Raise the lesson pool or the script setting and go again.";
-  }else{
-    $("reviewNote").textContent = "The characters that cost you the most keystrokes, worst first. Take these back to the dojo.";
-    rv.innerHTML = bad.map(b =>
-      '<div class="rv"><span class="k">' + b.item.disp + '</span>' +
-      '<span class="m"><b>' + b.item.r + '</b><span>' + b.n + ' error' + (b.n === 1 ? '' : 's') + '</span></span></div>'
-    ).join("");
-  }
+  $("reviewNote").textContent = bad.length
+    ? "The hands that cost you. Turn these on the practice floor before the next match."
+    : "Nothing missed.";
+  $("review").innerHTML = bad.length
+    ? bad.map(r => '<div class="rv"><span class="k">' + r.item.disp + '</span>' +
+        '<span class="m"><b>' + r.item.reads.join(" · ") + '</b><span>' + r.item.z + '</span></span></div>').join("")
+    : '<p class="clean">CLEAN SHEET — every card taken first time.</p>';
+  $("s-report").scrollTop = 0;
   show("s-report");
-  document.getElementById("s-report").scrollTop = 0;
 }
 
+matEl.addEventListener("click", e => {
+  const el = e.target.closest(".fuda");
+  if(el) takeCard(+el.dataset.i);
+});
+$("callAgain").addEventListener("click", () => { if(G.call && !G.locked) speakKana(G.call, G.twice, true); });
+$("m-leave").addEventListener("click", () => { if(G.running){ G.withdrawn = true; endMatch(); } });
 /* ==========================================================
    10. FRAME LOOP
    ========================================================== */
@@ -3524,67 +2676,18 @@ function frame(ts){
   const t = ts / 1000;
   const dt = last ? Math.min(0.05, t - last) : 0.016;
   last = t;
-
-  if(G.running){
-    /* timer */
-    if(G.tActive){
-      const el = performance.now() - G.tStart;
-      const p = Math.max(0, 1 - el / G.tDur);
-      timerBar.style.transform = "scaleX(" + p + ")";
-      timerBar.classList.toggle("urgent", p < 0.3);
-      if(G.phase === "offense" && !G.replayed && p < 0.5 && !G.buffer){
-        G.replayed = true;
-        if(listenMode()) speakKana(G.required, G.twice, true);
-      }
-      if(el >= G.tDur){
-        G.tActive = false;
-        if(G.phase === "defense") failDefense();
-        else if(G.phase === "offense") missTarget();
-      }
-    }
-    /* enemy */
-    if(G.zT < G.zDur) G.zT = Math.min(G.zDur, G.zT + dt);
-    const k = G.zDur ? G.zT / G.zDur : 1;
-    const e = G.zEase === "out" ? 1 - Math.pow(1 - k, 3)
-            : G.zEase === "in" ? k * k * k
-            : (k < 0.5 ? 4*k*k*k : 1 - Math.pow(-2*k + 2, 3) / 2);
-    G.enemyZ = G.zFrom + (G.zTo - G.zFrom) * e;
-    G.bob += dt;
-    const sway = Math.sin(G.bob * 2.0) * 9, bobY = Math.sin(G.bob * 1.35) * 11;
-    const env = envelope();
-    const span = (env.enemy[1] - env.enemy[0]) || 1;
-    const travel = Math.max(0, Math.min(1, (G.enemyZ - env.enemy[0]) / span));
-    const kz = env.prompt[0] + (env.prompt[1] - env.prompt[0]) * travel;
-    const arc = Math.sin(travel * Math.PI - Math.PI / 2);
-    G.lateral = (env.sway || 0) * arc * 430;
-    /* An encounter may seat the figure off-centre — the daimyo must not stand
-       in front of the scroll the player is being asked to read. Keep him on
-       screen: a narrow window would otherwise crop him in half. */
-    const enemyDepth = 820 / Math.max(120, 820 - G.enemyZ);
-    const enemySafe = Math.max(0, (window.innerWidth / 2) / enemyDepth - 220 * G.scale);
-    const enemyX = Math.max(-enemySafe, Math.min(enemySafe, env.offsetX || 0)) +
-                   (env.sway ? G.lateral : sway);
-    enemyEl.style.transform =
-      "translate3d(" + enemyX.toFixed(1) + "px," + bobY.toFixed(1) +
-      "px," + G.enemyZ.toFixed(1) + "px) scale(" + G.scale.toFixed(3) + ")";
-    /* clamp the character inside the window whatever its width, allowing for
-       the fact that a nearer character projects wider */
-    const depthScale = 820 / Math.max(120, 820 - kz);
-    const halfSafe = Math.max(0, (window.innerWidth / 2 - 210) / depthScale);
-    const promptX = Math.max(-halfSafe, Math.min(halfSafe, (env.promptSway || 0) * arc * 430));
-    promptWrap.style.transform =
-      "translate3d(" + promptX.toFixed(1) + "px,0," + kz.toFixed(1) + "px)";
-    /* shake */
-    if(G.shake > 0.002){
-      G.shake = Math.max(0, G.shake - dt * 2.4);
-      const a = G.shake;
-      cameraEl.style.transform =
-        "translate3d(" + ((Math.random()*2-1)*26*a).toFixed(1) + "px," +
-        ((Math.random()*2-1)*20*a).toFixed(1) + "px,0) rotate(" +
-        ((Math.random()*2-1)*1.5*a).toFixed(2) + "deg)";
-    }else if(G.shakeDirty){
-      cameraEl.style.transform = "none"; G.shakeDirty = false;
-    }
+  if(G.shake > 0.002){
+    G.shake = Math.max(0, G.shake - dt * 2.6);
+    const k = G.shake;
+    matEl.style.transform = "translate3d(" + ((Math.random()*2-1)*9*k).toFixed(1) + "px," +
+                            ((Math.random()*2-1)*7*k).toFixed(1) + "px,0)";
+  }else if(G.shakeDirty){ matEl.style.transform = "none"; G.shakeDirty = false; }
+  if(G.running && G.tActive){
+    const el = performance.now() - G.tStart;
+    const p = Math.max(0, 1 - el / G.tDur);
+    timerBar.style.transform = "scaleX(" + p + ")";
+    timerBar.classList.toggle("urgent", p < 0.3);
+    if(el >= G.tDur){ G.tActive = false; missCall(); }
   }
   stepFx(dt);
 }
@@ -3594,8 +2697,8 @@ requestAnimationFrame(frame);
    11. WIRING
    ========================================================== */
 $("btn-enter").addEventListener("click", () => { ac(); show("s-dojo"); });
-$("btn-duel").addEventListener("click", startDuel);
-$("btn-rematch").addEventListener("click", startDuel);
+$("btn-duel").addEventListener("click", startMatch);
+$("btn-rematch").addEventListener("click", startMatch);
 $("btn-back").addEventListener("click", () => { show("s-dojo"); refreshDojo(); });
 $("btn-audio").addEventListener("click", testAudio);
 $("voicewarn").addEventListener("click", e => {
@@ -3741,7 +2844,6 @@ function previewVoice(){
 renderChips();
 refreshDojo();
 restorePack();
-renderTiles("");
 sizeCanvas();
 </script>
 </body>
