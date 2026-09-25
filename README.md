@@ -1,35 +1,57 @@
-# 仮名決闘 — Kana Duel
+# 仮名夜行 — Kana Night Parade
 
 A single-file browser game for learning to read hiragana and katakana.
+Something is standing in the road; you read its name aloud and it lets you
+pass.
 
 **Play it:** https://psatkins.github.io/kana-game/
 
+There is a second game in here for a different reader:
+[変体仮名歌留多](https://psatkins.github.io/kana-game/hentaigana.html), a karuta
+match played with hentaigana, for people who already read modern kana and want
+the 285 historical forms.
+
 ## What's here
 
-- `index.html` — the entire game. No build step, no dependencies. Open it in a
-  browser and it runs.
-- `make_audio_pack.py` — optional, generates a pack of spoken-mora recordings.
+- `index.html` — the whole kana game. No build step, no dependencies. Open it
+  in a browser and it runs.
+- `hentaigana.html` — the hentaigana karuta game, on the same terms.
+- `audio/` — where a pack of spoken-mora recordings goes, if you have one.
+- `make_audio_pack.py` — optional, generates such a pack.
 
 ## Modes
 
 The dojo is the grid. Kana are drawn either in 五十音図 table order or
 shuffled, in hiragana, katakana, or both, and a card speaks when you turn it.
 Glyphs render as brush (筆), handwriting (手書き), or Mincho print (明朝), so a
-kana learned in one hand doesn't become unrecognizable in another.
+kana learned in one hand doesn't become unrecognizable in another. Every kanji
+in the interface carries furigana, because the people using this cannot read
+kanji yet — which makes the chrome itself practice rather than an obstacle.
+
+The basic set is the 46 kana a first-year course teaches. ゐ and ゑ are in the
+game but not in that set: they have not been in ordinary use since 1946, and
+they sit in their own row for anyone reading premodern text.
 
 稽古 Drill is the same pool with the stakes taken out. Twenty characters by
 multiple choice, then the same twenty typed from memory, then an account of
 what you missed — no clock, no hit points, and a way out on every screen.
 Turning a card only ever asks you to agree with it; this is the part that asks
-you to produce the answer from nothing, which is the one thing the duel
+you to produce the answer from nothing, which is the one thing the road
 demands. The wrong answers offered are near-misses rather than filler: the
 game already knows which mora the eye and ear run together, and draws the
 decoys from exactly those. Half of each draw leans on the characters you have
 got wrong before, and a character leaves that list by being typed correctly
 with no choices in front of it.
 
-The duel is where it is tested. You answer by reading left-to-right, in gojūon
-order, or by listening, against a ladder of opponents who do not wait.
+The night road is where it is tested. Six encounters — 一つ目小僧, 天狗, 鎌鼬,
+のっぺらぼう, 分福茶釜, 百鬼夜行 — and naming a thing is how you get past it, so
+the student's verb and the character's verb are the same. You name what comes
+at you by typing its romaji; then you seal it by picking, out of three paper
+charms, the one whose mora you just heard. Characters are read right to left,
+the way Japanese is.
+
+Nothing is timed in the dojo, nothing is lost in the drill, and 帰る Leave sits
+beside the input on every screen of the road.
 
 ## Audio
 
